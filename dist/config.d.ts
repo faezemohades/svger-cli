@@ -14,7 +14,7 @@ export declare function writeConfig(config: Record<string, any>): void;
  * Initialize the svger-cli configuration with default values.
  * If a config file already exists, this function will not overwrite it.
  */
-export declare function initConfig(): void;
+export declare function initConfig(): Promise<void>;
 /**
  * Set a specific configuration key to a new value.
  *

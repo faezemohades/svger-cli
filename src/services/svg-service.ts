@@ -1,0 +1,400 @@
+import path from 'path';
+import { FileSystem } from '../utils/native.js';
+import { BuildOptions, GenerateOptions, WatchOptions, FileWatchEvent } from '../types/index.js';
+import { logger } from '../core/logger.js';
+import { configService } from './config.js';
+import { svgProcessor } from '../processors/svg-processor.js';
+import { fileWatcher } from './file-watcher.js';
+
+/**
+ * Main SVG service that orchestrates all SVG processing operations
+ */
+export class SVGService {
+  private static instance: SVGService;
+  private activeWatchers: Set<string> = new Set();
+  public lockService: LockService;
+
+  private constructor() {
+    this.lockService = LockService.getInstance();
+  }
+
+  public static getInstance(): SVGService {
+    if (!SVGService.instance) {
+      SVGService.instance = new SVGService();
+    }
+    return SVGService.instance;
+  }
+
+  /**
+   * Build all SVG files from source to output directory
+   */
+  public async buildAll(options: BuildOptions): Promise<void> {
+    logger.info('Starting SVG build process');
+    logger.info(`Source: ${options.src}`);
+    logger.info(`Output: ${options.out}`);
+
+    const srcDir = path.resolve(options.src);
+    const outDir = path.resolve(options.out);
+
+    // Validate source directory
+    if (!(await FileSystem.exists(srcDir))) {
+      throw new Error(`Source folder not found: ${srcDir}`);
+    }
+
+    // Ensure output directory exists
+    await FileSystem.ensureDir(outDir);
+
+    // Get configuration
+    const config = configService.readConfig();
+    const mergedConfig = { ...config, ...options.config };
+
+    // Read all SVG files
+    const files = await FileSystem.readDir(srcDir);
+    const svgFiles = files.filter((file: string) => file.endsWith('.svg'));
+
+    if (svgFiles.length === 0) {
+      logger.warn('No SVG files found in source directory');
+      return;
+    }
+
+    logger.info(`Found ${svgFiles.length} SVG files to process`);
+
+    const results: Array<{ success: boolean; file: string; error?: Error }> = [];
+
+    // Process each SVG file
+    for (const file of svgFiles) {
+      const svgPath = path.join(srcDir, file);
+
+      // Check if file is locked
+      if (this.lockService.isLocked(svgPath)) {
+        logger.warn(`Skipped locked file: ${file}`);
+        continue;
+      }
+
+      try {
+        const processingResult = await svgProcessor.processSVGFile(svgPath, outDir, {
+          defaultWidth: mergedConfig.defaultWidth,
+          defaultHeight: mergedConfig.defaultHeight,
+          defaultFill: mergedConfig.defaultFill,
+          styleRules: Object.fromEntries(
+            Object.entries(mergedConfig.styleRules || {}).filter(([_, v]) => v !== undefined)
+          ) as Record<string, string>
+        });
+
+        results.push({
+          success: processingResult.success,
+          file,
+          error: processingResult.error
+        });
+
+      } catch (error) {
+        logger.error(`Failed to process ${file}:`, error);
+        results.push({
+          success: false,
+          file,
+          error: error as Error
+        });
+      }
+    }
+
+    // Log summary
+    const successful = results.filter(r => r.success).length;
+    const failed = results.filter(r => !r.success).length;
+
+    logger.info(`Build complete: ${successful} successful, ${failed} failed`);
+
+    if (failed > 0) {
+      logger.warn('Some files failed to process:');
+      results.filter(r => !r.success).forEach(r => {
+        logger.warn(`  - ${r.file}: ${r.error?.message}`);
+      });
+    }
+  }
+
+  /**
+   * Generate a React component from a single SVG file
+   */
+  public async generateSingle(options: GenerateOptions): Promise<void> {
+    logger.info(`Generating component from: ${options.svgFile}`);
+
+    const filePath = path.resolve(options.svgFile);
+    const outDir = path.resolve(options.outDir);
+
+    // Validate SVG file
+    if (!(await FileSystem.exists(filePath))) {
+      throw new Error(`SVG file not found: ${filePath}`);
+    }
+
+    // Check if file is locked
+    if (this.lockService.isLocked(filePath)) {
+      logger.warn(`File is locked: ${path.basename(options.svgFile)}`);
+      return;
+    }
+
+    // Get configuration
+    const config = configService.readConfig();
+    const mergedConfig = { ...config, ...options.config };
+
+    // Process the file
+    const result = await svgProcessor.processSVGFile(filePath, outDir, {
+      defaultWidth: mergedConfig.defaultWidth,
+      defaultHeight: mergedConfig.defaultHeight,
+      defaultFill: mergedConfig.defaultFill,
+      styleRules: Object.fromEntries(
+        Object.entries(mergedConfig.styleRules || {}).filter(([_, v]) => v !== undefined)
+      ) as Record<string, string>
+    });
+
+    if (!result.success) {
+      throw result.error || new Error('Failed to generate component');
+    }
+
+    logger.success(`Component generated: ${result.componentName}`);
+  }
+
+  /**
+   * Start watching SVG files for changes
+   */
+  public async startWatching(options: WatchOptions): Promise<string> {
+    logger.info('Starting watch mode');
+    logger.info(`Watching: ${options.src}`);
+    logger.info(`Output: ${options.out}`);
+
+    const srcDir = path.resolve(options.src);
+    const outDir = path.resolve(options.out);
+
+    // Validate source directory
+    if (!(await FileSystem.exists(srcDir))) {
+      throw new Error(`Source folder not found: ${srcDir}`);
+    }
+
+    // Start watching
+    const watchId = await fileWatcher.watchDirectory(srcDir, options);
+    this.activeWatchers.add(watchId);
+
+    // Register event handler
+    fileWatcher.onFileEvent(watchId, async (event: FileWatchEvent) => {
+      await this.handleWatchEvent(event, outDir, options.config);
+    });
+
+    logger.success(`Watch mode active - waiting for file changes...`);
+    return watchId;
+  }
+
+  /**
+   * Handle file watch events
+   */
+  private async handleWatchEvent(
+    event: FileWatchEvent, 
+    outDir: string,
+    config?: Partial<any>
+  ): Promise<void> {
+    const fileName = path.basename(event.filePath);
+    
+    switch (event.type) {
+      case 'add':
+        logger.info(`New SVG detected: ${fileName}`);
+        await this.processWatchedFile(event.filePath, outDir, config);
+        break;
+        
+      case 'change':
+        logger.info(`SVG updated: ${fileName}`);
+        await this.processWatchedFile(event.filePath, outDir, config);
+        break;
+        
+      case 'unlink':
+        logger.info(`SVG removed: ${fileName}`);
+        await this.handleFileRemoval(event.filePath, outDir);
+        break;
+    }
+  }
+
+  /**
+   * Process a watched file
+   */
+  private async processWatchedFile(
+    filePath: string,
+    outDir: string,
+    config?: Partial<any>
+  ): Promise<void> {
+    try {
+      // Check if file is locked
+      if (this.lockService.isLocked(filePath)) {
+        logger.warn(`Skipped locked file: ${path.basename(filePath)}`);
+        return;
+      }
+
+      // Get configuration
+      const fullConfig = configService.readConfig();
+      const mergedConfig = { ...fullConfig, ...config };
+
+      // Process the file
+      await svgProcessor.processSVGFile(filePath, outDir, {
+        defaultWidth: mergedConfig.defaultWidth,
+        defaultHeight: mergedConfig.defaultHeight,
+        defaultFill: mergedConfig.defaultFill,
+        styleRules: Object.fromEntries(
+          Object.entries(mergedConfig.styleRules || {}).filter(([_, v]) => v !== undefined)
+        ) as Record<string, string>
+      });
+
+    } catch (error) {
+      logger.error(`Failed to process watched file ${path.basename(filePath)}:`, error);
+    }
+  }
+
+  /**
+   * Handle file removal in watch mode
+   */
+  private async handleFileRemoval(filePath: string, outDir: string): Promise<void> {
+    try {
+      const componentName = svgProcessor.generateComponentName(path.basename(filePath));
+      const componentPath = path.join(outDir, `${componentName}.tsx`);
+
+      if (await FileSystem.exists(componentPath)) {
+        await FileSystem.unlink(componentPath);
+        logger.success(`Removed component: ${componentName}.tsx`);
+      }
+    } catch (error) {
+      logger.error(`Failed to remove component for ${path.basename(filePath)}:`, error);
+    }
+  }
+
+  /**
+   * Stop watching files
+   */
+  public stopWatching(watchId?: string): void {
+    if (watchId) {
+      fileWatcher.stopWatching(watchId);
+      this.activeWatchers.delete(watchId);
+    } else {
+      // Stop all watchers
+      for (const id of this.activeWatchers) {
+        fileWatcher.stopWatching(id);
+      }
+      this.activeWatchers.clear();
+    }
+  }
+
+  /**
+   * Clean output directory
+   */
+  public async clean(outDir: string): Promise<void> {
+    const targetDir = path.resolve(outDir);
+
+    if (!(await FileSystem.exists(targetDir))) {
+      logger.warn(`Directory not found: ${targetDir}`);
+      return;
+    }
+
+    await FileSystem.emptyDir(targetDir);
+    logger.success(`Cleaned all generated SVG components in: ${targetDir}`);
+  }
+
+  /**
+   * Get service statistics
+   */
+  public getStats(): {
+    activeWatchers: number;
+    processingQueue: any;
+    watcherStats: any;
+  } {
+    return {
+      activeWatchers: this.activeWatchers.size,
+      processingQueue: svgProcessor.getProcessingStats(),
+      watcherStats: fileWatcher.getWatchStats()
+    };
+  }
+
+  /**
+   * Shutdown service
+   */
+  public shutdown(): void {
+    this.stopWatching();
+    fileWatcher.shutdown();
+    svgProcessor.clearQueue();
+    logger.info('SVG service shutdown complete');
+  }
+}
+
+/**
+ * Simple file locking service
+ */
+export class LockService {
+  private static instance: LockService;
+  private static readonly LOCK_FILE = '.svg-lock';
+  private cachedLocks: Set<string> | null = null;
+
+  private constructor() {}
+
+  public static getInstance(): LockService {
+    if (!LockService.instance) {
+      LockService.instance = new LockService();
+    }
+    return LockService.instance;
+  }
+
+  private getLockFilePath(): string {
+    return path.resolve(LockService.LOCK_FILE);
+  }
+
+  private readLockFile(): Set<string> {
+    if (this.cachedLocks) {
+      return this.cachedLocks;
+    }
+
+    try {
+      const data = FileSystem.readJSONSync(this.getLockFilePath());
+      this.cachedLocks = new Set(Array.isArray(data) ? data : []);
+      return this.cachedLocks;
+    } catch {
+      this.cachedLocks = new Set();
+      return this.cachedLocks;
+    }
+  }
+
+  private writeLockFile(locks: Set<string>): void {
+    try {
+      FileSystem.writeJSONSync(this.getLockFilePath(), Array.from(locks), { spaces: 2 });
+      this.cachedLocks = locks;
+    } catch (error) {
+      logger.error('Failed to write lock file:', error);
+    }
+  }
+
+  public lockFiles(files: string[]): void {
+    const fileNames = files.map(f => path.basename(f));
+    const current = this.readLockFile();
+    
+    for (const fileName of fileNames) {
+      current.add(fileName);
+    }
+    
+    this.writeLockFile(current);
+    logger.success(`Locked files: ${fileNames.join(', ')}`);
+  }
+
+  public unlockFiles(files: string[]): void {
+    const fileNames = files.map(f => path.basename(f));
+    const current = this.readLockFile();
+    
+    for (const fileName of fileNames) {
+      current.delete(fileName);
+    }
+    
+    this.writeLockFile(current);
+    logger.success(`Unlocked files: ${fileNames.join(', ')}`);
+  }
+
+  public isLocked(file: string): boolean {
+    const locks = this.readLockFile();
+    return locks.has(path.basename(file));
+  }
+
+  public clearCache(): void {
+    this.cachedLocks = null;
+  }
+}
+
+// Export singleton instance
+export const svgService = SVGService.getInstance();

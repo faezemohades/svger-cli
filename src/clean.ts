@@ -1,5 +1,5 @@
-import fs from "fs-extra";
 import path from "path";
+import { FileSystem } from "./utils/native.js";
 
 /**
  * Cleans the specified output directory by removing all files and folders inside it.
@@ -11,11 +11,11 @@ import path from "path";
 export async function clean(outDir: string) {
   const targetDir = path.resolve(outDir);
 
-  if (!fs.existsSync(targetDir)) {
+  if (!(await FileSystem.exists(targetDir))) {
     console.log(`⚠️ Directory not found: ${targetDir}`);
     return;
   }
 
-  await fs.emptyDir(targetDir);
+  await FileSystem.emptyDir(targetDir);
   console.log(`🧹 Cleaned all generated SVG components in: ${targetDir}`);
 }
