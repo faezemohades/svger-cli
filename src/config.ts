@@ -1,5 +1,5 @@
-import fs from "fs-extra";
 import path from "path";
+import { FileSystem } from "./utils/native.js";
 
 const CONFIG_FILE = ".svgconfig.json";
 
@@ -18,8 +18,7 @@ function getConfigPath(): string {
  * @returns {Record<string, any>} Configuration object. Returns an empty object if no config file exists.
  */
 export function readConfig(): Record<string, any> {
-  if (!fs.existsSync(getConfigPath())) return {};
-  return fs.readJSONSync(getConfigPath());
+  return FileSystem.readJSONSync(getConfigPath());
 }
 
 /**
@@ -28,15 +27,15 @@ export function readConfig(): Record<string, any> {
  * @param {Record<string, any>} config - Configuration object to write.
  */
 export function writeConfig(config: Record<string, any>) {
-  fs.writeJSONSync(getConfigPath(), config, { spaces: 2 });
+  FileSystem.writeJSONSync(getConfigPath(), config, { spaces: 2 });
 }
 
 /**
  * Initialize the svger-cli configuration with default values.
  * If a config file already exists, this function will not overwrite it.
  */
-export function initConfig() {
-  if (fs.existsSync(getConfigPath())) {
+export async function initConfig() {
+  if (await FileSystem.exists(getConfigPath())) {
     console.log("⚠️  Config file already exists:", getConfigPath());
     return;
   }
