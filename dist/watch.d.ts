@@ -1,3 +1,4 @@
+import { FileWatcher } from "./utils/native.js";
 /**
  * Watches a source folder for changes to SVG files and automatically
  * rebuilds React components when SVGs are added, modified, or deleted.
@@ -18,4 +19,4 @@
 export declare function watchSVGs(config: {
     src: string;
     out: string;
-}): import("chokidar").FSWatcher;
+}): Promise<FileWatcher>;
