@@ -1073,16 +1073,8 @@ svger-cli build --framework react --responsive --theme dark
 5. Open a Pull Request
 
 ### **Support**
-- 📧 **Email**: support@svger-cli.com
-- 💬 **Discord**: [Join our community](https://discord.gg/svger-cli)
+- 📧 **Email**: navidrezadoost07@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/faezemohades/svger-cli/issues)
-- 📖 **Documentation**: [docs.svger-cli.com](https://docs.svger-cli.com)
-
-### **Enterprise Support**
-For enterprise users requiring dedicated support, custom features, or professional services:
-- 🏢 **Enterprise**: enterprise@svger-cli.com
-- 📞 **Phone**: +1 (555) 123-4567
-- 💼 **SLA**: 24/7 support with guaranteed response times
 
 ---
 
@@ -1097,7 +1089,7 @@ This project was developed through the collaborative efforts of:
 
 - **🏗️ Architecture Design**: [ADR-001](./docs/ADR-SVG-INTRGRATION-METHODS-001.adr.md) authored by **Engineer Navid Rezadoost**
 - **📋 Technical Requirements**: [TDR-001](https://docs.google.com/document/d/1b04_V01xOvLiSMzuPdaRynANlnt2wYdJ_vjs9MAqtn4/edit?tab=t.0) prepared by **Ehsan Jafari**  
-- **💻 Implementation**: **Faeze Mohades** - Lead developer and package maintainer
+- **💻 Implementation**: **Navid Rezadoost** - Faeze Mohades Lead developer and package maintainer
 - **🏢 Enterprise Architecture**: SVGER Development Team
 
 Their guidance and documentation on SVG integration methods in React, Vue, and other frameworks were instrumental in shaping the design and functionality of the SVGER-CLI v2.0.
