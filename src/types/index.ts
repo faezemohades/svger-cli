@@ -2,11 +2,30 @@
  * Type definitions for svger-cli
  */
 
-export type FrameworkType = 'react' | 'vue' | 'svelte' | 'angular' | 'solid' | 'preact' | 'lit' | 'vanilla' | 'react-native';
+
+export type FrameworkType =
+  | 'react'
+  | 'vue'
+  | 'svelte'
+  | 'angular'
+  | 'solid'
+  | 'preact'
+  | 'lit'
+  | 'vanilla'
+  | 'react-native';
+
+export type NamingConvention = 'kebab' | 'pascal' | 'camel';
+
+export interface OutputConfig {
+  naming?: NamingConvention;
+  extension?: string;
+  directory?: string;
+}
+
 
 export interface SVGConfig {
   source: string;
-  output: string;
+  output: string | OutputConfig;
   watch: boolean;
   framework: FrameworkType;
   typescript: boolean;
@@ -40,22 +59,22 @@ export interface FrameworkOptions {
   composition?: boolean;
   setup?: boolean;
   scriptSetup?: boolean;
-  
+
   // Angular-specific
   standalone?: boolean;
   moduleImport?: boolean;
-  
+
   // Solid-specific
   signals?: boolean;
-  
+
   // React/Preact-specific
   forwardRef?: boolean;
   memo?: boolean;
-  
+
   // Lit-specific
   customElement?: boolean;
   shadowDom?: boolean;
-  
+
   // General
   cssModules?: boolean;
   styledComponents?: boolean;
@@ -157,7 +176,11 @@ export interface Template {
 
 export type FileSystemEvent = 'change' | 'rename';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type ProcessingStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type ProcessingStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
 
 export interface ProcessingJob {
   id: string;

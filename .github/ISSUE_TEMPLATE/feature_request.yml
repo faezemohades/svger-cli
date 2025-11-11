@@ -1,0 +1,147 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for SVGER-CLI
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+assignees:
+  - faezemohades
+  - navidrezadoost
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! We appreciate your input in making SVGER-CLI better.
+
+  - type: checkboxes
+    id: preliminary-checks
+    attributes:
+      label: Preliminary Checks
+      description: Please confirm you have done the following
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested
+          required: true
+        - label: I have read the documentation to ensure this feature doesn't already exist
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature are you requesting?
+      options:
+        - New Framework Support
+        - CLI Enhancement
+        - Performance Improvement
+        - Developer Experience
+        - Output Customization
+        - Configuration Option
+        - Integration/Plugin
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: Problem Description
+      description: What problem does this feature solve? What's the current limitation?
+      placeholder: Describe the problem or limitation you're facing
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: What would you like to see implemented?
+      placeholder: Describe your ideal solution in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternative solutions or workarounds have you considered?
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe specific use cases where this feature would be valuable
+      placeholder: |
+        1. When working with large design systems...
+        2. When integrating with CI/CD pipelines...
+        3. When developing component libraries...
+
+  - type: textarea
+    id: expected-api
+    attributes:
+      label: Expected API/Usage
+      description: How do you envision using this feature? (CLI commands, configuration options, etc.)
+      render: bash
+      placeholder: |
+        # Example CLI usage
+        svger-cli build --new-feature-flag
+        
+        # Example configuration
+        {
+          "newFeature": {
+            "enabled": true,
+            "options": {}
+          }
+        }
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to your workflow?
+      options:
+        - Low - Nice to have
+        - Medium - Would improve my workflow
+        - High - Blocking or significantly impacts my work
+        - Critical - Can't proceed without this
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-frameworks
+    attributes:
+      label: Affected Frameworks
+      description: Which frameworks would this feature impact?
+      multiple: true
+      options:
+        - React
+        - Vue
+        - Angular
+        - Svelte
+        - Solid
+        - Lit
+        - Preact
+        - Vanilla
+        - All Frameworks
+        - Framework Agnostic
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any additional information, mockups, examples, or context
+      placeholder: |
+        - Links to similar features in other tools
+        - Screenshots or mockups
+        - Real-world examples
+        - Performance considerations
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you interested in contributing to implement this feature?
+      options:
+        - label: I'm willing to submit a PR to implement this feature
+        - label: I'm willing to help design the implementation
+        - label: I'm willing to help test this feature
+        - label: I can provide additional use cases and feedback

@@ -1,0 +1,38 @@
+{
+  "entryPoints": ["./src/index.ts"],
+  "out": "./docs/api",
+  "name": "SVGER-CLI API Documentation",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "readme": "./README.md",
+  "theme": "default",
+  "hideGenerator": true,
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Project",
+    "Module",
+    "Namespace",
+    "Enum",
+    "Class",
+    "Interface",
+    "Type alias",
+    "Constructor",
+    "Property",
+    "Method",
+    "Function",
+    "Variable"
+  ],
+  "categorizeByGroup": false,
+  "defaultCategory": "Other",
+  "categoryOrder": [
+    "Core",
+    "Framework Templates",
+    "Processors",
+    "Services", 
+    "Utilities",
+    "Types",
+    "*"
+  ]
+}

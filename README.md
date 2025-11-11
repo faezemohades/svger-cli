@@ -9,13 +9,32 @@
 
 ## 🆕 **Latest Developer Experience Improvements**
 
-### **Auto-Generated index.ts Exports**
-Automatically generates clean index.ts files with all component exports for seamless importing:
+### **Auto-Generated index.ts Exports (Enhanced)**
+Automatically generates clean index.ts files with **unified export pattern** for maximum flexibility:
 ```typescript
 // Auto-generated in your output directory
-export { ArrowLeft } from './ArrowLeft';
-export { ArrowRight } from './ArrowRight';
-// ... all your components
+// Named exports for tree-shaking
+export { default as ArrowLeft } from './ArrowLeft';
+export { default as ArrowRight } from './ArrowRight';
+
+// Grouped named exports
+export { ArrowLeft, ArrowRight };
+
+// Default export for convenience
+export default { ArrowLeft, ArrowRight };
+```
+
+**Import flexibility:**
+```typescript
+// Named imports (tree-shaking friendly)
+import { ArrowLeft, ArrowRight } from './components';
+
+// Namespace import
+import * as Icons from './components';
+
+// Default import
+import Icons from './components';
+const { ArrowLeft } = Icons;
 ```
 
 ### **Enhanced Props & Styling**

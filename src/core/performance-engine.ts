@@ -1,3 +1,4 @@
+import os from 'os';
 import { logger } from '../core/logger.js';
 import { SVGProcessor, svgProcessor } from '../processors/svg-processor.js';
 import { ComponentGenerationOptions } from '../types/index.js';
@@ -7,7 +8,8 @@ import { ComponentGenerationOptions } from '../types/index.js';
  */
 export class PerformanceEngine {
   private static instance: PerformanceEngine;
-  private processingCache: Map<string, { result: any; timestamp: number }> = new Map();
+  private processingCache: Map<string, { result: any; timestamp: number }> =
+    new Map();
   private readonly cacheTimeout = 5 * 60 * 1000; // 5 minutes
 
   private constructor() {}
@@ -23,19 +25,41 @@ export class PerformanceEngine {
    * Process multiple SVG files in parallel with optimized batching
    */
   public async processBatch(
-    files: Array<{ path: string; outputDir: string; options?: Partial<ComponentGenerationOptions> }>,
-    config: { batchSize?: number; parallel?: boolean; maxConcurrency?: number } = {}
-  ): Promise<Array<{ success: boolean; filePath: string; error?: Error; duration: number }>> {
+    files: Array<{
+      path: string;
+      outputDir: string;
+      options?: Partial<ComponentGenerationOptions>;
+    }>,
+    config: {
+      batchSize?: number;
+      parallel?: boolean;
+      maxConcurrency?: number;
+    } = {}
+  ): Promise<
+    Array<{
+      success: boolean;
+      filePath: string;
+      error?: Error;
+      duration: number;
+    }>
+  > {
     const {
       batchSize = 10,
       parallel = true,
-      maxConcurrency = Math.min(4, require('os').cpus().length)
+      maxConcurrency = Math.min(4, os.cpus().length),
     } = config;
 
-    logger.info(`Processing ${files.length} files with ${parallel ? 'parallel' : 'sequential'} execution`);
-    
+    logger.info(
+      `Processing ${files.length} files with ${parallel ? 'parallel' : 'sequential'} execution`
+    );
+
     const startTime = Date.now();
-    const results: Array<{ success: boolean; filePath: string; error?: Error; duration: number }> = [];
+    const results: Array<{
+      success: boolean;
+      filePath: string;
+      error?: Error;
+      duration: number;
+    }> = [];
 
     if (!parallel) {
       // Sequential processing for stability
@@ -46,13 +70,15 @@ export class PerformanceEngine {
     } else {
       // Parallel processing with controlled concurrency
       const batches = this.createBatches(files, batchSize);
-      
+
       for (const batch of batches) {
         const semaphore = new Semaphore(maxConcurrency);
-        const batchPromises = batch.map(file => 
-          this.withSemaphore(semaphore, () => this.processSingleWithCaching(file))
+        const batchPromises = batch.map(file =>
+          this.withSemaphore(semaphore, () =>
+            this.processSingleWithCaching(file)
+          )
         );
-        
+
         const batchResults = await Promise.all(batchPromises);
         results.push(...batchResults);
       }
@@ -60,18 +86,27 @@ export class PerformanceEngine {
 
     const totalDuration = Date.now() - startTime;
     const successful = results.filter(r => r.success).length;
-    
-    logger.info(`Batch processing complete: ${successful}/${files.length} successful in ${totalDuration}ms`);
-    
+
+    logger.info(
+      `Batch processing complete: ${successful}/${files.length} successful in ${totalDuration}ms`
+    );
+
     return results;
   }
 
   /**
    * Process single file with caching support
    */
-  private async processSingleWithCaching(
-    file: { path: string; outputDir: string; options?: Partial<ComponentGenerationOptions> }
-  ): Promise<{ success: boolean; filePath: string; error?: Error; duration: number }> {
+  private async processSingleWithCaching(file: {
+    path: string;
+    outputDir: string;
+    options?: Partial<ComponentGenerationOptions>;
+  }): Promise<{
+    success: boolean;
+    filePath: string;
+    error?: Error;
+    duration: number;
+  }> {
     const startTime = Date.now();
     const cacheKey = this.generateCacheKey(file.path, file.options || {});
 
@@ -82,7 +117,7 @@ export class PerformanceEngine {
       return {
         success: true,
         filePath: file.path,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
     }
 
@@ -102,15 +137,14 @@ export class PerformanceEngine {
         success: result.success,
         filePath: file.path,
         error: result.error,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
-
     } catch (error) {
       return {
         success: false,
         filePath: file.path,
         error: error as Error,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
     }
   }
@@ -118,7 +152,10 @@ export class PerformanceEngine {
   /**
    * Optimize SVG content with performance considerations
    */
-  public optimizeSVGContent(content: string, level: 'fast' | 'balanced' | 'maximum' = 'balanced'): string {
+  public optimizeSVGContent(
+    content: string,
+    level: 'fast' | 'balanced' | 'maximum' = 'balanced'
+  ): string {
     const startTime = performance.now();
     let optimized = content;
 
@@ -127,12 +164,12 @@ export class PerformanceEngine {
         // Basic optimizations only
         optimized = this.applyFastOptimizations(content);
         break;
-        
+
       case 'balanced':
         // Standard optimizations with good performance/quality balance
         optimized = this.applyBalancedOptimizations(content);
         break;
-        
+
       case 'maximum':
         // Comprehensive optimizations
         optimized = this.applyMaximumOptimizations(content);
@@ -141,9 +178,11 @@ export class PerformanceEngine {
 
     const duration = performance.now() - startTime;
     const compressionRatio = (1 - optimized.length / content.length) * 100;
-    
-    logger.debug(`SVG optimization (${level}): ${compressionRatio.toFixed(1)}% reduction in ${duration.toFixed(2)}ms`);
-    
+
+    logger.debug(
+      `SVG optimization (${level}): ${compressionRatio.toFixed(1)}% reduction in ${duration.toFixed(2)}ms`
+    );
+
     return optimized;
   }
 
@@ -166,13 +205,17 @@ export class PerformanceEngine {
     const heapTotalMB = memUsage.heapTotal / 1024 / 1024;
 
     if (heapUsedMB > 500) {
-      recommendations.push('Consider reducing batch size or enabling sequential processing');
+      recommendations.push(
+        'Consider reducing batch size or enabling sequential processing'
+      );
     }
-    
+
     if (cacheSize > 1000) {
-      recommendations.push('Cache size is large, consider clearing old entries');
+      recommendations.push(
+        'Cache size is large, consider clearing old entries'
+      );
     }
-    
+
     if (memUsage.external > 100 * 1024 * 1024) {
       recommendations.push('High external memory usage detected');
     }
@@ -182,7 +225,7 @@ export class PerformanceEngine {
       heapTotal: heapTotalMB,
       external: memUsage.external / 1024 / 1024,
       cacheSize,
-      recommendations
+      recommendations,
     };
   }
 
@@ -206,7 +249,7 @@ export class PerformanceEngine {
     return {
       cacheHitRate: 0, // Placeholder
       averageProcessingTime: 0, // Placeholder
-      memoryUsage: this.monitorMemoryUsage()
+      memoryUsage: this.monitorMemoryUsage(),
     };
   }
 
@@ -220,7 +263,10 @@ export class PerformanceEngine {
     return batches;
   }
 
-  private async withSemaphore<T>(semaphore: Semaphore, task: () => Promise<T>): Promise<T> {
+  private async withSemaphore<T>(
+    semaphore: Semaphore,
+    task: () => Promise<T>
+  ): Promise<T> {
     await semaphore.acquire();
     try {
       return await task();
@@ -229,7 +275,10 @@ export class PerformanceEngine {
     }
   }
 
-  private generateCacheKey(filePath: string, options: Partial<ComponentGenerationOptions>): string {
+  private generateCacheKey(
+    filePath: string,
+    options: Partial<ComponentGenerationOptions>
+  ): string {
     // Create a hash of file path and options for caching
     const key = JSON.stringify({ filePath, options });
     return Buffer.from(key).toString('base64');
@@ -238,20 +287,20 @@ export class PerformanceEngine {
   private getCachedResult(key: string): any | null {
     const cached = this.processingCache.get(key);
     if (!cached) return null;
-    
+
     // Check if cache entry is still valid
     if (Date.now() - cached.timestamp > this.cacheTimeout) {
       this.processingCache.delete(key);
       return null;
     }
-    
+
     return cached.result;
   }
 
   private setCachedResult(key: string, result: any): void {
     this.processingCache.set(key, {
       result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -264,20 +313,20 @@ export class PerformanceEngine {
 
   private applyBalancedOptimizations(content: string): string {
     let optimized = this.applyFastOptimizations(content);
-    
+
     // Remove unnecessary attributes
     optimized = optimized
       .replace(/\s+id="[^"]*"/g, '') // Remove IDs (usually not needed in components)
       .replace(/\s+class="[^"]*"/g, '') // Remove classes
       .replace(/<!--[\s\S]*?-->/g, '') // Remove comments
       .replace(/\s+xmlns="[^"]*"/g, ''); // Remove xmlns (React adds it)
-    
+
     return optimized;
   }
 
   private applyMaximumOptimizations(content: string): string {
     let optimized = this.applyBalancedOptimizations(content);
-    
+
     // Advanced optimizations
     optimized = optimized
       .replace(/\s+style="[^"]*"/g, '') // Remove inline styles
@@ -286,7 +335,7 @@ export class PerformanceEngine {
       .replace(/stroke="none"/g, '') // Remove default stroke
       .replace(/\s+version="[^"]*"/g, '') // Remove version
       .replace(/\s+baseProfile="[^"]*"/g, ''); // Remove baseProfile
-    
+
     return optimized;
   }
 }
@@ -308,7 +357,7 @@ class Semaphore {
       return Promise.resolve();
     }
 
-    return new Promise<void>((resolve) => {
+    return new Promise<void>(resolve => {
       this.waitQueue.push(resolve);
     });
   }

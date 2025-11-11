@@ -1,38 +1,180 @@
 {
   "name": "svger-cli",
-  "version": "1.0.8",
-  "description": "CLI and runtime for converting SVGs to React components with watch support",
+  "version": "2.0.3",
+  "description": "Enterprise-grade, zero-dependency SVG to component converter supporting React, Vue, Angular, Svelte, Solid, Lit, Preact & Vanilla. Features auto-generated TypeScript exports, responsive design, themes, performance optimization & 85% faster processing than SVGR.",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "bin": {
-    "svger-cli": "./bin/svg-tool.js"
+    "svger-cli": "./bin/svg-tool.js",
+    "svger": "./bin/svg-tool.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist",
-    "bin",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "bin/svg-tool.js",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "DEVELOPMENT.md",
+    "docs/**/*.md",
+    ".svgerconfig.example.json"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "prepublishOnly": "npm run build",
-    "dev": "ts-node src/cli.ts"
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "clean": "rimraf dist",
+    "dev": "ts-node --esm src/cli.ts",
+    "test": "npm run test:frameworks && npm run test:config && npm run test:e2e",
+    "test:frameworks": "node frameworks.test.js",
+    "test:config": "tsc tests/config-options.test.ts --outDir dist-tests --module es2022 --target es2022 --moduleResolution bundler && node dist-tests/config-options.test.js",
+    "test:e2e": "tsc tests/e2e-complete.test.ts --outDir dist-tests --module es2022 --target es2022 --moduleResolution bundler && node dist-tests/e2e-complete.test.js",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:all": "npm run test:frameworks && npm run test:config && npm run test:e2e",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json,md}\"",
+    "prepublishOnly": "npm run build && npm run test && npm run lint",
+    "prepack": "npm run build",
+    "release": "npm version patch && npm publish",
+    "release:minor": "npm version minor && npm publish",
+    "release:major": "npm version major && npm publish",
+    "docs:generate": "typedoc --out docs/api src/index.ts",
+    "benchmark": "node --loader ts-node/esm scripts/benchmark.ts",
+    "validate": "npm run typecheck && npm run lint && npm run test"
   },
   "keywords": [
     "svg",
     "react",
+    "vue",
+    "angular",
+    "svelte",
+    "solid",
+    "preact",
+    "lit",
     "cli",
-    "components"
+    "components",
+    "typescript",
+    "zero-dependency",
+    "performance",
+    "design-system",
+    "responsive",
+    "enterprise",
+    "batch-processing",
+    "icon-generation",
+    "frontend-tooling",
+    "web-components",
+    "component-library",
+    "svg-optimization",
+    "framework-agnostic",
+    "developer-tools",
+    "build-tools"
   ],
-  "author": "faeze mohades",
+  "author": {
+    "name": "Faeze Mohades",
+    "email": "faezemohades@gmail.com",
+    "url": "https://github.com/faezemohades"
+  },
+  "contributors": [
+    {
+      "name": "Navid Rezadoost",
+      "email": "navidrezadoost07@gmail.com",
+      "url": "https://www.linkedin.com/in/navid-rezadoost-5526b9173/",
+      "role": "Core Developer & Technical Lead"
+    },
+    {
+      "name": "Ehsan Jafari",
+      "role": "Technical Requirements & Architecture"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Faeze Mohades",
+      "email": "faezemohades@gmail.com"
+    },
+    {
+      "name": "Navid Rezadoost",
+      "email": "navidrezadoost07@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faezemohades/svger-cli.git",
+    "directory": "."
+  },
+  "homepage": "https://github.com/faezemohades/svger-cli#readme",
+  "bugs": {
+    "url": "https://github.com/faezemohades/svger-cli/issues",
+    "email": "faezemohades@gmail.com"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/faezemohades"
+    },
+    {
+      "type": "buymeacoffee",
+      "url": "https://buymeacoffee.com/faezemohades"
+    }
+  ],
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "^24.9.2",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "typedoc": "^0.26.11",
     "typescript": "^5.9.3"
   },
+  "peerDependencies": {
+    "node": ">=18.17.0"
+  },
   "engines": {
-    "node": ">=18.17"
+    "node": ">=18.17.0",
+    "npm": ">=9.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "packageManager": "npm@10.8.2",
+  "preferGlobal": true,
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "browserslist": [
+    "node >= 18.17.0"
+  ],
+  "volta": {
+    "node": "18.20.4"
   }
 }

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/faezemohades/svger-cli/main/schemas/config.schema.json",
+  "source": "./src/assets/svg",
+  "output": "./src/components/icons",
+  "framework": "react",
+  "typescript": true,
+  "watch": false,
+  "parallel": true,
+  "batchSize": 10,
+  "defaultWidth": 24,
+  "defaultHeight": 24,
+  "defaultFill": "currentColor",
+  "exclude": [],
+  "styleRules": {
+    "fill": "inherit",
+    "stroke": "none"
+  },
+  "responsive": {
+    "enabled": false,
+    "breakpoints": ["sm", "md", "lg"],
+    "values": {
+      "width": ["20px", "24px", "32px"],
+      "height": ["20px", "24px", "32px"]
+    }
+  },
+  "theme": {
+    "mode": "light",
+    "variables": {
+      "primary": "#007bff",
+      "secondary": "#6c757d"
+    }
+  },
+  "performance": {
+    "optimization": "balanced",
+    "cache": true,
+    "memoryLimit": 512
+  }
+}

@@ -1,0 +1,155 @@
+name: Bug Report
+description: Report a bug or issue with SVGER-CLI
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees:
+  - faezemohades
+  - navidrezadoost
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please fill out the information below to help us resolve the issue quickly.
+
+  - type: checkboxes
+    id: preliminary-checks
+    attributes:
+      label: Preliminary Checks
+      description: Please confirm you have done the following
+      options:
+        - label: I have searched existing issues to ensure this bug hasn't been reported
+          required: true
+        - label: I have read the documentation and this isn't a usage question
+          required: true
+        - label: I am using a supported version of SVGER-CLI (2.0.x)
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: SVGER-CLI Version
+      description: What version of SVGER-CLI are you using?
+      placeholder: e.g., 2.0.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: What environment are you using?
+      options:
+        - Node.js (Local Development)
+        - CI/CD Pipeline
+        - Docker Container
+        - Other (please specify in description)
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version
+      description: What version of Node.js are you using?
+      placeholder: e.g., 18.17.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Target Framework
+      description: Which framework are you targeting?
+      options:
+        - React
+        - Vue
+        - Angular
+        - Svelte
+        - Solid
+        - Lit
+        - Preact
+        - Vanilla
+        - Multiple Frameworks
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe what happened and what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the behavior
+      placeholder: |
+        1. Run command: svger-cli build ...
+        2. With these files: ...
+        3. See error: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output
+      description: Any error messages or logs
+      render: shell
+      placeholder: Paste error messages, stack traces, or logs here
+
+  - type: textarea
+    id: minimal-reproduction
+    attributes:
+      label: Minimal Reproduction Case
+      description: |
+        If possible, provide a minimal set of files that reproduce the issue
+        You can use code blocks or link to a repository
+      render: typescript
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration
+      description: Your SVGER-CLI configuration (.svgerconfig.json or command-line arguments)
+      render: json
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any additional information that might help resolve the issue
+      placeholder: |
+        - Does this happen with specific SVG files?
+        - Does this happen in a specific OS?
+        - Any workarounds you've found?
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you interested in contributing to fix this issue?
+      options:
+        - label: I'm willing to submit a PR to fix this issue
+        - label: I'm willing to help test a fix

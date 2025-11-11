@@ -1,3 +1,17 @@
 {
-  "defaultHeight": 32
+  "source": "./svg-icons",
+  "output": "./components/icons",
+  "framework": "react",
+  "typescript": true,
+  "watch": false,
+  "defaultWidth": 48,
+  "defaultHeight": 48,
+  "defaultFill": "#000000",
+  "exclude": [
+    "test.svg"
+  ],
+  "styleRules": {
+    "fill": "currentColor",
+    "stroke": "none"
+  }
 }

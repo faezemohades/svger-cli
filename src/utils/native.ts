@@ -6,15 +6,52 @@ import { promisify } from 'util';
  */
 
 /**
- * Convert string to PascalCase (replaces change-case package)
+ * Convert a string to PascalCase.
+ * Handles kebab-case, snake_case, and space-separated strings.
+ *
+ * @param {string} str - Input string to convert.
+ * @returns {string} PascalCase string.
+ *
+ * @example
+ * toPascalCase('hello-world') => 'HelloWorld'
+ * toPascalCase('hello_world') => 'HelloWorld'
+ * toPascalCase('hello world') => 'HelloWorld'
  */
 export function toPascalCase(str: string): string {
   return str
-    .replace(/[^a-zA-Z0-9]/g, ' ')
-    .split(' ')
-    .filter(Boolean)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
+    .replace(/[-_\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ''))
+    .replace(/^(.)/, char => char.toUpperCase());
+}
+
+/**
+ * Convert a string to camelCase.
+ *
+ * @param {string} str - Input string to convert.
+ * @returns {string} camelCase string.
+ *
+ * @example
+ * toCamelCase('hello-world') => 'helloWorld'
+ */
+export function toCamelCase(str: string): string {
+  const pascal = toPascalCase(str);
+  return pascal.charAt(0).toLowerCase() + pascal.slice(1);
+}
+
+/**
+ * Convert a string to kebab-case.
+ *
+ * @param {string} str - Input string to convert.
+ * @returns {string} kebab-case string.
+ *
+ * @example
+ * toKebabCase('HelloWorld') => 'hello-world'
+ * toKebabCase('hello_world') => 'hello-world'
+ */
+export function toKebabCase(str: string): string {
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase();
 }
 
 /**
@@ -38,11 +75,18 @@ export class FileSystem {
     }
   }
 
-  static async readFile(path: string, encoding: BufferEncoding = 'utf8'): Promise<string> {
+  static async readFile(
+    path: string,
+    encoding: BufferEncoding = 'utf8'
+  ): Promise<string> {
     return this._readFile(path, encoding);
   }
 
-  static async writeFile(path: string, content: string, encoding: BufferEncoding = 'utf8'): Promise<void> {
+  static async writeFile(
+    path: string,
+    content: string,
+    encoding: BufferEncoding = 'utf8'
+  ): Promise<void> {
     return this._writeFile(path, content, encoding);
   }
 
@@ -63,18 +107,18 @@ export class FileSystem {
   static async removeDir(dirPath: string): Promise<void> {
     try {
       const files = await this._readdir(dirPath);
-      
+
       for (const file of files) {
         const filePath = `${dirPath}/${file}`;
         const stats = await this._stat(filePath);
-        
+
         if (stats.isDirectory()) {
           await this.removeDir(filePath);
         } else {
           await this._unlink(filePath);
         }
       }
-      
+
       await this._rmdir(dirPath);
     } catch (error: any) {
       if (error.code !== 'ENOENT') {
@@ -87,13 +131,13 @@ export class FileSystem {
     if (!(await this.exists(dirPath))) {
       return;
     }
-    
+
     const files = await this._readdir(dirPath);
-    
+
     for (const file of files) {
       const filePath = `${dirPath}/${file}`;
       const stats = await this._stat(filePath);
-      
+
       if (stats.isDirectory()) {
         await this.removeDir(filePath);
       } else {
@@ -115,7 +159,11 @@ export class FileSystem {
     }
   }
 
-  static writeJSONSync(path: string, data: any, options?: { spaces?: number }): void {
+  static writeJSONSync(
+    path: string,
+    data: any,
+    options?: { spaces?: number }
+  ): void {
     const content = JSON.stringify(data, null, options?.spaces || 0);
     fs.writeFileSync(path, content, 'utf8');
   }
@@ -144,11 +192,17 @@ export class FileSystem {
  * Simple CLI argument parser (replaces commander package)
  */
 export class CLI {
-  private commands: Map<string, {
-    description: string;
-    action: (args: string[], options: Record<string, any>) => void | Promise<void>;
-    options: Map<string, { description: string; hasValue: boolean }>;
-  }> = new Map();
+  private commands: Map<
+    string,
+    {
+      description: string;
+      action: (
+        args: string[],
+        options: Record<string, any>
+      ) => void | Promise<void>;
+      options: Map<string, { description: string; hasValue: boolean }>;
+    }
+  > = new Map();
 
   private programName = '';
   private programDescription = '';
@@ -173,18 +227,23 @@ export class CLI {
     return new CommandBuilder(signature, this);
   }
 
-  addCommand(signature: string, description: string, action: Function, options: Map<string, any>): void {
+  addCommand(
+    signature: string,
+    description: string,
+    action: Function,
+    options: Map<string, any>
+  ): void {
     const [command] = signature.split(' ');
     this.commands.set(command, {
       description,
       action: action as any,
-      options
+      options,
     });
   }
 
   async parse(): Promise<void> {
     const args = process.argv.slice(2);
-    
+
     if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
       this.showHelp();
       return;
@@ -204,8 +263,11 @@ export class CLI {
       process.exit(1);
     }
 
-    const { parsedArgs, options } = this.parseArgs(remainingArgs, command.options);
-    
+    const { parsedArgs, options } = this.parseArgs(
+      remainingArgs,
+      command.options
+    );
+
     try {
       await command.action(parsedArgs, options);
     } catch (error) {
@@ -214,21 +276,24 @@ export class CLI {
     }
   }
 
-  private parseArgs(args: string[], commandOptions: Map<string, any>): {
+  private parseArgs(
+    args: string[],
+    commandOptions: Map<string, any>
+  ): {
     parsedArgs: string[];
     options: Record<string, any>;
   } {
     const parsedArgs: string[] = [];
     const options: Record<string, any> = {};
-    
+
     let i = 0;
     while (i < args.length) {
       const arg = args[i];
-      
+
       if (arg.startsWith('--')) {
         const optionName = arg.slice(2);
         const optionConfig = commandOptions.get(optionName);
-        
+
         if (optionConfig) {
           if (optionConfig.hasValue) {
             options[optionName] = args[i + 1];
@@ -252,7 +317,7 @@ export class CLI {
         i++;
       }
     }
-    
+
     return { parsedArgs, options };
   }
 
@@ -260,11 +325,11 @@ export class CLI {
     console.log(`${this.programName} - ${this.programDescription}`);
     console.log(`Version: ${this.programVersion}\n`);
     console.log('Commands:');
-    
+
     for (const [name, cmd] of this.commands) {
       console.log(`  ${name.padEnd(15)} ${cmd.description}`);
     }
-    
+
     console.log('\nOptions:');
     console.log('  --help, -h      Show help');
     console.log('  --version, -v   Show version');
@@ -275,7 +340,8 @@ class CommandBuilder {
   private signature: string;
   private desc = '';
   private cli: CLI;
-  private options: Map<string, { description: string; hasValue: boolean }> = new Map();
+  private options: Map<string, { description: string; hasValue: boolean }> =
+    new Map();
 
   constructor(signature: string, cli: CLI) {
     this.signature = signature;
@@ -308,14 +374,18 @@ export class FileWatcher {
 
   watch(path: string, options?: { recursive?: boolean }): this {
     try {
-      const watcher = fs.watch(path, { 
-        recursive: options?.recursive || false,
-        persistent: true 
-      }, (eventType, filename) => {
-        if (filename) {
-          this.emit(eventType, `${path}/${filename}`);
+      const watcher = fs.watch(
+        path,
+        {
+          recursive: options?.recursive || false,
+          persistent: true,
+        },
+        (eventType, filename) => {
+          if (filename) {
+            this.emit(eventType, `${path}/${filename}`);
+          }
         }
-      });
+      );
 
       this.watchers.push(watcher);
     } catch (error) {

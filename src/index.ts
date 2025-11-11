@@ -1,9 +1,9 @@
 /**
  * SVGER-CLI - Zero-Dependency SVG to React Component Generator
- * 
+ *
  * A high-performance, framework-agnostic SVG processing toolkit with enterprise-grade
  * architecture and comprehensive styling capabilities.
- * 
+ *
  * @version 2.0.0
  * @author SVGER-CLI Development Team
  * @license MIT
@@ -29,7 +29,12 @@ export { ConfigService, configService } from './services/config.js';
  * Error Handler - Comprehensive error management with recovery strategies
  * Provides: structured error handling, recovery mechanisms, and user-friendly messages
  */
-export { SVGErrorHandler, errorHandler, withErrorHandling, handleErrors } from './core/error-handler.js';
+export {
+  SVGErrorHandler,
+  errorHandler,
+  withErrorHandling,
+  handleErrors,
+} from './core/error-handler.js';
 
 // ============================================================================
 // PROCESSING ENGINES
@@ -45,7 +50,10 @@ export { SVGProcessor, svgProcessor } from './processors/svg-processor.js';
  * Performance Engine - Advanced optimization for batch processing and parallel execution
  * Provides: batch processing, caching, memory optimization, and performance monitoring
  */
-export { PerformanceEngine, performanceEngine } from './core/performance-engine.js';
+export {
+  PerformanceEngine,
+  performanceEngine,
+} from './core/performance-engine.js';
 
 /**
  * Style Compiler - Comprehensive styling system with responsive design and theming
@@ -67,11 +75,10 @@ export { TemplateManager, templateManager } from './core/template-manager.js';
  * Framework Template Engine - Universal template generator supporting multiple UI frameworks
  * Provides: React, Vue, Svelte, Angular, Solid, Preact, Lit, and Vanilla JS components
  */
-export { 
-  FrameworkTemplateEngine, 
+export {
+  FrameworkTemplateEngine,
   frameworkTemplateEngine,
-  type FrameworkType,
-  type FrameworkOptions 
+  type FrameworkOptions,
 } from './core/framework-templates.js';
 
 // ============================================================================
@@ -92,11 +99,13 @@ export { PluginManager, pluginManager } from './core/plugin-manager.js';
  * Native Node.js Utilities - Zero-dependency replacements for external libraries
  * Provides: file operations, string manipulation, CLI parsing, and file watching
  */
-export { 
-  toPascalCase, 
-  FileSystem, 
-  CLI, 
-  FileWatcher 
+export {
+  toPascalCase,
+  toCamelCase,
+  toKebabCase,
+  FileSystem,
+  CLI,
+  FileWatcher,
 } from './utils/native.js';
 
 /**
@@ -135,22 +144,25 @@ export type {
   // Core configuration types
   SVGConfig,
   ComponentGenerationOptions,
-  
+  OutputConfig,
+  NamingConvention,
+  FrameworkType,
+
   // Processing types
   SVGProcessorResult,
   ProcessingJob,
   ProcessingStatus,
-  
+
   // Plugin system types
   Plugin,
   PluginConfig,
-  
+
   // Template system types
   Template,
   TemplateConfig,
-  
+
   // File operation types
-  WatchOptions
+  WatchOptions,
 } from './types/index.js';
 
 /**
@@ -187,31 +199,32 @@ export const SVGER = {
    * Process single SVG file to React component
    */
   processFile: svgProcessor.processSVGFile.bind(svgProcessor),
-  
+
   /**
    * Process multiple SVG files in batch
    */
   processBatch: svgProcessor.processBatch.bind(svgProcessor),
-  
+
   /**
    * Generate framework-agnostic component
    */
-  generateFrameworkComponent: svgProcessor.generateFrameworkComponent.bind(svgProcessor),
-  
+  generateFrameworkComponent:
+    svgProcessor.generateFrameworkComponent.bind(svgProcessor),
+
   /**
    * Watch directory for changes
    */
   watch: watchSVGs,
-  
+
   /**
    * Clean and optimize directory
    */
   clean,
-  
+
   /**
    * Build all SVG files in directory
    */
-  build: buildAll
+  build: buildAll,
 } as const;
 
 // ============================================================================
