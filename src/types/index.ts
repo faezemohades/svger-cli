@@ -2,7 +2,7 @@
  * Type definitions for svger-cli
  */
 
-export type FrameworkType = 'react' | 'vue' | 'svelte' | 'angular' | 'solid' | 'preact' | 'lit' | 'vanilla';
+export type FrameworkType = 'react' | 'vue' | 'svelte' | 'angular' | 'solid' | 'preact' | 'lit' | 'vanilla' | 'react-native';
 
 export interface SVGConfig {
   source: string;
