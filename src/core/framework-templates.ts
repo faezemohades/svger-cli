@@ -434,27 +434,33 @@ export function ${componentName}(options: ${componentName}Options = {}): SVGSVGE
     const defaultFill = attributes.fill || 'currentColor'
 
     const svgImports = this.getReactNativeSVGImports(innerContent)
-    const imports = `import React from "react";
+    const imports = typescript
+      ? `import React from "react";
+import Svg${svgImports ? `, { ${svgImports} }` : ''} from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import { StyleProp, ViewStyle } from "react-native";`
+      : `import React from "react";
 import Svg${svgImports ? `, { ${svgImports} }` : ''} from "react-native-svg";`
 
     const propsInterface = typescript
       ? `
-export interface ${componentName}Props {
+export interface ${componentName}Props extends SvgProps {
   width?: number | string;
   height?: number | string;
   fill?: string;
   stroke?: string;
   strokeWidth?: number | string;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }`
       : ''
 
     const componentProps = typescript ? `${componentName}Props` : 'any'
+    const refType = typescript ? 'React.ComponentRef<typeof Svg>' : 'any'
 
     let componentCode = ''
 
     if (forwardRef) {
-      componentCode = `const ${componentName} = React.forwardRef<any, ${componentProps}>(
+      componentCode = `const ${componentName} = React.forwardRef<${refType}, ${componentProps}>(
   ({ width = ${defaultWidth}, height = ${defaultHeight}, fill = "${defaultFill}", stroke, strokeWidth, style, ...props }, ref) => {
     return (
       <Svg
