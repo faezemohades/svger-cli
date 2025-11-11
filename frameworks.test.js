@@ -118,6 +118,15 @@ frameworks.forEach((config, index) => {
         if (options.forwardRef !== false && !component.includes('React.forwardRef')) {
           throw new Error('Missing forwardRef wrapper')
         }
+        if (options.forwardRef !== false && !component.includes('React.ComponentRef<typeof Svg>')) {
+          throw new Error('Should use React.ComponentRef<typeof Svg> instead of deprecated ElementRef')
+        }
+        if (component.includes('React.ElementRef<typeof Svg>')) {
+          throw new Error('Should not use deprecated React.ElementRef, use React.ComponentRef instead')
+        }
+        if (!component.includes('StyleProp<ViewStyle>')) {
+          throw new Error('Should use StyleProp<ViewStyle> for style prop instead of any')
+        }
         break
 
       case 'vue':
