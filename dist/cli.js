@@ -1,30 +1,27 @@
 #!/usr/bin/env node
-import { CLI } from "./utils/native.js";
-import { svgService } from "./services/svg-service.js";
-import { configService } from "./services/config.js";
-import { logger } from "./core/logger.js";
+import { CLI } from './utils/native.js';
+import { svgService } from './services/svg-service.js';
+import { configService } from './services/config.js';
+import { logger } from './core/logger.js';
 const program = new CLI();
 /**
  * svger-cli CLI
  * Custom SVG to Angular, React, Vue, Svelte, Solid, and other component converter.
  */
-program
-    .name("svger-cli")
-    .description("Custom SVG to Angular, React, Vue, Svelte, Solid, and other component converter")
-    .version("2.0.0");
+program.name('svger-cli').description('Custom SVG to Angular, React, Vue, Svelte, Solid, React Native, and other component converter').version('2.0.0');
 // -------- Build Command --------
 /**
  * Build all SVGs from a source folder to an output folder.
  */
 program
-    .command("build <src> <out>")
-    .description("Build all SVGs from source to output")
-    .option("--framework <type>", "Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla)")
-    .option("--typescript", "Generate TypeScript components (default: true)")
-    .option("--no-typescript", "Generate JavaScript components")
-    .option("--composition", "Use Vue Composition API with <script setup>")
-    .option("--standalone", "Generate Angular standalone components")
-    .option("--signals", "Use Angular signals for reactive state")
+    .command('build <src> <out>')
+    .description('Build all SVGs from source to output')
+    .option('--framework <type>', 'Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla|react-native)')
+    .option('--typescript', 'Generate TypeScript components (default: true)')
+    .option('--no-typescript', 'Generate JavaScript components')
+    .option('--composition', 'Use Vue Composition API with <script setup>')
+    .option('--standalone', 'Generate Angular standalone components')
+    .option('--signals', 'Use Angular signals for reactive state')
     .action(async (args, opts) => {
     try {
         const [src, out] = args;
@@ -62,8 +59,8 @@ program
  * Watch a source folder and rebuild SVGs automatically on changes.
  */
 program
-    .command("watch <src> <out>")
-    .description("Watch source folder and rebuild SVGs automatically")
+    .command('watch <src> <out>')
+    .description('Watch source folder and rebuild SVGs automatically')
     .action(async (args) => {
     try {
         const [src, out] = args;
@@ -85,13 +82,13 @@ program
  * Generate a component from a single SVG file.
  */
 program
-    .command("generate <svgFile> <out>")
-    .description("Convert a single SVG file into a component")
-    .option("--framework <type>", "Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla)")
-    .option("--typescript", "Generate TypeScript component (default: true)")
-    .option("--no-typescript", "Generate JavaScript component")
-    .option("--composition", "Use Vue Composition API with <script setup>")
-    .option("--standalone", "Generate Angular standalone component")
+    .command('generate <svgFile> <out>')
+    .description('Convert a single SVG file into a component')
+    .option('--framework <type>', 'Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla|react-native)')
+    .option('--typescript', 'Generate TypeScript component (default: true)')
+    .option('--no-typescript', 'Generate JavaScript component')
+    .option('--composition', 'Use Vue Composition API with <script setup>')
+    .option('--standalone', 'Generate Angular standalone component')
     .action(async (args, opts) => {
     try {
         const [svgFile, out] = args;
@@ -124,8 +121,8 @@ program
  * Lock one or more SVG files to prevent accidental overwrites.
  */
 program
-    .command("lock <files...>")
-    .description("Lock one or more SVG files")
+    .command('lock <files...>')
+    .description('Lock one or more SVG files')
     .action((args) => {
     try {
         svgService.lockService.lockFiles(args);
@@ -139,8 +136,8 @@ program
  * Unlock one or more SVG files to allow modifications.
  */
 program
-    .command("unlock <files...>")
-    .description("Unlock one or more SVG files")
+    .command('unlock <files...>')
+    .description('Unlock one or more SVG files')
     .action((args) => {
     try {
         svgService.lockService.unlockFiles(args);
@@ -155,19 +152,19 @@ program
  * Manage svger-cli configuration.
  */
 program
-    .command("config")
-    .description("Manage svger-cli configuration")
-    .option("--init", "Create default .svgconfig.json")
-    .option("--set <keyValue>", "Set config key=value")
-    .option("--show", "Show current config")
+    .command('config')
+    .description('Manage svger-cli configuration')
+    .option('--init', 'Create default .svgconfig.json')
+    .option('--set <keyValue>', 'Set config key=value')
+    .option('--show', 'Show current config')
     .action(async (args, opts) => {
     try {
         if (opts.init)
             return await configService.initConfig();
         if (opts.set) {
-            const [key, value] = opts.set.split("=");
+            const [key, value] = opts.set.split('=');
             if (!key || value === undefined) {
-                logger.error("Invalid format. Use key=value");
+                logger.error('Invalid format. Use key=value');
                 process.exit(1);
             }
             const parsedValue = !isNaN(Number(value)) ? Number(value) : value;
@@ -175,7 +172,7 @@ program
         }
         if (opts.show)
             return configService.showConfig();
-        logger.error("No option provided. Use --init, --set, or --show");
+        logger.error('No option provided. Use --init, --set, or --show');
     }
     catch (error) {
         logger.error('Config operation failed:', error);
@@ -187,8 +184,8 @@ program
  * Remove all generated SVG React components from an output folder.
  */
 program
-    .command("clean <out>")
-    .description("Remove all generated SVG React components from output folder")
+    .command('clean <out>')
+    .description('Remove all generated SVG React components from output folder')
     .action(async (args) => {
     try {
         const [out] = args;

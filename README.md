@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)](https://www.npmjs.com/package/svger-cli)
 
-> **The most advanced, zero-dependency SVG to component converter, now with first-class support for 8+ UI frameworks. Enjoy enterprise-grade performance, auto-generated exports, and a unified workflow for your entire design system.**
+> **The most advanced, zero-dependency SVG to component converter, now with first-class support for 9+ UI frameworks. Enjoy enterprise-grade performance, auto-generated exports, and a unified workflow for your entire design system.**
 
 ## 🆕 **Latest Developer Experience Improvements**
 
@@ -55,7 +55,7 @@ svger-cli lock ./icons/critical-logo.svg  # Protects during all operations
 |-------------|--------------------|------------------|-------------------------|-------------------------|----------|
 | **Dependencies** | ✅ **Zero** | ❌ 15+ deps | ❌ 9+ deps | ❌ 7+ deps | ❌ 8+ deps |
 | **Auto-Generated Exports** | ✅ **Full Support** | ❌ Manual | ❌ Manual | ❌ Manual | ❌ N/A |
-| **Framework Support** | ✅ **8+ Frameworks** | ❌ React only | ❌ Vue only | ❌ Svelte only | ❌ N/A |
+| **Framework Support** | ✅ **9+ Frameworks** | ❌ React only | ❌ Vue only | ❌ Svelte only | ❌ N/A |
 | **Advanced Props** | ✅ **Full Support** | ❌ Basic | ❌ Basic | ❌ Basic | ❌ N/A |
 | **File Protection** | ✅ **Lock System** | ❌ None | ❌ None | ❌ None | ❌ None |
 | **Performance** | ✅ **Up to 85% Faster** | Standard | Slow | Standard | Fast (Optimization) |
@@ -731,6 +731,62 @@ const MyIcon: FunctionalComponent<IconProps> = ({ size = 24, ...props }) => {
 export default MyIcon;
 ```
 
+### **React Native**
+
+Generate React Native components using `react-native-svg` with proper TypeScript types.
+
+```bash
+svger-cli build ./my-svgs ./react-native-components --framework react-native
+```
+
+**Generated React Native Component (`.tsx`):**
+```tsx
+import React from "react";
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import { StyleProp, ViewStyle } from "react-native";
+
+export interface MyIconProps extends SvgProps {
+  width?: number | string;
+  height?: number | string;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number | string;
+  style?: StyleProp<ViewStyle>;
+}
+
+const MyIcon = React.forwardRef<React.ComponentRef<typeof Svg>, MyIconProps>(
+  ({ width = 24, height = 24, fill = "currentColor", stroke, strokeWidth, style, ...props }, ref) => {
+    return (
+      <Svg
+        ref={ref}
+        viewBox="0 0 24 24"
+        width={width}
+        height={height}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={strokeWidth}
+        style={style}
+        {...props}
+      >
+        <Path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/>
+      </Svg>
+    );
+  }
+);
+
+MyIcon.displayName = "MyIcon";
+
+export default MyIcon;
+```
+
+**Note:** Make sure you have `react-native-svg` installed in your React Native project:
+```bash
+npm install react-native-svg
+# For iOS
+cd ios && pod install
+```
+
 ### **Vanilla JS/TS**
 
 Generate framework-agnostic factory functions for use anywhere.
@@ -771,7 +827,7 @@ svger-cli init [options]
 ```
 
 **Options:**
-- `--framework <type>` - Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla)
+- `--framework <type>` - Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla|react-native)
 - `--typescript` - Enable TypeScript generation (default: true)
 - `--src <path>` - Source directory for SVG files (default: ./src/assets/svg)
 - `--out <path>` - Output directory for components (default: ./src/components/icons)

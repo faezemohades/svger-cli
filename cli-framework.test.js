@@ -6,7 +6,7 @@ import { frameworkTemplateEngine } from './dist/index.js';
 // Test file extension generation
 console.log('\n📋 Testing File Extension Generation:\n');
 
-const frameworks = ['react', 'vue', 'svelte', 'angular', 'solid', 'preact', 'lit', 'vanilla'];
+const frameworks = ['react', 'vue', 'svelte', 'angular', 'solid', 'preact', 'lit', 'vanilla', 'react-native'];
 
 frameworks.forEach(fw => {
   const ext = frameworkTemplateEngine.getFileExtension(fw, true);

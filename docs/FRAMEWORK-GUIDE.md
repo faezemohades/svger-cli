@@ -1,6 +1,6 @@
 # SVGER-CLI - Multi-Framework SVG to Component Converter 🚀
 
-> Zero-dependency, enterprise-grade SVG processing toolkit supporting **8 modern UI frameworks**
+> Zero-dependency, enterprise-grade SVG processing toolkit supporting **9 modern UI frameworks**
 
 [![NPM Version](https://img.shields.io/npm/v/svger-cli.svg)](https://www.npmjs.com/package/svger-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -9,7 +9,7 @@
 
 ## ✨ Features
 
-- **🎯 Multi-Framework Support**: React, Vue, Svelte, Angular, Solid, Preact, Lit, Vanilla JS
+- **🎯 Multi-Framework Support**: React, Vue, Svelte, Angular, Solid, Preact, Lit, Vanilla JS, React Native
 - **📦 Zero Dependencies**: Native Node.js implementation, no external runtime dependencies
 - **⚡ High Performance**: Batch processing with parallel execution and intelligent caching
 - **🔒 Type-Safe**: Full TypeScript support with comprehensive type definitions
@@ -82,6 +82,7 @@ svger-cli generate ./icon.svg ./components --framework lit
 | **Preact** | 10+ | ✅ | Lightweight React alternative |
 | **Lit** | 3+ | ✅ | Web Components |
 | **Vanilla** | ES6+ | ✅ | Pure JavaScript |
+| **React Native** | 0.70+ | ✅ | `forwardRef`, `memo`, `react-native-svg` |
 
 ---
 
@@ -415,6 +416,93 @@ const Icon: FunctionComponent<IconProps> = ({
 };
 
 export default Icon;
+```
+
+---
+
+### React Native
+
+Generate React Native components using `react-native-svg` with proper TypeScript types and best practices:
+
+```bash
+svger-cli build ./svgs ./components --framework react-native
+```
+
+**Generated Output** (`components/Icon.tsx`):
+
+```tsx
+import React from "react";
+import Svg, { Path, Circle } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import { StyleProp, ViewStyle } from "react-native";
+
+export interface IconProps extends SvgProps {
+  width?: number | string;
+  height?: number | string;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number | string;
+  style?: StyleProp<ViewStyle>;
+}
+
+const Icon = React.forwardRef<React.ComponentRef<typeof Svg>, IconProps>(
+  ({ width = 24, height = 24, fill = "currentColor", stroke, strokeWidth, style, ...props }, ref) => {
+    return (
+      <Svg
+        ref={ref}
+        viewBox="0 0 24 24"
+        width={width}
+        height={height}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={strokeWidth}
+        style={style}
+        {...props}
+      >
+        <Path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/>
+        <Circle cx="12" cy="12" r="3"/>
+      </Svg>
+    );
+  }
+);
+
+Icon.displayName = "Icon";
+
+export default Icon;
+```
+
+**Key Features:**
+- ✅ Uses `React.ComponentRef<typeof Svg>` for proper ref typing (not deprecated `ElementRef`)
+- ✅ Extends `SvgProps` from `react-native-svg` for full type safety
+- ✅ Uses `StyleProp<ViewStyle>` for style prop (not `any`)
+- ✅ Automatically imports required SVG components (Path, Circle, Rect, etc.)
+- ✅ Supports `forwardRef` and `memo` options
+
+**Prerequisites:**
+
+Install `react-native-svg` in your React Native project:
+
+```bash
+npm install react-native-svg
+
+# For iOS
+cd ios && pod install
+```
+
+**Usage**:
+
+```tsx
+import Icon from './components/Icon';
+import { View } from 'react-native';
+
+function App() {
+  return (
+    <View>
+      <Icon width={32} height={32} fill="#ff0000" />
+      <Icon width={48} style={{ marginTop: 10 }} />
+    </View>
+  );
+}
 ```
 
 ---
