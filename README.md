@@ -1,13 +1,14 @@
-# SVGER-CLI v2.0.7 - Enterprise SVG Processing Framework
+# SVGER-CLI v3.0.0 - Enterprise SVG Processing Framework
 
 [![npm version](https://badge.fury.io/js/svger-cli.svg)](https://badge.fury.io/js/svger-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)](https://www.npmjs.com/package/svger-cli)
 
-> **The most advanced, zero-dependency SVG to component converter, now with first-class support for
-> 9+ UI frameworks including React Native. Enjoy enterprise-grade performance, auto-generated
-> exports, and a unified workflow for your entire design system.**
+> **The most advanced, zero-dependency SVG to component converter with official build tool
+> integrations. First-class support for Webpack, Vite, Rollup, Babel, Next.js, and Jest. Supporting
+> 9+ UI frameworks including React Native with enterprise-grade performance and auto-generated
+> exports.**
 
 ---
 
@@ -16,7 +17,14 @@
 ### 🚀 **Getting Started**
 
 - [📦 Installation](#-installation)
-- [🚀 Quick Start: Your First Conversion](#-quick-start-your-first-conversion)
+- [� Build Tool Integrations](#-build-tool-integrations) **← NEW in v3.0**
+  - [Webpack](#webpack-integration)
+  - [Vite](#vite-integration)
+  - [Rollup](#rollup-integration)
+  - [Babel](#babel-integration)
+  - [Next.js](#nextjs-integration)
+  - [Jest](#jest-integration)
+- [�🚀 Quick Start: Your First Conversion](#-quick-start-your-first-conversion)
 - [💡 Why SVGER-CLI?](#-why-svger-cli-the-zero-dependency-advantage)
 
 ### 📚 **Core Documentation**
@@ -74,6 +82,32 @@
 | ------------------------------------- | --------------------------------------------------------------- |
 | 🎯 Get started immediately            | [Quick Start](#-quick-start-your-first-conversion)              |
 | 📦 Install the package                | [Installation](#-installation)                                  |
+| 🔧 Use with Webpack/Vite/Rollup       | [Build Tool Integrations](#-build-tool-integrations) **NEW**    |
+| ⚙️ Configure Webpack                  | [Webpack Integration](#webpack-integration)                     |
+| ⚡ Set up Vite                        | [Vite Integration](#vite-integration)                           |
+| 📦 Use with Rollup                    | [Rollup Integration](#rollup-integration)                       |
+| 🔄 Integrate Babel                    | [Babel Integration](#babel-integration)                         |
+| ▲ Use with Next.js                    | [Next.js Integration](#nextjs-integration)                      |
+| 🧪 Set up Jest                        | [Jest Integration](#jest-integration)                           |
+| 🤔 Understand why SVGER-CLI is better | [Why SVGER-CLI?](#-why-svger-cli-the-zero-dependency-advantage) |
+| ⚡ Compare features with competitors  | [Feature Comparison](#-feature-comparison-matrix)               |
+| 🚀 Convert SVGs to React components   | [React Guide](#react)                                           |
+| 📱 Use with React Native              | [React Native Guide](#react-native)                             |
+| 💚 Use with Vue                       | [Vue Guide](#vue-3)                                             |
+| 🅰️ Use with Angular                   | [Angular Guide](#angular)                                       |
+| 🌪️ Use with Svelte                    | [Svelte Guide](#svelte)                                         |
+| 📖 Learn all CLI commands             | [CLI Reference](#-comprehensive-cli-reference)                  |
+| 💻 Use the programmatic API           | [API Reference](#-programmatic-api)                             |
+| 🎨 Configure styling & theming        | [Styling Guide](#-advanced-styling--theming)                    |
+| ⚡ Optimize performance               | [Performance Guide](#-performance-optimization)                 |
+| 🚀 Deploy to production               | [Deployment Guide](#-production-deployment)                     |
+| 🐳 Use with Docker                    | [Docker Setup](#docker-integration)                             |
+| 🧪 Test my components                 | [Testing Guide](#-testing--quality-assurance)                   |
+| 🔧 Configure everything               | [Configuration Reference](#-configuration-reference)            |
+| 🔌 Create custom plugins              | [Plugin Development](#-plugin-development)                      |
+| 🐛 Fix issues                         | [Troubleshooting](#-troubleshooting--faq)                       |
+| 📚 Migrate from another tool          | [Migration Guide](#-migration-guide)                            |
+| 📦 Install the package                | [Installation](#-installation)                                  |
 | 🤔 Understand why SVGER-CLI is better | [Why SVGER-CLI?](#-why-svger-cli-the-zero-dependency-advantage) |
 | ⚡ Compare features with competitors  | [Feature Comparison](#-feature-comparison-matrix)               |
 | 🚀 Convert SVGs to React components   | [React Guide](#react)                                           |
@@ -98,6 +132,30 @@
 ---
 
 ## 🌟 **Key Features Overview**
+
+### **🔧 Official Build Tool Integrations (NEW in v3.0)**
+
+First-class support for all major build tools with zero configuration:
+
+- ✅ **Webpack Plugin** - HMR, watch mode, and loader support
+- ✅ **Vite Plugin** - Lightning-fast HMR and virtual modules
+- ✅ **Rollup Plugin** - Tree-shaking and source maps
+- ✅ **Babel Plugin** - Universal transpilation and import transformation
+- ✅ **Next.js Integration** - SSR support for App and Pages Router
+- ✅ **Jest Preset** - SVG transformers and mocking for tests
+
+```javascript
+// One-line setup for any build tool
+const { SvgerWebpackPlugin } = require('svger-cli/webpack');
+import { svgerVitePlugin } from 'svger-cli/vite';
+import { svgerRollupPlugin } from 'svger-cli/rollup';
+const { svgerBabelPlugin } = require('svger-cli/babel');
+const { withSvger } = require('svger-cli/nextjs');
+```
+
+**[See full integration guide →](#-build-tool-integrations)**
+
+---
 
 ### **✨ Auto-Generated index.ts Exports (Enhanced)**
 
@@ -228,7 +286,284 @@ npm install --save-dev svger-cli
 
 ---
 
-## 🚀 **Quick Start: Your First Conversion**
+## � **Build Tool Integrations**
+
+**NEW in v3.0**: SVGER-CLI now provides official integrations for all major build tools, enabling
+seamless SVG-to-component conversion directly in your build pipeline.
+
+### Quick Integration Overview
+
+| Build Tool  | Package Import      | Use Case                | Key Features                     |
+| ----------- | ------------------- | ----------------------- | -------------------------------- |
+| **Webpack** | `svger-cli/webpack` | Modern web apps         | HMR, Watch mode, Loader support  |
+| **Vite**    | `svger-cli/vite`    | Lightning-fast dev      | HMR, Virtual modules, Dev server |
+| **Rollup**  | `svger-cli/rollup`  | Libraries & apps        | Tree-shaking, Source maps        |
+| **Babel**   | `svger-cli/babel`   | Universal transpilation | Import transform, CRA, Gatsby    |
+| **Next.js** | `svger-cli/nextjs`  | React SSR apps          | SSR support, App Router          |
+| **Jest**    | `svger-cli/jest`    | Testing                 | SVG mocking, Transformers        |
+
+### Webpack Integration
+
+Perfect for modern webpack-based applications with full HMR support.
+
+**Install:**
+
+```bash
+npm install svger-cli --save-dev
+```
+
+**webpack.config.js:**
+
+```javascript
+const { SvgerWebpackPlugin } = require('svger-cli/webpack');
+
+module.exports = {
+  plugins: [
+    new SvgerWebpackPlugin({
+      source: './src/icons', // SVG source directory
+      output: './src/components/icons', // Output directory
+      framework: 'react', // Target framework
+      typescript: true, // Generate TypeScript files
+      hmr: true, // Enable Hot Module Replacement
+      generateIndex: true, // Generate index.ts with exports
+    }),
+  ],
+
+  // Optional: Use the loader for inline SVG imports
+  module: {
+    rules: [
+      {
+        test: /\.svg$/,
+        use: ['svger-cli/webpack-loader'],
+      },
+    ],
+  },
+};
+```
+
+**Usage in your app:**
+
+```tsx
+import { HomeIcon, UserIcon } from './components/icons';
+
+function App() {
+  return <HomeIcon width={24} height={24} />;
+}
+```
+
+---
+
+### Vite Integration
+
+Lightning-fast development with HMR and virtual module support.
+
+**vite.config.js:**
+
+```javascript
+import { svgerVitePlugin } from 'svger-cli/vite';
+
+export default {
+  plugins: [
+    svgerVitePlugin({
+      source: './src/icons',
+      output: './src/components/icons',
+      framework: 'react',
+      typescript: true,
+      hmr: true, // Hot Module Replacement
+      virtualModules: true, // Enable virtual module imports
+    }),
+  ],
+};
+```
+
+**Features:**
+
+- ✅ Instant HMR - changes reflect immediately
+- ✅ Virtual modules - `import Icon from 'virtual:svger/icon-name'`
+- ✅ Dev server integration
+- ✅ Optimized production builds
+
+---
+
+### Rollup Integration
+
+Ideal for library development and tree-shakeable bundles.
+
+**rollup.config.js:**
+
+```javascript
+import { svgerRollupPlugin } from 'svger-cli/rollup';
+
+export default {
+  plugins: [
+    svgerRollupPlugin({
+      source: './src/icons',
+      output: './dist/icons',
+      framework: 'react',
+      typescript: true,
+      sourcemap: true, // Generate source maps
+      exportType: 'named', // 'named' or 'default'
+    }),
+  ],
+};
+```
+
+**Perfect for:**
+
+- Component libraries
+- Tree-shakeable exports
+- Multi-framework support
+- Production optimization
+
+---
+
+### Babel Integration
+
+Universal transpilation with automatic import transformation.
+
+**babel.config.js:**
+
+```javascript
+const { svgerBabelPlugin } = require('svger-cli/babel');
+
+module.exports = {
+  presets: ['@babel/preset-env', '@babel/preset-react'],
+  plugins: [
+    [
+      svgerBabelPlugin,
+      {
+        source: './src/icons',
+        output: './src/components/icons',
+        framework: 'react',
+        typescript: true,
+        transformImports: true, // Auto-transform SVG imports
+        processOnInit: true, // Process all SVGs on plugin init
+        generateIndex: true, // Generate barrel exports
+      },
+    ],
+  ],
+};
+```
+
+**Import transformation:**
+
+```javascript
+// Before (write this in your code)
+import HomeIcon from './assets/home.svg';
+
+// After (automatically transformed)
+import HomeIcon from './components/icons/HomeIcon';
+
+// Use it
+<HomeIcon width={24} height={24} />;
+```
+
+**Works with:**
+
+- Create React App
+- Gatsby
+- Vue CLI
+- Any Babel-based setup
+
+---
+
+### Next.js Integration
+
+Seamless integration with Next.js App Router and Pages Router.
+
+**next.config.js:**
+
+```javascript
+const { withSvger } = require('svger-cli/nextjs');
+
+module.exports = withSvger({
+  svger: {
+    source: './public/icons',
+    output: './components/icons',
+    framework: 'react',
+    typescript: true,
+    ssr: true, // Server-Side Rendering support
+    hmr: true, // Hot Module Replacement
+  },
+  // ...other Next.js config
+  reactStrictMode: true,
+});
+```
+
+**Features:**
+
+- ✅ SSR (Server-Side Rendering) support
+- ✅ App Router compatible
+- ✅ Pages Router compatible
+- ✅ Automatic webpack configuration
+- ✅ TypeScript support
+
+---
+
+### Jest Integration
+
+Transform SVGs in your tests or mock them for faster execution.
+
+**jest.config.js:**
+
+**Option 1: Use the preset (recommended)**
+
+```javascript
+module.exports = {
+  preset: 'svger-cli/jest',
+  testEnvironment: 'jsdom',
+};
+```
+
+**Option 2: Manual configuration**
+
+```javascript
+module.exports = {
+  transform: {
+    '\\.svg$': [
+      'svger-cli/jest-transformer',
+      {
+        framework: 'react',
+        typescript: true,
+        mock: false, // Set true for mock mode
+      },
+    ],
+  },
+  testEnvironment: 'jsdom',
+};
+```
+
+**Mock mode** (faster tests):
+
+```javascript
+transform: {
+  '\\.svg$': ['svger-cli/jest-transformer', {
+    mock: true,  // Returns simple mock component
+  }],
+}
+```
+
+---
+
+### Complete Integration Documentation
+
+For detailed documentation, configuration options, and advanced examples, see:
+
+📖 **[Complete Integration Guide](./docs/INTEGRATIONS.md)** - 500+ lines of comprehensive
+documentation
+
+**What's included:**
+
+- Detailed setup instructions for each build tool
+- All configuration options explained
+- Framework-specific examples (React, Vue, Angular, etc.)
+- Troubleshooting guides
+- Performance optimization tips
+- Feature comparison matrix
+
+---
+
+## �🚀 **Quick Start: Your First Conversion**
 
 1.  **Place your SVGs** in a directory (e.g., `./my-svgs`).
 2.  **Run the build command**:

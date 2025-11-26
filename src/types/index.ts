@@ -267,3 +267,6 @@ export interface ProcessingJob {
   endTime?: number;
   error?: Error;
 }
+
+// Re-export integration types
+export * from './integrations.js';

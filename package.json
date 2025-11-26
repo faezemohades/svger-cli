@@ -1,7 +1,7 @@
 {
   "name": "svger-cli",
-  "version": "2.0.7",
-  "description": "Enterprise-grade, zero-dependency SVG to component converter supporting React, React Native, Vue, Angular, Svelte, Solid, Lit, Preact & Vanilla. Features auto-generated TypeScript exports, responsive design, themes, performance optimization & 85% faster processing than SVGR.",
+  "version": "3.0.0",
+  "description": "Enterprise-grade, zero-dependency SVG to component converter with official Webpack, Vite, Rollup, Babel, Next.js & Jest integrations. Supporting React, React Native, Vue, Angular, Svelte, Solid, Lit, Preact & Vanilla. Features auto-generated TypeScript exports, HMR, responsive design, themes & 85% faster processing than SVGR.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -15,6 +15,56 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./webpack": {
+      "types": "./dist/integrations/webpack.d.ts",
+      "import": "./dist/integrations/webpack.js",
+      "default": "./dist/integrations/webpack.js"
+    },
+    "./webpack-loader": {
+      "types": "./dist/integrations/webpack.d.ts",
+      "import": "./dist/integrations/webpack.js",
+      "default": "./dist/integrations/webpack.js"
+    },
+    "./vite": {
+      "types": "./dist/integrations/vite.d.ts",
+      "import": "./dist/integrations/vite.js",
+      "default": "./dist/integrations/vite.js"
+    },
+    "./rollup": {
+      "types": "./dist/integrations/rollup.d.ts",
+      "import": "./dist/integrations/rollup.js",
+      "default": "./dist/integrations/rollup.js"
+    },
+    "./babel": {
+      "types": "./dist/integrations/babel.d.ts",
+      "import": "./dist/integrations/babel.js",
+      "default": "./dist/integrations/babel.js"
+    },
+    "./babel-plugin": {
+      "types": "./dist/integrations/babel.d.ts",
+      "import": "./dist/integrations/babel.js",
+      "default": "./dist/integrations/babel.js"
+    },
+    "./nextjs": {
+      "types": "./dist/integrations/nextjs.d.ts",
+      "import": "./dist/integrations/nextjs.js",
+      "default": "./dist/integrations/nextjs.js"
+    },
+    "./jest": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./jest-transformer": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./jest-preset": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -27,6 +77,7 @@
     "SECURITY.md",
     "DEVELOPMENT.md",
     "docs/**/*.md",
+    "examples/**/*.js",
     ".svgerconfig.example.json"
   ],
   "scripts": {
@@ -34,10 +85,11 @@
     "build:watch": "tsc -p tsconfig.json --watch",
     "clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\"",
     "dev": "ts-node --esm src/cli.ts",
-    "test": "npm run test:frameworks && npm run test:config && npm run test:e2e",
+    "test": "npm run test:frameworks && npm run test:config && npm run test:e2e && npm run test:integrations",
     "test:frameworks": "node frameworks.test.js",
     "test:config": "tsc tests/config-options.test.ts --outDir dist-tests --module es2022 --target es2022 --moduleResolution bundler && node dist-tests/config-options.test.js",
     "test:e2e": "tsc tests/e2e-complete.test.ts --outDir dist-tests --module es2022 --target es2022 --moduleResolution bundler && node dist-tests/e2e-complete.test.js",
+    "test:integrations": "node tests/integrations/verify-integrations.mjs",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:integration": "jest --testPathPattern=integration",
@@ -76,6 +128,25 @@
     "batch-processing",
     "icon-generation",
     "frontend-tooling",
+    "webpack",
+    "webpack-plugin",
+    "webpack-loader",
+    "vite",
+    "vite-plugin",
+    "rollup",
+    "rollup-plugin",
+    "babel",
+    "babel-plugin",
+    "babel-transform",
+    "nextjs",
+    "next-js",
+    "jest",
+    "jest-preset",
+    "jest-transformer",
+    "build-tools",
+    "bundler",
+    "hmr",
+    "hot-module-replacement",
     "web-components",
     "component-library",
     "svg-optimization",

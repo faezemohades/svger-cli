@@ -238,6 +238,67 @@ export const VERSION = '2.0.0';
 export const PACKAGE_NAME = 'svger-cli';
 
 // ============================================================================
+// BUILD TOOL INTEGRATIONS
+// ============================================================================
+
+/**
+ * Webpack Plugin - Official webpack integration for SVGER-CLI
+ * Provides: HMR support, asset processing, and webpack loader
+ */
+export {
+  SvgerWebpackPlugin,
+  svgerLoader,
+  default as webpackPlugin,
+} from './integrations/webpack.js';
+
+/**
+ * Vite Plugin - Official Vite integration for SVGER-CLI
+ * Provides: HMR support, virtual modules, and dev server integration
+ */
+export { svgerVitePlugin, default as vitePlugin } from './integrations/vite.js';
+
+/**
+ * Rollup Plugin - Official Rollup integration for SVGER-CLI
+ * Provides: Bundle optimization and tree-shaking support
+ */
+export {
+  svgerRollupPlugin,
+  default as rollupPlugin,
+} from './integrations/rollup.js';
+
+/**
+ * Babel Plugin - Official Babel integration for SVGER-CLI
+ * Provides: SVG import transformation and component generation
+ */
+export {
+  svgerBabelPlugin,
+  createBabelPlugin,
+  default as babelPlugin,
+} from './integrations/babel.js';
+
+/**
+ * Next.js Plugin - Official Next.js integration for SVGER-CLI
+ * Provides: SSR support, webpack integration, and HMR
+ */
+export {
+  withSvger,
+  SvgerNextJsPlugin,
+  configureSvgImports,
+  default as nextjsPlugin,
+} from './integrations/nextjs.js';
+
+/**
+ * Jest Preset - Official Jest integration for SVGER-CLI
+ * Provides: SVG transformers and test configuration
+ */
+export {
+  svgerJestTransformer,
+  jestPreset,
+  createJestTransformer,
+  default as jestTransformer,
+} from './integrations/jest-preset.js';
+
+// ============================================================================
 // DEFAULT EXPORT
 // ============================================================================
 
