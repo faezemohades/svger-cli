@@ -1,0 +1,258 @@
+/**
+ * Test Fixtures
+ * Reusable test data for unit tests
+ */
+
+export const sampleSVGs = {
+  simple: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10"/>
+  </svg>`,
+
+  withFill: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+  </svg>`,
+
+  complex: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+  </svg>`,
+
+  nested: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g>
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2v20"/>
+      <path d="M2 12h20"/>
+    </g>
+  </svg>`,
+
+  multiPath: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+  </svg>`,
+
+  withGradient: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <defs>
+      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+        <stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    <circle cx="12" cy="12" r="10" fill="url(#grad1)"/>
+  </svg>`,
+
+  withText: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <text x="12" y="12" text-anchor="middle">SVG</text>
+  </svg>`,
+
+  accessibility: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-labelledby="iconTitle">
+    <title id="iconTitle">Home Icon</title>
+    <desc>An icon representing a house</desc>
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+  </svg>`,
+
+  animated: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10">
+      <animate attributeName="r" from="10" to="5" dur="1s" repeatCount="indefinite"/>
+    </circle>
+  </svg>`,
+
+  invalid: `<svg><unclosed`,
+
+  empty: ``,
+
+  malformed: `<invalid>not an svg</invalid>`
+};
+
+export const sampleConfigs = {
+  react: {
+    framework: 'react',
+    typescript: true,
+    naming: 'pascal',
+    generateIndex: true
+  },
+
+  vue: {
+    framework: 'vue',
+    typescript: true,
+    naming: 'kebab',
+    generateIndex: true
+  },
+
+  angular: {
+    framework: 'angular',
+    typescript: true,
+    naming: 'kebab',
+    generateIndex: true
+  },
+
+  minimal: {
+    framework: 'react'
+  },
+
+  full: {
+    source: './icons',
+    output: './components',
+    framework: 'react',
+    typescript: true,
+    naming: 'pascal',
+    generateIndex: true,
+    watch: false,
+    clean: true,
+    parallel: true,
+    verbose: true,
+    responsive: {
+      mobile: 16,
+      tablet: 20,
+      desktop: 24
+    },
+    theme: {
+      primary: '#007bff',
+      secondary: '#6c757d'
+    }
+  }
+};
+
+export const expectedOutputs = {
+  react: {
+    js: `import React from 'react';
+
+export const TestIcon = (props) => (
+  <svg {...props}>
+    <circle cx="12" cy="12" r="10"/>
+  </svg>
+);
+
+export default TestIcon;`,
+
+    ts: `import React from 'react';
+
+interface TestIconProps extends React.SVGProps<SVGSVGElement> {}
+
+export const TestIcon: React.FC<TestIconProps> = (props) => (
+  <svg {...props}>
+    <circle cx="12" cy="12" r="10"/>
+  </svg>
+);
+
+export default TestIcon;`,
+
+    withForwardRef: `import React, { forwardRef } from 'react';
+
+interface TestIconProps extends React.SVGProps<SVGSVGElement> {}
+
+export const TestIcon = forwardRef<SVGSVGElement, TestIconProps>(
+  (props, ref) => (
+    <svg ref={ref} {...props}>
+      <circle cx="12" cy="12" r="10"/>
+    </svg>
+  )
+);
+
+TestIcon.displayName = 'TestIcon';
+
+export default TestIcon;`
+  },
+
+  vue: {
+    composition: `<template>
+  <svg v-bind="$attrs">
+    <circle cx="12" cy="12" r="10"/>
+  </svg>
+</template>
+
+<script setup lang="ts">
+</script>`,
+
+    options: `<template>
+  <svg v-bind="$attrs">
+    <circle cx="12" cy="12" r="10"/>
+  </svg>
+</template>
+
+<script lang="ts">
+export default {
+  name: 'TestIcon'
+};
+</script>`
+  },
+
+  angular: {
+    standalone: `import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-test-icon',
+  standalone: true,
+  template: \`
+    <svg>
+      <circle cx="12" cy="12" r="10"/>
+    </svg>
+  \`
+})
+export class TestIconComponent {}`
+  },
+
+  svelte: `<script lang="ts">
+  export let width: number = 24;
+  export let height: number = 24;
+</script>
+
+<svg {width} {height}>
+  <circle cx="12" cy="12" r="10"/>
+</svg>`,
+
+  indexFile: `export { default as HomeIcon } from './HomeIcon';
+export { default as UserIcon } from './UserIcon';
+export { default as SettingsIcon } from './SettingsIcon';
+
+/**
+ * SVG Components Index
+ * Generated by svger-cli
+ *
+ * Import individual components:
+ * import { HomeIcon } from './components';
+ *
+ * Import all components:
+ * import * as Icons from './components';
+ */`
+};
+
+export const mockFileStructure = {
+  input: {
+    'home.svg': sampleSVGs.simple,
+    'user.svg': sampleSVGs.withFill,
+    'settings.svg': sampleSVGs.complex,
+    'nested/folder/icon.svg': sampleSVGs.nested
+  },
+
+  expected: {
+    'HomeIcon.tsx': expectedOutputs.react.ts,
+    'UserIcon.tsx': expectedOutputs.react.ts,
+    'SettingsIcon.tsx': expectedOutputs.react.ts,
+    'index.ts': expectedOutputs.indexFile
+  }
+};
+
+export const frameworks = [
+  'react',
+  'react-native',
+  'vue',
+  'angular',
+  'svelte',
+  'solid',
+  'lit',
+  'preact',
+  'vanilla'
+];
+
+export const namingConventions = ['pascal', 'camel', 'kebab'];
+
+export const fileExtensions = {
+  react: { js: '.jsx', ts: '.tsx' },
+  'react-native': { js: '.jsx', ts: '.tsx' },
+  vue: { js: '.vue', ts: '.vue' },
+  angular: { js: '.component.ts', ts: '.component.ts' },
+  svelte: { js: '.svelte', ts: '.svelte' },
+  solid: { js: '.tsx', ts: '.tsx' },
+  lit: { js: '.ts', ts: '.ts' },
+  preact: { js: '.tsx', ts: '.tsx' },
+  vanilla: { js: '.ts', ts: '.ts' }
+};

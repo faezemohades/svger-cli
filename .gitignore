@@ -92,3 +92,15 @@ generated-components/
 # Test artifacts
 test-results/
 screenshots/
+test-temp/
+test-temp-*/
+test-output/
+test-config-output/
+test-e2e-complete/
+dist-tests/
+
+# CI/CD
+workspace/input/*
+workspace/output/*
+!workspace/input/.gitkeep
+!workspace/output/.gitkeep

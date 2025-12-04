@@ -1,0 +1,69 @@
+# Docker ignore patterns for SVGER-CLI
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+dist-tests/
+*.tgz
+
+# Test directories
+tests/test-output/
+tests/test-config-output/
+tests/test-e2e-complete/
+coverage/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.circleci/
+.travis.yml
+azure-pipelines.yml
+Jenkinsfile
+
+# Documentation (keep only essential docs)
+docs/api/
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# Development files
+.env
+.env.local
+.env.*.local
+*.log
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Testing
+jest.config.js
+jest.setup.js
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Misc
+.prettierrc
+.prettierignore
+.eslintrc*
+.editorconfig

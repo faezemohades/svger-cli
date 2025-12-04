@@ -1,0 +1,135 @@
+version: '3.9'
+
+services:
+  # Development environment
+  svger-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: svger-cli-dev
+    volumes:
+      # Mount source code for development
+      - ./src:/app/src:cached
+      - ./tests:/app/tests:cached
+      - ./bin:/app/bin:cached
+      # Mount workspace for SVG processing
+      - ./workspace/input:/workspace/input:rw
+      - ./workspace/output:/workspace/output:rw
+      # Node modules volume for better performance
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DEBUG=svger:*
+    working_dir: /app
+    command: npm run dev
+    networks:
+      - svger-network
+    restart: unless-stopped
+
+  # Production-like environment for testing
+  svger-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: svger-cli-prod
+    volumes:
+      - ./workspace/input:/workspace/input:ro
+      - ./workspace/output:/workspace/output:rw
+    environment:
+      - NODE_ENV=production
+    working_dir: /workspace
+    networks:
+      - svger-network
+    profiles:
+      - production
+
+  # Testing environment
+  svger-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: svger-cli-test
+    volumes:
+      - ./src:/app/src:cached
+      - ./tests:/app/tests:cached
+      - ./coverage:/app/coverage:rw
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    working_dir: /app
+    command: npm run test:coverage
+    networks:
+      - svger-network
+    profiles:
+      - test
+
+  # Watch mode for development
+  svger-watch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: svger-cli-watch
+    volumes:
+      - ./src:/app/src:cached
+      - ./dist:/app/dist:rw
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+    working_dir: /app
+    command: npm run build:watch
+    networks:
+      - svger-network
+    profiles:
+      - watch
+
+  # CI/CD simulation environment
+  svger-ci:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: svger-cli-ci
+    volumes:
+      - ./:/app:cached
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    working_dir: /app
+    command: >
+      sh -c "
+        npm run lint &&
+        npm run typecheck &&
+        npm run build &&
+        npm run test
+      "
+    networks:
+      - svger-network
+    profiles:
+      - ci
+
+  # Documentation server
+  docs:
+    image: nginx:alpine
+    container_name: svger-cli-docs
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    networks:
+      - svger-network
+    profiles:
+      - docs
+
+volumes:
+  node_modules:
+    driver: local
+
+networks:
+  svger-network:
+    driver: bridge

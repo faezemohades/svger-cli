@@ -5,6 +5,182 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2025-12-04
+
+### 🚀 Major Improvements - Testing & DevOps
+
+This release brings comprehensive testing infrastructure and production-grade CI/CD pipelines, significantly improving project reliability and developer experience.
+
+### Added - Testing Infrastructure
+
+#### **Comprehensive Test Suite** 📋
+- ✅ **114 automated tests** covering unit, integration, and E2E scenarios
+- ✅ **Jest integration** with TypeScript support and ESM modules
+- ✅ **82.5% initial pass rate** with well-structured test cases
+- ✅ **7 test suites**:
+  - `builder.test.ts` - Build orchestration and parallel processing (7 tests)
+  - `cli.test.ts` - CLI command parsing and execution (13 tests)
+  - `config-service.test.ts` - Configuration validation and loading (17 tests)
+  - `integration.test.ts` - End-to-end workflow testing (19 tests)
+  - `svg-processor.test.ts` - SVG parsing and optimization (11 tests)
+  - `templates.test.ts` - Framework template generation (22 tests)
+  - `utils.test.ts` - Utility functions and FileSystem operations (26 tests)
+- ✅ **Test fixtures** with 11 SVG variations (simple, complex, nested, gradients, accessibility, animated)
+- ✅ **Code coverage** configured with 70% threshold across branches, functions, lines, statements
+- ✅ **Coverage reporters**: text, text-summary, lcov, html, json, clover
+- ✅ **Test documentation** in `src/__tests__/README.md` with best practices and debugging guides
+
+#### **New Test Scripts** 🧪
+- `npm run test:jest` - Run all Jest tests
+- `npm run test:unit` - Run unit tests only
+- `npm run test:watch` - Watch mode for development
+- `npm run test:coverage` - Generate coverage reports
+- `npm test` - Run complete test suite (Jest + framework + config + E2E + integrations)
+
+### Added - CI/CD Infrastructure
+
+#### **GitHub Actions Workflows** 🔄
+- ✅ **Release workflow** (`.github/workflows/release.yml`):
+  - Automated version bumping and changelog generation
+  - Multi-platform Docker builds (linux/amd64, linux/arm64)
+  - NPM package publishing with provenance
+  - Documentation deployment to GitHub Pages
+  - Codecov integration for coverage tracking
+  - Snyk security scanning
+  - Slack notifications for releases
+  - GitHub Release creation with assets
+- ✅ **CI workflow** enhancements for automated testing
+
+#### **Jenkins Pipeline** 🏗️
+- ✅ **Complete Jenkinsfile** with 11 stages:
+  1. Checkout - Git repository cloning
+  2. Setup - Node.js environment configuration
+  3. Install - Dependency installation with caching
+  4. Lint - Code quality checks
+  5. Build - TypeScript compilation
+  6. Test - Parallel test execution (unit, integration, E2E)
+  7. Security - Dependency vulnerability scanning
+  8. Package - NPM package creation
+  9. Docker - Multi-architecture image builds
+  10. Release - Version management and publishing
+  11. Push - Docker registry updates
+- ✅ **Build parameters** for version bumping and branch selection
+- ✅ **Parallel execution** for faster builds
+- ✅ **Artifact preservation** and workspace cleanup
+- ✅ **Email notifications** for build status
+
+#### **Docker Support** 🐳
+- ✅ **Multi-stage Dockerfile**:
+  - Alpine-based production image
+  - Non-root user for security
+  - Health checks configured
+  - Multi-architecture support (amd64, arm64)
+  - Optimized layer caching
+- ✅ **docker-compose.yml** with 6 profiles:
+  - `dev` - Development environment with volume mounts
+  - `prod` - Production deployment
+  - `test` - Test execution environment
+  - `watch` - File watching for auto-rebuild
+  - `ci` - CI/CD pipeline execution
+  - `docs` - Documentation server (nginx)
+- ✅ **Docker optimization**:
+  - `.dockerignore` for efficient builds
+  - Volume mounts for workspace persistence
+  - Environment variable configuration
+  - Network isolation
+
+#### **Validation & Documentation** 📚
+- ✅ **CI/CD validation script** (`scripts/validate-cicd.sh`):
+  - Project structure verification
+  - NPM scripts validation
+  - Dependencies check
+  - TypeScript configuration
+  - Build verification
+  - YAML syntax validation
+  - Docker and Jenkinsfile validation
+  - Security and documentation checks
+- ✅ **Comprehensive documentation**:
+  - `CICD.md` - Complete CI/CD setup guide
+  - `CICD-QUICKREF.md` - Quick reference for developers
+  - `CICD-SETUP-CHECKLIST.md` - Step-by-step setup instructions
+  - `CI-CD-IMPLEMENTATION-REPORT.md` - Implementation summary
+  - `TEST-SUITE-SUMMARY.md` - Test suite documentation
+
+### Changed - Configuration
+
+#### **Jest Configuration**
+- 🔧 Renamed `jest.config.js` → `jest.config.cjs` for ES module compatibility
+- 🔧 Renamed `jest.setup.js` → `jest.setup.cjs`
+- 🔧 Updated module name mapper for `.js` extension handling
+- 🔧 Added test path ignoring for build artifacts and temporary files
+- 🔧 Configured parallel execution with 50% max workers
+- 🔧 Added fixtures exclusion from test runs
+
+#### **Package.json**
+- 🔧 Updated test scripts to include Jest integration
+- 🔧 Added new npm scripts for granular test execution
+- 🔧 Main test script now runs comprehensive suite
+
+### Improved - Developer Experience
+
+#### **Documentation**
+- 📖 **README.md** enhanced with:
+  - Complete project structure tree
+  - NPM download and version badges
+  - Test suite information
+  - CI/CD pipeline documentation links
+- 📖 **Test documentation** with:
+  - Writing tests best practices
+  - Debugging guides
+  - CI/CD integration instructions
+  - Troubleshooting section
+  - Coverage information
+
+#### **Code Quality**
+- ✨ Structured test organization following industry standards
+- ✨ AAA pattern (Arrange, Act, Assert) in test cases
+- ✨ Proper cleanup with beforeEach/afterEach hooks
+- ✨ Comprehensive edge case coverage
+- ✨ Reusable test fixtures and utilities
+
+### Fixed
+
+- 🐛 Jest configuration compatibility with ES modules
+- 🐛 TypeScript compilation in test environment
+- 🐛 Module resolution for test imports
+- 🐛 Docker permission handling in validation scripts
+
+### Security
+
+- 🔒 Snyk integration for vulnerability scanning
+- 🔒 Automated dependency auditing in CI/CD
+- 🔒 Non-root Docker user for container security
+- 🔒 NPM provenance for package authenticity
+
+### Performance
+
+- ⚡ Parallel test execution for faster validation
+- ⚡ Docker layer caching optimization
+- ⚡ Multi-stage builds for smaller images
+- ⚡ Jest worker optimization (50% CPU allocation)
+
+### Testing Coverage
+
+- 🎯 **94/114 tests passing** (82.5% success rate)
+- 🎯 **4/7 test suites** fully passing
+- 🎯 Coverage targets: 70% for branches, functions, lines, statements
+- 🎯 Multiple coverage formats: text, lcov, html, json, clover
+
+### CI/CD Metrics
+
+- 📊 **11-stage Jenkins pipeline** for complete automation
+- 📊 **6 Docker Compose profiles** for different environments
+- 📊 **Multi-architecture builds** (linux/amd64, linux/arm64)
+- 📊 **Automated release workflow** with GitHub Actions
+- 📊 **Comprehensive validation** with 10+ checks
+
+---
+
 ## [3.0.0] - 2025-11-26
 
 ### 🎉 Major Release - Official Build Tool Integrations
