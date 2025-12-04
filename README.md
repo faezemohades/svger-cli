@@ -1,18 +1,22 @@
-# SVGER-CLI v3.1.0 - Enterprise SVG Processing Framework
+<div align="center">
+  <img src="./assets/svger-cli.png" alt="SVGER-CLI Banner" width="100%" />
+  
+  <h1>SVGER-CLI v3.1.0</h1>
+  <h3>Enterprise SVG Processing Framework</h3>
+  
+  <p>
+    <a href="https://badge.fury.io/js/svger-cli"><img src="https://badge.fury.io/js/svger-cli.svg" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/svger-cli"><img src="https://img.shields.io/npm/dm/svger-cli.svg" alt="npm downloads" /></a>
+    <a href="https://www.npmjs.com/package/svger-cli"><img src="https://img.shields.io/npm/v/svger-cli.svg" alt="npm" /></a>
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Ready-blue.svg" alt="TypeScript" /></a>
+    <a href="https://www.npmjs.com/package/svger-cli"><img src="https://img.shields.io/badge/Dependencies-Zero-green.svg" alt="Zero Dependencies" /></a>
+    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Tests-114%20passing-success.svg" alt="Tests" /></a>
+    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Coverage-82%25-yellow.svg" alt="Coverage" /></a>
+  </p>
 
-[![npm version](https://badge.fury.io/js/svger-cli.svg)](https://badge.fury.io/js/svger-cli)
-[![npm downloads](https://img.shields.io/npm/dm/svger-cli.svg)](https://www.npmjs.com/package/svger-cli)
-[![npm](https://img.shields.io/npm/v/svger-cli.svg)](https://www.npmjs.com/package/svger-cli)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)](https://www.npmjs.com/package/svger-cli)
-[![Tests](https://img.shields.io/badge/Tests-114%20passing-success.svg)](https://github.com/faezemohades/svger-cli)
-[![Coverage](https://img.shields.io/badge/Coverage-82%25-yellow.svg)](https://github.com/faezemohades/svger-cli)
-
-> **The most advanced, zero-dependency SVG to component converter with official build tool
-> integrations. First-class support for Webpack, Vite, Rollup, Babel, Next.js, and Jest. Supporting
-> 9+ UI frameworks including React Native with enterprise-grade performance, comprehensive test suite,
-> and production-ready CI/CD pipelines.**
+  <p><strong>The most advanced, zero-dependency SVG to component converter with official build tool integrations. First-class support for Webpack, Vite, Rollup, Babel, Next.js, and Jest. Supporting 9+ UI frameworks including React Native with enterprise-grade performance, comprehensive test suite, and production-ready CI/CD pipelines.</strong></p>
+</div>
 
 ---
 
