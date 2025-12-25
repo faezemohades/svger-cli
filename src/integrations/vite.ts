@@ -58,15 +58,10 @@ export function svgerVitePlugin(options: VitePluginOptions = {}): any {
       options.generateIndex !== undefined ? options.generateIndex : true,
   };
 
-  let viteConfig: any;
   const processedFiles = new Set<string>();
 
   return {
     name: PLUGIN_NAME,
-
-    configResolved(resolvedConfig: any) {
-      viteConfig = resolvedConfig;
-    },
 
     async buildStart() {
       logger.info('SVGER Vite Plugin: Processing SVG files...');
@@ -217,7 +212,7 @@ async function processAllSVGs(
 
   // Generate index file
   if (options.generateIndex) {
-    await generateIndexFile(outputDir, results, options);
+    await generateIndexFile(outputDir, options);
   }
 
   const successful = results.filter(r => r.success).length;
@@ -267,24 +262,47 @@ async function processSVGFile(
 
 /**
  * Generate index file with all exports
+ * Scans the output directory for all existing component files
  */
 async function generateIndexFile(
   outputDir: string,
-  results: ProcessingResult[],
   options: Required<VitePluginOptions>
 ): Promise<void> {
-  const extension = options.typescript ? 'ts' : 'js';
-  const exports = results
-    .filter(r => r.componentName)
-    .map(
-      r =>
-        `export { default as ${r.componentName} } from './${r.componentName}';`
-    )
-    .join('\n');
+  try {
+    // Scan output directory for all component files
+    const files = await FileSystem.readDir(outputDir);
+    const extension = options.typescript ? 'tsx' : 'jsx';
 
-  const indexPath = path.join(outputDir, `index.${extension}`);
-  await FileSystem.writeFile(indexPath, exports, 'utf-8');
-  logger.debug(`Generated index file: ${indexPath}`);
+    // Filter component files (exclude index files)
+    const componentFiles = files.filter(
+      file =>
+        (file.endsWith(`.${extension}`) ||
+          file.endsWith('.ts') ||
+          file.endsWith('.js')) &&
+        !file.startsWith('index.')
+    );
+
+    if (componentFiles.length === 0) {
+      logger.warn('No component files found for index generation');
+      return;
+    }
+
+    // Extract component names
+    const componentNames = componentFiles.map(file =>
+      path.basename(file, path.extname(file))
+    );
+
+    const indexExtension = options.typescript ? 'ts' : 'js';
+    const exports = componentNames
+      .map(name => `export { default as ${name} } from './${name}';`)
+      .join('\n');
+
+    const indexPath = path.join(outputDir, `index.${indexExtension}`);
+    await FileSystem.writeFile(indexPath, exports, 'utf-8');
+    logger.debug(`Generated index file: ${indexPath}`);
+  } catch (error) {
+    logger.error('Failed to generate index file:', error);
+  }
 }
 
 // Default export

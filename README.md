@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./assets/svger-cli.png" alt="SVGER-CLI Banner" width="100%" />
   
-  <h1>SVGER-CLI v3.1.0</h1>
+  <h1>SVGER-CLI v3.1.1</h1>
   <h3>Enterprise SVG Processing Framework</h3>
   
   <p>
@@ -2767,7 +2767,7 @@ svger-cli build --framework react --responsive --theme dark
 
 ### **Comprehensive Test Suite**
 
-SVGER-CLI v3.1.0 includes a production-ready test suite with **114 automated tests** covering:
+SVGER-CLI v3.1.1 includes a production-ready test suite with **114 automated tests** covering:
 
 - ✅ **Unit Tests** - Core modules, utilities, and processors
 - ✅ **Integration Tests** - Complete workflows and multi-framework support

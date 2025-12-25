@@ -1,6 +1,6 @@
 {
   "name": "svger-cli",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Enterprise-grade, zero-dependency SVG to component converter with official Webpack, Vite, Rollup, Babel, Next.js & Jest integrations. Supporting React, React Native, Vue, Angular, Svelte, Solid, Lit, Preact & Vanilla. Features auto-generated TypeScript exports, HMR, responsive design, themes & 85% faster processing than SVGR.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

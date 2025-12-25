@@ -101,7 +101,7 @@ export class SVGService {
             defaultWidth: mergedConfig.defaultWidth,
             defaultHeight: mergedConfig.defaultHeight,
             defaultFill: mergedConfig.defaultFill,
-            namingConvention: mergedConfig.output?.naming || 'pascal',
+            namingConvention: mergedConfig.outputConfig?.naming || 'pascal',
             styleRules: Object.fromEntries(
               Object.entries(mergedConfig.styleRules || {}).filter(
                 ([, v]) => v !== undefined
@@ -141,13 +141,8 @@ export class SVGService {
     }
 
     // Generate index.ts file with all component exports
-    if (successful > 0) {
-      await this.generateIndexFile(
-        outDir,
-        results.filter(r => r.success).map(r => r.file),
-        mergedConfig
-      );
-    }
+    // This includes both newly generated components and existing locked components
+    await this.generateIndexFile(outDir, mergedConfig);
   }
 
   /**
@@ -349,17 +344,39 @@ export class SVGService {
 
   /**
    * Generate index.ts file with all component exports
+   * Scans the output directory for all existing component files,
+   * including those from locked SVGs that weren't regenerated
    */
-  private async generateIndexFile(
-    outDir: string,
-    svgFiles: string[],
-    config?: any
-  ): Promise<void> {
+  private async generateIndexFile(outDir: string, config?: any): Promise<void> {
     try {
-      const namingConvention = config?.output?.naming || 'pascal';
-      const componentNames = svgFiles.map(file => {
-        const baseName = path.basename(file, '.svg');
-        return svgProcessor.generateComponentName(baseName, namingConvention);
+      // Scan output directory for all component files
+      const files = await FileSystem.readDir(outDir);
+
+      // Get the file extension based on typescript setting
+      const typescript = config?.typescript !== false;
+      const ext = typescript ? '.tsx' : '.jsx';
+
+      // Filter component files (exclude index.ts/index.js)
+      const componentFiles = files.filter(
+        file =>
+          (file.endsWith(ext) ||
+            file.endsWith('.ts') ||
+            file.endsWith('.js')) &&
+          !file.startsWith('index.')
+      );
+
+      if (componentFiles.length === 0) {
+        logger.warn(
+          'No component files found in output directory for index generation'
+        );
+        return;
+      }
+
+      // Extract component names from filenames
+      const componentNames = componentFiles.map(file => {
+        // Remove extension to get component name
+        const baseName = path.basename(file, path.extname(file));
+        return baseName;
       });
 
       const indexContent = this.generateIndexContent(componentNames);

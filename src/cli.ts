@@ -15,7 +15,7 @@ program
   .description(
     'Custom SVG to Angular, React, Vue, Svelte, Solid, and other component converter'
   )
-  .version('2.0.0');
+  .version('3.0.0');
 
 // -------- Build Command --------
 /**

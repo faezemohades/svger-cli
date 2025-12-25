@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2025-12-25
+
+### 🐛 Bug Fixes
+
+#### **Critical: Locked Files Missing from Index Exports**
+- **Fixed**: Locked SVG files are now correctly included in auto-generated `index.ts` exports
+- **Issue**: When SVG files were locked using `svger-cli lock`, their generated components were excluded from the `index.ts` barrel file, breaking imports and requiring manual maintenance
+- **Root Cause**: Index generation logic only included files processed in the current build session, excluding locked files that were intentionally skipped
+- **Solution**: Modified index generation to scan output directory for ALL existing component files instead of relying on processed files list
+
+#### **Files Changed**
+- **Core Service** (`src/services/svg-service.ts`):
+  - Updated `generateIndexFile()` to scan output directory for all component files (`.tsx`, `.jsx`, `.ts`, `.js`)
+  - Now includes both newly generated and previously locked components in exports
+  - Fixed incorrect property access `output?.naming` → `outputConfig?.naming`
+
+- **Integration Plugins** (all updated to scan output directory):
+  - `src/integrations/babel.ts` - Babel plugin index generation
+  - `src/integrations/vite.ts` - Vite plugin index generation
+  - `src/integrations/webpack.ts` - Webpack plugin index generation (affects Next.js)
+  - `src/integrations/rollup.ts` - Rollup plugin index generation
+
+#### **Framework Coverage**
+- ✅ React (TSX/JSX)
+- ✅ React Native
+- ✅ Vue (Composition & Options API)
+- ✅ Angular (Module & Standalone)
+- ✅ Svelte
+- ✅ Solid
+- ✅ Preact
+- ✅ Lit
+- ✅ Vanilla JS/TS
+
+#### **Build Tool Coverage**
+- ✅ CLI (`svger-cli build`)
+- ✅ Babel Plugin
+- ✅ Vite Plugin
+- ✅ Webpack Plugin
+- ✅ Rollup Plugin
+- ✅ Next.js Plugin (uses Webpack)
+
+#### **Testing**
+- Added comprehensive test suite: `tests/locked-files-index.test.ts`
+- Tests verify locked files remain in index after build
+- Tests verify multiple locked files are handled correctly
+- Tests verify unlocking allows regeneration
+- Tests verify locked files aren't regenerated
+- All existing tests pass (40+ tests)
+
+#### **Lock Mechanism Behavior (Corrected)**
+- **Locking a file**: Prevents regeneration/overwrite of component file ✅
+- **Building with locked files**: Skips locked file regeneration but **includes in index.ts** ✅
+- **Index exports**: Now includes ALL components (locked + unlocked) ✅
+
+### 🧹 Code Quality
+- Removed unused `viteConfig` variable from Vite plugin
+- Fixed TypeScript compilation warnings
+- All linting rules pass
+
+### 📝 Documentation
+- Created detailed GitHub issue response documentation
+- Updated fix summary with comprehensive coverage details
+- No breaking changes
+- No migration required
+
+---
+
 ## [3.1.0] - 2025-12-04
 
 ### 🚀 Major Improvements - Testing & DevOps
