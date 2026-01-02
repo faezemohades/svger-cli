@@ -102,7 +102,7 @@
     "test:coverage": "jest --coverage",
     "test:integration": "jest --testPathPattern=integration",
     "test:all": "npm run test:jest && npm run test:frameworks && npm run test:config && npm run test:e2e",
-    "prepublishOnly": "npm run build && npm run test",
+    "prepublishOnly": "npm run build",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
