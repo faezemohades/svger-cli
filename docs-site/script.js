@@ -20,7 +20,19 @@ const navigation = [
     items: [
       { title: "Feature Comparison", href: "#feature-comparison" },
       { title: "Multi-Framework Guide", href: "#framework-guide" },
+      { title: "CLI Reference", href: "#cli-reference" },
       { title: "Configuration", href: "#configuration" },
+    ],
+  },
+  {
+    title: "Advanced Features",
+    icon: `<svg class="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>
+    </svg>`,
+    items: [
+      { title: "Plugin System", href: "#plugins" },
+      { title: "Testing & Samples", href: "#testing" },
+      { title: "Production Deployment", href: "#deployment" },
     ],
   },
   {
@@ -31,6 +43,15 @@ const navigation = [
     items: [
       { title: "Real-World Performance", href: "#performance" },
       { title: "Live Benchmark Testing", href: "#live-benchmark" },
+    ],
+  },
+  {
+    title: "Help & Support",
+    icon: `<svg class="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>`,
+    items: [
+      { title: "Troubleshooting & FAQ", href: "#troubleshooting" },
     ],
   },
 ];
@@ -129,12 +150,17 @@ function updateActiveNavItem() {
   });
   
   navLinks.forEach(link => {
-    link.style.color = '';
-    link.style.backgroundColor = '';
+    link.classList.remove('active');
     
     if (link.getAttribute('href') === `#${currentSection}`) {
-      link.style.color = 'var(--foreground)';
-      link.style.backgroundColor = 'var(--accent)';
+      link.classList.add('active');
+      
+      // Auto-expand parent section
+      const parentSection = link.closest('.nav-items').previousElementSibling;
+      if (parentSection && !parentSection.classList.contains('expanded')) {
+        parentSection.classList.add('expanded');
+        link.closest('.nav-items').style.display = 'block';
+      }
     }
   });
   
