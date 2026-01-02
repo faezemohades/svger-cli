@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Transform SVG files into clean, optimized components for React, Vue, Angular, Svelte, and 5+ more frameworks. Zero dependencies, 52% faster, ~2MB bundle size.">
+  <meta name="generator" content="SVGER-CLI Documentation">
+  <title>SVGer CLI Documentation - Enterprise SVG Processing Framework</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen bg-background text-foreground font-sans antialiased">
+  
+  <!-- Header -->
+  <header class="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
+    <div class="container flex h-16 items-center justify-between px-6">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted">
+          <svg class="h-5 w-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-sm font-semibold tracking-tight leading-none">SVGer CLI</span>
+          <span class="text-[10px] text-muted-foreground tracking-wider leading-none mt-0.5">v4.0.0</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="https://www.npmjs.com/package/svger-cli" target="_blank" class="btn btn-ghost btn-sm gap-2 text-xs">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Install
+        </a>
+        <a href="https://github.com/faezemohades/svger-cli" target="_blank" class="btn btn-ghost btn-sm">
+          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <!-- Navigation Sidebar -->
+    <nav id="sidebar" class="w-64 border-r border-border bg-muted/30 overflow-y-auto sticky top-16 h-[calc(100vh-4rem)]">
+      <div class="sticky top-0 bg-muted/30 border-b border-border px-4 py-3">
+        <p class="text-xs font-medium text-muted-foreground tracking-wide uppercase">Documentation</p>
+      </div>
+      <div class="p-3 space-y-1" id="nav-content">
+        <!-- Navigation will be inserted here by JavaScript -->
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <div class="max-w-4xl mx-auto px-8 py-12">
+        
+        <!-- Hero Section -->
+        <section class="mb-16">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted/50 text-xs font-medium mb-6">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            v4.0.0 — Enterprise SVG Processing Framework
+          </div>
+
+          <h1 class="text-4xl font-bold tracking-tight mb-4 text-balance">
+            Transform SVGs into Framework Components
+          </h1>
+          <p class="text-lg text-muted-foreground leading-relaxed text-pretty">
+            A powerful, zero-dependency command-line tool that instantly converts SVG files into clean, optimized
+            components for any modern JavaScript framework. First-class support for React, Vue, Angular, Svelte, and 5+
+            more frameworks.
+          </p>
+
+          <div class="flex items-center gap-3 mt-6">
+            <span class="badge badge-secondary">
+              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+              Zero Dependencies
+            </span>
+            <span class="badge badge-secondary">
+              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+              ~2MB Bundle
+            </span>
+            <span class="badge badge-secondary">
+              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              52% Faster
+            </span>
+          </div>
+        </section>
+
+        <!-- Key Features -->
+        <section class="mb-16" id="why-svger">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Why SVGer CLI?</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="card p-5">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 h-8 w-8 rounded-md border border-border bg-muted flex items-center justify-center flex-shrink-0">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-semibold mb-1.5">Zero Dependencies</h3>
+                  <p class="text-xs text-muted-foreground leading-relaxed">No node_modules bloat. Drastically smaller footprint with no third-party vulnerabilities.</p>
+                </div>
+              </div>
+            </div>
+            <div class="card p-5">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 h-8 w-8 rounded-md border border-border bg-muted flex items-center justify-center flex-shrink-0">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-semibold mb-1.5">52% Faster</h3>
+                  <p class="text-xs text-muted-foreground leading-relaxed">Native performance with parallel processing and smart caching system. Real-world tested on 606 production SVG icons.</p>
+                </div>
+              </div>
+            </div>
+            <div class="card p-5">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 h-8 w-8 rounded-md border border-border bg-muted flex items-center justify-center flex-shrink-0">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-semibold mb-1.5">9+ Frameworks</h3>
+                  <p class="text-xs text-muted-foreground leading-relaxed">React, Vue, Angular, Svelte, Solid, Lit, Preact, React Native & Vanilla JS.</p>
+                </div>
+              </div>
+            </div>
+            <div class="card p-5">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 h-8 w-8 rounded-md border border-border bg-muted flex items-center justify-center flex-shrink-0">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-semibold mb-1.5">Auto Exports</h3>
+                  <p class="text-xs text-muted-foreground leading-relaxed">Automatically generates clean index.ts files with tree-shaking support.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Installation -->
+        <section class="mb-16" id="installation">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Installation</h2>
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm text-muted-foreground mb-3">Install globally for CLI access:</p>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">bash</span>
+                <pre><code>npm install -g svger-cli</code></pre>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm text-muted-foreground mb-3">Or add to your project:</p>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">bash</span>
+                <pre><code>npm install --save-dev svger-cli</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Start -->
+        <section class="mb-16" id="quick-start">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Quick Start</h2>
+          <div class="space-y-6">
+            <div class="space-y-3">
+              <p class="text-sm font-medium">1. Convert a single SVG file:</p>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">bash</span>
+                <pre><code>svger-cli convert ./icons/logo.svg --framework react --output ./components</code></pre>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <p class="text-sm font-medium">2. Batch convert an entire directory:</p>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">bash</span>
+                <pre><code>svger-cli batch ./icons --framework vue --output ./components/icons</code></pre>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <p class="text-sm font-medium">3. Use the generated component:</p>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">tsx</span>
+                <pre><code>import { Logo } from './components';
+
+function App() {
+  return &lt;Logo className="w-8 h-8" /&gt;;
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Build Tool Integrations -->
+        <section class="mb-16" id="build-integrations">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Build Tool Integrations</h2>
+          <p class="text-sm text-muted-foreground mb-6">
+            First-class support for all major build tools with zero configuration.
+          </p>
+          <div class="space-y-4">
+            <div class="card p-5">
+              <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                <div class="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+                Webpack
+              </h3>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">javascript</span>
+                <pre><code>const { SvgerWebpackPlugin } = require('svger-cli/webpack');
+
+module.exports = {
+  plugins: [new SvgerWebpackPlugin()],
+};</code></pre>
+              </div>
+            </div>
+            <div class="card p-5">
+              <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                <div class="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
+                Vite
+              </h3>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">javascript</span>
+                <pre><code>import { svgerVitePlugin } from 'svger-cli/vite';
+
+export default {
+  plugins: [svgerVitePlugin()],
+};</code></pre>
+              </div>
+            </div>
+            <div class="card p-5">
+              <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                <div class="h-1.5 w-1.5 rounded-full bg-red-500"></div>
+                Next.js
+              </h3>
+              <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                  <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                <span class="code-lang">javascript</span>
+                <pre><code>const { withSvger } = require('svger-cli/nextjs');
+
+module.exports = withSvger({});</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Feature Comparison -->
+        <section class="mb-16" id="feature-comparison">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Feature Comparison</h2>
+          <div class="border border-border rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-muted/50 border-b border-border">
+                  <tr>
+                    <th class="text-left py-3 px-4 font-semibold">Feature</th>
+                    <th class="text-center py-3 px-4 font-semibold">SVGer CLI v4.0.0</th>
+                    <th class="text-center py-3 px-4 font-semibold text-muted-foreground">SVGR</th>
+                    <th class="text-center py-3 px-4 font-semibold text-muted-foreground">Others</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                  <tr class="hover:bg-muted/30">
+                    <td class="py-3 px-4">Dependencies</td>
+                    <td class="py-3 px-4 text-center">
+                      <div class="inline-flex items-center gap-1.5 text-green-600">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span class="font-medium">Zero</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">15+</td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">7-9+</td>
+                  </tr>
+                  <tr class="hover:bg-muted/30">
+                    <td class="py-3 px-4">Framework Support</td>
+                    <td class="py-3 px-4 text-center">
+                      <div class="inline-flex items-center gap-1.5 text-green-600">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span class="font-medium">9+</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">React only</td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">Single</td>
+                  </tr>
+                  <tr class="hover:bg-muted/30">
+                    <td class="py-3 px-4">Performance</td>
+                    <td class="py-3 px-4 text-center">
+                      <div class="inline-flex items-center gap-1.5 text-green-600">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        <span class="font-medium">52% Faster</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">Standard</td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">Standard</td>
+                  </tr>
+                  <tr class="hover:bg-muted/30">
+                    <td class="py-3 px-4">Bundle Size</td>
+                    <td class="py-3 px-4 text-center">
+                      <div class="inline-flex items-center gap-1.5 text-green-600">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span class="font-medium">~2MB</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">~18.7MB</td>
+                    <td class="py-3 px-4 text-center text-muted-foreground">~11-14MB</td>
+                  </tr>
+                  <tr class="hover:bg-muted/30">
+                    <td class="py-3 px-4">Auto Migration</td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-muted/30">
+                    <td class="py-3 px-4">React Native</td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-muted/30">
+                    <td class="py-3 px-4">Auto Exports</td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <svg class="h-4 w-4 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Framework Support -->
+        <section class="mb-16" id="framework-guide">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Multi-Framework Support</h2>
+          <p class="text-sm text-muted-foreground mb-6">
+            SVGer CLI supports 9+ modern frameworks with consistent API and output quality.
+          </p>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">React</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">Vue 3</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">Angular</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">Svelte</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">Solid</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">Lit</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">Preact</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">React Native</p>
+            </div>
+            <div class="card p-4 hover:border-foreground/20 transition-colors">
+              <p class="text-sm font-medium text-center">Vanilla JS</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Performance -->
+        <section class="mb-16" id="performance">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Real-World Performance</h2>
+          <p class="text-sm text-muted-foreground mb-6">
+            Tested on 606 production SVG icons (1.01MB) - real benchmarks, not synthetic tests.
+          </p>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="card p-5">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold">Processing Speed</h3>
+                <div class="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-2xl font-bold mb-1">52%</p>
+              <p class="text-xs text-muted-foreground">Faster than SVGR</p>
+            </div>
+            <div class="card p-5">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold">Bundle Size</h3>
+                <div class="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-2xl font-bold mb-1">~2MB</p>
+              <p class="text-xs text-muted-foreground">90% smaller package</p>
+            </div>
+            <div class="card p-5">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold">Memory Usage</h3>
+                <div class="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <svg class="h-4 w-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-2xl font-bold mb-1">0.17MB</p>
+              <p class="text-xs text-muted-foreground">69% less than SVGR</p>
+            </div>
+          </div>
+          <div class="mt-6">
+            <a href="https://github.com/faezemohades/svger-cli#performance" class="text-sm text-blue-600 hover:underline">
+              View detailed performance reports →
+            </a>
+          </div>
+        </section>
+
+        <!-- Live Benchmarking -->
+        <section class="mb-16" id="live-benchmark">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Live Performance Testing</h2>
+          <p class="text-sm text-muted-foreground mb-6">
+            Test SVG processing performance directly in your browser. Upload SVG files or use sample data to see real-time conversion metrics.
+          </p>
+
+          <!-- Benchmark Controls -->
+          <div class="card p-6 mb-6">
+            <h3 class="text-sm font-semibold mb-4">Benchmark Configuration</h3>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="text-xs font-medium text-muted-foreground mb-2 block">Framework</label>
+                <select id="benchmark-framework" class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm">
+                  <option value="react">React</option>
+                  <option value="vue">Vue 3</option>
+                  <option value="angular">Angular</option>
+                  <option value="svelte">Svelte</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs font-medium text-muted-foreground mb-2 block">Test Mode</label>
+                <select id="benchmark-mode" class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm">
+                  <option value="sample">Sample SVGs (10 icons)</option>
+                  <option value="upload">Upload Your SVGs</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- File Upload (hidden by default) -->
+            <div id="upload-section" class="mb-4 hidden">
+              <label class="text-xs font-medium text-muted-foreground mb-2 block">Upload SVG Files</label>
+              <div class="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-foreground/50 transition-colors cursor-pointer" id="drop-zone">
+                <input type="file" id="svg-upload" accept=".svg" multiple class="hidden">
+                <svg class="h-8 w-8 mx-auto mb-2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                <p class="text-sm font-medium mb-1">Drop SVG files here or click to browse</p>
+                <p class="text-xs text-muted-foreground">Supports multiple files</p>
+              </div>
+              <div id="file-list" class="mt-3 text-xs text-muted-foreground"></div>
+            </div>
+
+            <button id="run-benchmark" class="btn btn-primary w-full">
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              Run Benchmark Test
+            </button>
+          </div>
+
+          <!-- Benchmark Results -->
+          <div id="benchmark-results" class="hidden">
+            <div class="card p-6 mb-4">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold">Test Results</h3>
+                <span id="test-status" class="badge badge-secondary">
+                  <span class="relative flex h-2 w-2 mr-1.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  Running...
+                </span>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mb-6">
+                <div class="flex justify-between text-xs text-muted-foreground mb-2">
+                  <span>Progress</span>
+                  <span id="progress-text">0%</span>
+                </div>
+                <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
+                  <div id="progress-bar" class="h-full bg-green-500 transition-all duration-300" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <!-- Metrics Grid -->
+              <div class="grid grid-cols-4 gap-4">
+                <div class="border border-border rounded-lg p-4">
+                  <p class="text-xs text-muted-foreground mb-1">Files Processed</p>
+                  <p class="text-2xl font-bold" id="metric-files">0</p>
+                </div>
+                <div class="border border-border rounded-lg p-4">
+                  <p class="text-xs text-muted-foreground mb-1">Total Time</p>
+                  <p class="text-2xl font-bold" id="metric-time">0ms</p>
+                </div>
+                <div class="border border-border rounded-lg p-4">
+                  <p class="text-xs text-muted-foreground mb-1">Avg Per File</p>
+                  <p class="text-2xl font-bold" id="metric-avg">0ms</p>
+                </div>
+                <div class="border border-border rounded-lg p-4">
+                  <p class="text-xs text-muted-foreground mb-1">Throughput</p>
+                  <p class="text-2xl font-bold" id="metric-throughput">0/s</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detailed Results -->
+            <div class="card p-6">
+              <h3 class="text-sm font-semibold mb-4">Detailed Output</h3>
+              <div id="detailed-results" class="space-y-2 max-h-96 overflow-y-auto">
+                <!-- Results will be inserted here -->
+              </div>
+            </div>
+
+            <!-- Export Button -->
+            <div class="mt-4 flex gap-2">
+              <button id="export-results" class="btn btn-ghost btn-sm">
+                <svg class="h-3.5 w-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Export Results (JSON)
+              </button>
+              <button id="reset-benchmark" class="btn btn-ghost btn-sm">
+                <svg class="h-3.5 w-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Run Again
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Configuration -->
+        <section class="mb-16" id="configuration">
+          <h2 class="text-2xl font-semibold mb-6 tracking-tight">Configuration</h2>
+          <p class="text-sm text-muted-foreground mb-6">
+            Create a <code>.svgerconfig.json</code> file in your project root for persistent settings.
+          </p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">
+              <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              <svg class="check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </button>
+            <span class="code-lang">json</span>
+            <pre><code>{
+  "framework": "react",
+  "typescript": true,
+  "outputDir": "./components/icons",
+  "exportIndex": true,
+  "svgo": true,
+  "prettier": true
+}</code></pre>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-border bg-muted/30">
+    <div class="container px-6 py-8">
+      <div class="grid grid-cols-4 gap-8 mb-8">
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Resources</h3>
+          <ul class="space-y-2">
+            <li>
+              <a href="#" class="text-sm text-foreground hover:underline">Documentation</a>
+            </li>
+            <li>
+              <a href="https://github.com/faezemohades/svger-cli" class="text-sm text-foreground hover:underline inline-flex items-center gap-1">
+                GitHub
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.npmjs.com/package/svger-cli" class="text-sm text-foreground hover:underline inline-flex items-center gap-1">
+                npm Package
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Community</h3>
+          <ul class="space-y-2">
+            <li>
+              <a href="https://github.com/faezemohades/svger-cli/blob/main/CONTRIBUTING.md" class="text-sm text-foreground hover:underline">Contributing</a>
+            </li>
+            <li>
+              <a href="https://github.com/faezemohades/svger-cli/blob/main/CODE_OF_CONDUCT.md" class="text-sm text-foreground hover:underline">Code of Conduct</a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Legal</h3>
+          <ul class="space-y-2">
+            <li>
+              <a href="https://github.com/faezemohades/svger-cli/blob/main/LICENSE" class="text-sm text-foreground hover:underline">MIT License</a>
+            </li>
+            <li>
+              <a href="https://github.com/faezemohades/svger-cli/blob/main/SECURITY.md" class="text-sm text-foreground hover:underline">Security</a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Project</h3>
+          <ul class="space-y-2">
+            <li>
+              <a href="https://github.com/faezemohades/svger-cli/blob/main/CHANGELOG.md" class="text-sm text-foreground hover:underline">Changelog</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-6 border-t border-border flex items-center justify-between">
+        <p class="text-xs text-muted-foreground">© 2025 SVGer CLI. Released under the MIT License.</p>
+        <p class="text-xs text-muted-foreground">
+          Built by
+          <a href="https://github.com/faezemohades" class="underline hover:text-foreground">faezemohades</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark Demo - SVGER-CLI</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .demo-card {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    h1 { color: #333; margin-bottom: 10px; }
+    h2 { color: #666; font-size: 20px; margin-bottom: 20px; }
+    .feature { 
+      padding: 15px;
+      background: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .feature-title {
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 5px;
+    }
+    .feature-desc {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #3b82f6;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      margin-top: 20px;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #2563eb;
+    }
+    .screenshots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .screenshot {
+      padding: 15px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+      color: #475569;
+    }
+    code {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #10b981;
+      color: white;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin: 5px 5px 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-card">
+    <h1>🚀 Live Benchmark Testing</h1>
+    <h2>Interactive SVG Performance Testing in Your Browser</h2>
+    
+    <p style="color: #64748b; line-height: 1.6;">
+      Test SVGER-CLI's SVG processing performance directly in your browser without installing anything. 
+      Upload your own SVG files or use our sample icons to see real-time conversion metrics.
+    </p>
+
+    <div style="margin: 20px 0;">
+      <span class="badge">Zero Install</span>
+      <span class="badge">Real-Time</span>
+      <span class="badge">Multi-Framework</span>
+      <span class="badge">Export Results</span>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <h2>✨ Key Features</h2>
+
+    <div class="feature">
+      <div class="feature-title">📊 Real-Time Metrics</div>
+      <div class="feature-desc">
+        Track files processed, total time, average time per file, and throughput (files/second) as the benchmark runs.
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-title">🎯 Multiple Test Modes</div>
+      <div class="feature-desc">
+        Choose between pre-loaded sample SVGs (10 icons) or upload your own custom SVG files for testing.
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-title">🔄 Framework Comparison</div>
+      <div class="feature-desc">
+        Test conversion performance across React, Vue 3, Angular, and Svelte to compare results.
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-title">📥 Export Capability</div>
+      <div class="feature-desc">
+        Download detailed results as JSON including all metrics, per-file times, and timestamps.
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-title">🎨 Visual Feedback</div>
+      <div class="feature-desc">
+        Animated progress bar, status badges, and color-coded results for easy monitoring.
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <h2>🧪 How to Test</h2>
+    
+    <div style="background: #f8fafc; padding: 20px; border-radius: 6px; margin: 15px 0;">
+      <p style="margin: 0 0 15px 0; font-weight: 600;">Option 1: Sample SVGs (Quick Test)</p>
+      <ol style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Navigate to <code>#live-benchmark</code> section</li>
+        <li>Select framework (React, Vue, Angular, Svelte)</li>
+        <li>Keep "Sample SVGs (10 icons)" selected</li>
+        <li>Click "Run Benchmark Test"</li>
+        <li>Watch real-time progress and results</li>
+      </ol>
+    </div>
+
+    <div style="background: #f8fafc; padding: 20px; border-radius: 6px; margin: 15px 0;">
+      <p style="margin: 0 0 15px 0; font-weight: 600;">Option 2: Upload Custom SVGs</p>
+      <ol style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Switch to "Upload Your SVGs" mode</li>
+        <li>Drag & drop SVG files or click to browse</li>
+        <li>Verify file count and size display</li>
+        <li>Click "Run Benchmark Test"</li>
+        <li>Export results as JSON for record-keeping</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <h2>📈 Expected Performance</h2>
+    
+    <div class="screenshots">
+      <div class="screenshot">
+        <strong>Sample Test (10 files)</strong><br><br>
+        Total Time: 100-300ms<br>
+        Per File: 10-30ms<br>
+        Throughput: 30-100/s<br>
+        Success: 100%
+      </div>
+      <div class="screenshot">
+        <strong>Custom Upload (20 files)</strong><br><br>
+        Total Time: 200-600ms<br>
+        Per File: 10-30ms<br>
+        Throughput: 30-100/s<br>
+        Success: 95-100%
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <h2>💻 Technical Details</h2>
+    
+    <p style="color: #64748b; line-height: 1.6; margin-bottom: 15px;">
+      The benchmark system simulates SVGER-CLI's SVG processing pipeline:
+    </p>
+
+    <ul style="line-height: 1.8; color: #64748b;">
+      <li><strong>File Processing:</strong> Reads SVG content and parses structure</li>
+      <li><strong>Component Generation:</strong> Applies framework-specific templates</li>
+      <li><strong>Performance Tracking:</strong> Uses Performance API for accurate timing</li>
+      <li><strong>Real-Time Updates:</strong> Progress bar and status indicators</li>
+      <li><strong>Export Feature:</strong> Blob API for JSON download</li>
+    </ul>
+
+    <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+      <strong style="color: #92400e;">📌 Note:</strong>
+      <span style="color: #78350f; font-size: 14px;">
+        This is a browser-based simulation. Actual CLI performance may vary based on system resources 
+        and file complexity. For production benchmarks, see our real-world test results.
+      </span>
+    </div>
+  </div>
+
+  <div class="demo-card" style="text-align: center;">
+    <h2>🎯 Try It Now!</h2>
+    <p style="color: #64748b; margin-bottom: 20px;">
+      Experience the interactive benchmark testing directly on the documentation site
+    </p>
+    <a href="http://localhost:8000#live-benchmark" class="btn">
+      🚀 Launch Benchmark Testing
+    </a>
+    <br>
+    <a href="http://localhost:8000" class="btn" style="background: #6b7280; margin-left: 10px;">
+      📖 View Full Documentation
+    </a>
+  </div>
+
+  <div class="demo-card">
+    <h2>📚 Additional Resources</h2>
+    <ul style="line-height: 2; color: #64748b;">
+      <li><a href="../BENCHMARK_TESTING.md" style="color: #3b82f6;">Benchmark Testing Guide</a> - Detailed testing instructions</li>
+      <li><a href="../README.md" style="color: #3b82f6;">Development Guide</a> - Site customization</li>
+      <li><a href="https://github.com/faezemohades/svger-cli#performance" style="color: #3b82f6;">Real-World Benchmarks</a> - Production test results</li>
+    </ul>
+  </div>
+</body>
+</html>
