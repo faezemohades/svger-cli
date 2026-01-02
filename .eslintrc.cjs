@@ -7,8 +7,14 @@ module.exports = {
   plugins: ['@typescript-eslint', 'prettier'],
   extends: ['eslint:recommended', 'prettier'],
   rules: {
+    // Disable base rule as it can report incorrect errors
+    'no-unused-vars': 'off',
+
     // TypeScript specific rules
-    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ],
     '@typescript-eslint/no-explicit-any': 'warn',
 
     // General JavaScript rules

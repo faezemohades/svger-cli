@@ -10,6 +10,7 @@ import { logger } from '../core/logger.js';
 import { configService } from './config.js';
 import { svgProcessor } from '../processors/svg-processor.js';
 import { fileWatcher } from './file-watcher.js';
+import { OptLevel } from '../optimizers/types.js';
 
 /**
  * Main SVG service that orchestrates all SVG processing operations
@@ -28,6 +29,30 @@ export class SVGService {
       SVGService.instance = new SVGService();
     }
     return SVGService.instance;
+  }
+
+  /**
+   * Set optimizer level for SVG processing
+   */
+  private setOptimizerLevel(level: string): void {
+    const validLevels = ['none', 'basic', 'balanced', 'aggressive', 'maximum'];
+    if (!validLevels.includes(level.toLowerCase())) {
+      logger.warn(
+        `Invalid optimization level "${level}". Using "basic" instead.`
+      );
+      svgProcessor.setOptimizationLevel(OptLevel.BASIC);
+      return;
+    }
+
+    const optLevel = level.toLowerCase() as
+      | 'none'
+      | 'basic'
+      | 'balanced'
+      | 'aggressive'
+      | 'maximum';
+    svgProcessor.setOptimizationLevel(
+      OptLevel[optLevel.toUpperCase() as keyof typeof OptLevel]
+    );
   }
 
   /**
@@ -64,7 +89,17 @@ export class SVGService {
       ...((options as any).frameworkOptions && {
         frameworkOptions: (options as any).frameworkOptions,
       }),
+      ...((options as any).optimize && {
+        optimize: (options as any).optimize,
+      }),
     };
+
+    // Set optimizer level if specified
+    if ((options as any).optimize) {
+      const optimizeLevel = (options as any).optimize as string;
+      logger.info(`Using optimization level: ${optimizeLevel}`);
+      this.setOptimizerLevel(optimizeLevel);
+    }
 
     // Read all SVG files
     const files = await FileSystem.readDir(srcDir);
@@ -165,6 +200,13 @@ export class SVGService {
       return;
     }
 
+    // Set optimizer level if specified
+    if ((options as any).optimize) {
+      const optimizeLevel = (options as any).optimize as string;
+      logger.info(`Using optimization level: ${optimizeLevel}`);
+      this.setOptimizerLevel(optimizeLevel);
+    }
+
     // Get configuration
     const config = configService.readConfig();
     const mergedConfig = { ...config, ...options.config };
@@ -227,21 +269,25 @@ export class SVGService {
   ): Promise<void> {
     const fileName = path.basename(event.filePath);
 
-    switch (event.type) {
-      case 'add':
+    // Object lookup map for event handlers - O(1) performance
+    const eventHandlers: Record<string, () => Promise<void>> = {
+      add: async () => {
         logger.info(`New SVG detected: ${fileName}`);
         await this.processWatchedFile(event.filePath, outDir, config);
-        break;
-
-      case 'change':
+      },
+      change: async () => {
         logger.info(`SVG updated: ${fileName}`);
         await this.processWatchedFile(event.filePath, outDir, config);
-        break;
-
-      case 'unlink':
+      },
+      unlink: async () => {
         logger.info(`SVG removed: ${fileName}`);
         await this.handleFileRemoval(event.filePath, outDir);
-        break;
+      },
+    };
+
+    const handler = eventHandlers[event.type];
+    if (handler) {
+      await handler();
     }
   }
 

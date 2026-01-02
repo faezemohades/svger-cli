@@ -16,7 +16,7 @@ We take the security of SVGER-CLI seriously. If you discover a security vulnerab
 ### How to Report
 
 1. **DO NOT** create a public GitHub issue for security vulnerabilities
-2. Send an email to **faezemohades@gmail.com** with the subject line: `[SECURITY] SVGER-CLI Vulnerability Report`
+2. Send an email to **navidrezadoost07@gmail.com** with the subject line: `[SECURITY] SVGER-CLI Vulnerability Report`
 3. Include the following information:
    - Description of the vulnerability
    - Steps to reproduce the issue
@@ -62,8 +62,8 @@ SVGER-CLI includes several security features:
 
 For any security-related questions or concerns:
 
-- **Primary Contact**: faezemohades@gmail.com
-- **Alternative Contact**: navidrezadoost07@gmail.com
+- **Primary Contact**: navidrezadoost07@gmail.com
+- **Alternative Contact**: faezemohades@gmail.com
 - **PGP Key**: Available upon request
 
 Thank you for helping keep SVGER-CLI secure!

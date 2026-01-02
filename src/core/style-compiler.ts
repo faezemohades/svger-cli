@@ -84,7 +84,6 @@ export interface CompiledStyles {
 export class SVGStyleCompiler {
   private static instance: SVGStyleCompiler;
   private themes: Map<string, StyleTheme> = new Map();
-  private globalCSS: string[] = [];
 
   private constructor() {
     this.loadDefaultThemes();
@@ -210,10 +209,7 @@ if (typeof document !== 'undefined') {
         ? `const defaultStyles = ${JSON.stringify(compiled.inline, null, 2)};`
         : '';
 
-    const classNames =
-      compiled.classes.length > 0
-        ? `'${compiled.classes.join(' ')} ' + (props.className || '')`
-        : 'props.className';
+    // Note: className prop generation for CSS classes will be implemented in future enhancement
 
     return `${imports}
 
@@ -333,7 +329,7 @@ function getAnimationStyles(animationType: string): React.CSSProperties {
   return animations[animationType as keyof typeof animations] || {};
 }
 
-function getThemeStyles(theme: string): React.CSSProperties {
+function getThemeStyles(theme: _theme): React.CSSProperties {
   if (theme === 'dark') {
     return { filter: 'invert(1) hue-rotate(180deg)' };
   }
@@ -486,7 +482,7 @@ if (typeof document !== 'undefined') {
   private compileBaseStyles(
     options: SVGStyleOptions,
     compiled: CompiledStyles,
-    theme: StyleTheme | null
+    _theme: StyleTheme | null
   ): void {
     // Handle basic properties
     const styleMap: Record<string, keyof SVGStyleOptions> = {

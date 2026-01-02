@@ -78,6 +78,9 @@ export interface AngularConfig {
 }
 
 export interface SVGConfig {
+  // Configuration Version (for migration compatibility)
+  version?: string;
+
   // Source & Output
   source: string;
   output: string;

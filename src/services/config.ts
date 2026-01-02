@@ -25,6 +25,9 @@ export class ConfigService {
    */
   public getDefaultConfig(): SVGConfig {
     return {
+      // Configuration Version (for migration compatibility)
+      version: '4.0.0',
+
       // Source & Output
       source: './src/assets/svg',
       output: './src/components/icons',
@@ -73,8 +76,10 @@ export class ConfigService {
 
       animations: [],
 
-      // Advanced Options
+      // v4.0.0: Plugin System
       plugins: [],
+
+      // Advanced Options
       exclude: [],
       include: [],
 
@@ -147,6 +152,14 @@ export class ConfigService {
       if (Object.keys(configData).length === 0) {
         logger.debug('No configuration found, using defaults');
         this.cachedConfig = this.getDefaultConfig();
+        return this.cachedConfig;
+      }
+
+      // Check if migration is needed
+      if (!configData.version || configData.version !== '4.0.0') {
+        logger.info('Detected older configuration version, migrating...');
+        const migratedConfig = this.migrateConfig(configData);
+        this.cachedConfig = migratedConfig;
         return this.cachedConfig;
       }
 
@@ -242,6 +255,69 @@ export class ConfigService {
     }
 
     return current;
+  }
+
+  /**
+   * Migrate configuration from older versions to v4.0.0
+   */
+  public migrateConfig(config: any): SVGConfig {
+    const currentVersion = config.version || '3.0.0';
+
+    // No migration needed if already v4.0.0
+    if (currentVersion === '4.0.0') {
+      return config;
+    }
+
+    logger.info(`Migrating configuration from ${currentVersion} to 4.0.0...`);
+
+    // Migration from v3.x to v4.0.0
+    const migratedConfig: any = { ...config };
+
+    // Add version field
+    migratedConfig.version = '4.0.0';
+
+    // Ensure plugins array exists (new in v4.0.0)
+    if (!migratedConfig.plugins) {
+      migratedConfig.plugins = [];
+      logger.info('Added plugins array (new in v4.0.0)');
+    }
+
+    // Migrate legacy plugin configurations
+    if (migratedConfig.plugin) {
+      logger.warn('Migrating legacy "plugin" field to "plugins" array');
+      if (Array.isArray(migratedConfig.plugin)) {
+        migratedConfig.plugins = migratedConfig.plugin;
+      } else {
+        migratedConfig.plugins = [migratedConfig.plugin];
+      }
+      delete migratedConfig.plugin;
+    }
+
+    // Ensure performance.optimization uses new values
+    if (migratedConfig.performance?.optimization) {
+      const oldOptimization = migratedConfig.performance.optimization;
+      const optimizationMap: Record<string, string> = {
+        none: 'fast',
+        basic: 'fast',
+        standard: 'balanced',
+        aggressive: 'maximum',
+        maximum: 'maximum',
+      };
+
+      if (optimizationMap[oldOptimization]) {
+        migratedConfig.performance.optimization =
+          optimizationMap[oldOptimization];
+        logger.info(
+          `Migrated optimization level: ${oldOptimization} → ${migratedConfig.performance.optimization}`
+        );
+      }
+    }
+
+    // Save migrated config
+    this.writeConfig(migratedConfig);
+    logger.success('Configuration migrated to v4.0.0');
+
+    return migratedConfig;
   }
 
   /**

@@ -156,7 +156,7 @@ function convertToCommonJS(code: string, componentName: string): string {
       "const React = require('react')"
     )
     .replace(/export\s+default\s+/g, 'module.exports = ')
-    .replace(/export\s+{([^}]+)}/g, (match, exports) => {
+    .replace(/export\s+{([^}]+)}/g, (_match, exports) => {
       const exportList = exports.split(',').map((e: string) => e.trim());
       return exportList
         .map((exp: string) => `module.exports.${exp} = ${exp}`)

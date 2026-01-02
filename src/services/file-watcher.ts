@@ -11,7 +11,8 @@ export class FileWatcherService {
   private static instance: FileWatcherService;
   private watchers: Map<string, fs.FSWatcher> = new Map();
   private eventHandlers: Map<string, Function[]> = new Map();
-  private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
+  private debounceTimers: Map<string, ReturnType<typeof setTimeout>> =
+    new Map();
   private readonly debounceDelay = 300; // milliseconds
 
   private constructor() {}
@@ -28,7 +29,7 @@ export class FileWatcherService {
    */
   public async watchDirectory(
     watchPath: string,
-    options: Partial<WatchOptions> = {}
+    _options: Partial<WatchOptions> = {}
   ): Promise<string> {
     const resolvedPath = path.resolve(watchPath);
 

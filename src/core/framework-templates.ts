@@ -27,64 +27,56 @@ export class FrameworkTemplateEngine {
       frameworkOptions = {},
     } = options;
 
-    switch (framework) {
-      case 'react':
-        return this.generateReactComponent(
+    // Object lookup map for framework generators - O(1) performance
+    const frameworkGenerators = {
+      react: () =>
+        this.generateReactComponent(
           componentName,
           svgContent,
           typescript,
           frameworkOptions
-        );
-      case 'react-native':
-        return this.generateReactNativeComponent(
+        ),
+      'react-native': () =>
+        this.generateReactNativeComponent(
           componentName,
           svgContent,
           typescript,
           frameworkOptions
-        );
-      case 'vue':
-        return this.generateVueComponent(
+        ),
+      vue: () =>
+        this.generateVueComponent(
           componentName,
           svgContent,
           typescript,
           frameworkOptions
-        );
-      case 'svelte':
-        return this.generateSvelteComponent(
-          componentName,
-          svgContent,
-          typescript
-        );
-      case 'angular':
-        return this.generateAngularComponent(
+        ),
+      svelte: () =>
+        this.generateSvelteComponent(componentName, svgContent, typescript),
+      angular: () =>
+        this.generateAngularComponent(
           componentName,
           svgContent,
           typescript,
           frameworkOptions
-        );
-      case 'solid':
-        return this.generateSolidComponent(
-          componentName,
-          svgContent,
-          typescript
-        );
-      case 'preact':
-        return this.generatePreactComponent(
-          componentName,
-          svgContent,
-          typescript
-        );
-      case 'lit':
-        return this.generateLitComponent(componentName, svgContent, typescript);
-      case 'vanilla':
-        return this.generateVanillaComponent(
-          componentName,
-          svgContent,
-          typescript
-        );
-      default:
-        throw new Error(`Unsupported framework: ${framework}`);
+        ),
+      solid: () =>
+        this.generateSolidComponent(componentName, svgContent, typescript),
+      preact: () =>
+        this.generatePreactComponent(componentName, svgContent, typescript),
+      lit: () =>
+        this.generateLitComponent(componentName, svgContent, typescript),
+      vanilla: () =>
+        this.generateVanillaComponent(componentName, svgContent, typescript),
+    } as const;
+
+    const generator =
+      frameworkGenerators[framework as keyof typeof frameworkGenerators];
+
+    if (!generator) {
+      throw new Error(`Unsupported framework: ${framework}`);
     }
+
+    return generator();
   }
 
   public getFileExtension(
@@ -93,24 +85,20 @@ export class FrameworkTemplateEngine {
   ): string {
     const tsExt = typescript ? 'ts' : 'js';
 
-    switch (framework) {
-      case 'react':
-      case 'react-native':
-      case 'preact':
-      case 'solid':
-        return typescript ? 'tsx' : 'jsx';
-      case 'vue':
-        return 'vue';
-      case 'svelte':
-        return 'svelte';
-      case 'angular':
-        return `component.${tsExt}`;
-      case 'lit':
-      case 'vanilla':
-        return `${tsExt}`;
-      default:
-        return `${tsExt}`;
-    }
+    // Object lookup map for file extensions - O(1) performance
+    const extensionMap: Record<string, string> = {
+      react: typescript ? 'tsx' : 'jsx',
+      'react-native': typescript ? 'tsx' : 'jsx',
+      preact: typescript ? 'tsx' : 'jsx',
+      solid: typescript ? 'tsx' : 'jsx',
+      vue: 'vue',
+      svelte: 'svelte',
+      angular: `component.${tsExt}`,
+      lit: tsExt,
+      vanilla: tsExt,
+    };
+
+    return extensionMap[framework] || tsExt;
   }
 
   private parseSVG(svgContent: string): {
@@ -138,8 +126,8 @@ export class FrameworkTemplateEngine {
   private generateReactComponent(
     componentName: string,
     svgContent: string,
-    typescript: boolean,
-    options: FrameworkOptions
+    _typescript: boolean,
+    _options: FrameworkOptions
   ): string {
     const { attributes, innerContent } = this.parseSVG(svgContent);
     return `import React from "react";
@@ -183,8 +171,8 @@ export default ${componentName};
   private generateReactNativeComponent(
     componentName: string,
     svgContent: string,
-    typescript: boolean,
-    options: FrameworkOptions
+    _typescript: boolean,
+    _options: FrameworkOptions
   ): string {
     const { attributes, innerContent } = this.parseSVG(svgContent);
 
@@ -354,7 +342,7 @@ export default defineComponent({
   }
 
   private generateSvelteComponent(
-    componentName: string,
+    _componentName: string,
     svgContent: string,
     typescript: boolean
   ): string {
@@ -387,7 +375,7 @@ export default defineComponent({
   private generateAngularComponent(
     componentName: string,
     svgContent: string,
-    typescript: boolean,
+    _typescript: boolean,
     options: FrameworkOptions
   ): string {
     const { attributes, innerContent } = this.parseSVG(svgContent);
@@ -431,7 +419,7 @@ export class ${componentName}Component {
   private generateSolidComponent(
     componentName: string,
     svgContent: string,
-    typescript: boolean
+    _typescript: boolean
   ): string {
     const { attributes, innerContent } = this.parseSVG(svgContent);
     return `import { Component, JSX } from 'solid-js';
@@ -467,7 +455,7 @@ export default ${componentName};
   private generatePreactComponent(
     componentName: string,
     svgContent: string,
-    typescript: boolean
+    _typescript: boolean
   ): string {
     const { attributes, innerContent } = this.parseSVG(svgContent);
     return `import { h, FunctionComponent } from 'preact';
@@ -514,7 +502,7 @@ export default ${componentName};
   private generateLitComponent(
     componentName: string,
     svgContent: string,
-    typescript: boolean
+    _typescript: boolean
   ): string {
     const { attributes, innerContent } = this.parseSVG(svgContent);
     const kebabName = this.toKebabCase(componentName);
@@ -560,7 +548,7 @@ declare global {
   private generateVanillaComponent(
     componentName: string,
     svgContent: string,
-    typescript: boolean
+    _typescript: boolean
   ): string {
     const { attributes, innerContent } = this.parseSVG(svgContent);
     return `export interface ${componentName}Options {

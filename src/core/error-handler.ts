@@ -166,19 +166,17 @@ export class SVGErrorHandler {
   private logError(error: SVGError): void {
     const logMessage = `[${error.code}] ${error.message}`;
 
-    switch (error.severity) {
-      case 'critical':
-        logger.error('CRITICAL:', logMessage, error.context);
-        break;
-      case 'high':
-        logger.error('HIGH:', logMessage, error.context);
-        break;
-      case 'medium':
-        logger.warn('MEDIUM:', logMessage, error.context);
-        break;
-      case 'low':
-        logger.info('LOW:', logMessage, error.context);
-        break;
+    // Object lookup map for severity logging - O(1) performance
+    const severityLoggers: Record<string, () => void> = {
+      critical: () => logger.error('CRITICAL:', logMessage, error.context),
+      high: () => logger.error('HIGH:', logMessage, error.context),
+      medium: () => logger.warn('MEDIUM:', logMessage, error.context),
+      low: () => logger.info('LOW:', logMessage, error.context),
+    };
+
+    const logFunction = severityLoggers[error.severity];
+    if (logFunction) {
+      logFunction();
     }
   }
 
@@ -226,7 +224,7 @@ export class SVGErrorHandler {
     this.registerRecoveryStrategy('FILE_NOT_FOUND', {
       canRecover: error =>
         error.context?.filePath && error.context?.canSkip === true,
-      recover: async (error, context) => {
+      recover: async (error, _context) => {
         logger.warn(`Skipping missing file: ${error.context?.filePath}`);
         return { skipped: true, filePath: error.context?.filePath };
       },
@@ -235,7 +233,7 @@ export class SVGErrorHandler {
     // Invalid SVG recovery
     this.registerRecoveryStrategy('INVALID_SVG', {
       canRecover: error => error.context?.svgContent,
-      recover: async (error, context) => {
+      recover: async (error, _context) => {
         logger.info('Attempting to clean invalid SVG content');
 
         // Basic SVG cleanup
@@ -255,7 +253,7 @@ export class SVGErrorHandler {
     // Permission denied recovery
     this.registerRecoveryStrategy('PERMISSION_DENIED', {
       canRecover: error => error.context?.alternative,
-      recover: async (error, context) => {
+      recover: async (error, _context) => {
         logger.warn(
           `Using alternative path due to permission issue: ${error.context?.alternative}`
         );
@@ -301,7 +299,7 @@ export async function withErrorHandling<T>(
  */
 export function handleErrors(context?: Record<string, any>) {
   return function (
-    target: any,
+    _target: any,
     propertyName: string,
     descriptor: PropertyDescriptor
   ) {

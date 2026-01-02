@@ -28,13 +28,10 @@ describe('Config Service', () => {
         source: './src/icons',
         output: './src/components/icons',
         framework: 'react',
-        typescript: true
+        typescript: true,
       };
 
-      await FileSystem.writeFile(
-        configPath,
-        JSON.stringify(config, null, 2)
-      );
+      await FileSystem.writeFile(configPath, JSON.stringify(config, null, 2));
 
       const loaded = configService.load(testDir);
       expect(loaded).toBeDefined();
@@ -48,7 +45,7 @@ describe('Config Service', () => {
     it('should merge CLI options with file config', async () => {
       const fileConfig = {
         framework: 'react',
-        typescript: true
+        typescript: true,
       };
 
       await FileSystem.writeFile(
@@ -58,7 +55,7 @@ describe('Config Service', () => {
 
       const cliOptions = {
         source: './icons',
-        output: './components'
+        output: './components',
       };
 
       // Config service should merge these
@@ -70,7 +67,7 @@ describe('Config Service', () => {
   describe('config validation', () => {
     it('should validate required fields', () => {
       const invalidConfig = {
-        framework: 'react'
+        framework: 'react',
         // missing source and output
       };
 
@@ -87,7 +84,7 @@ describe('Config Service', () => {
         'solid',
         'lit',
         'preact',
-        'vanilla'
+        'vanilla',
       ];
 
       validFrameworks.forEach(framework => {
@@ -109,7 +106,7 @@ describe('Config Service', () => {
       const config = {
         typescript: true,
         generateIndex: false,
-        watch: true
+        watch: true,
       };
 
       expect(typeof config.typescript).toBe('boolean');
@@ -144,7 +141,7 @@ describe('Config Service', () => {
     it('should resolve relative paths', () => {
       const config = {
         source: './src/icons',
-        output: './src/components'
+        output: './src/components',
       };
 
       const resolved = configService.resolvePaths(config, testDir);
@@ -158,7 +155,7 @@ describe('Config Service', () => {
 
       const config = {
         source: absoluteSrc,
-        output: absoluteOut
+        output: absoluteOut,
       };
 
       const resolved = configService.resolvePaths(config, testDir);
@@ -170,24 +167,28 @@ describe('Config Service', () => {
   describe('config file formats', () => {
     it('should handle .svgerconfig.json', async () => {
       const config = { framework: 'react' };
-      
+
       await FileSystem.writeFile(
         path.join(testDir, '.svgerconfig.json'),
         JSON.stringify(config)
       );
 
-      expect(await FileSystem.exists(path.join(testDir, '.svgerconfig.json'))).toBe(true);
+      expect(
+        await FileSystem.exists(path.join(testDir, '.svgerconfig.json'))
+      ).toBe(true);
     });
 
     it('should handle svger.config.json', async () => {
       const config = { framework: 'vue' };
-      
+
       await FileSystem.writeFile(
         path.join(testDir, 'svger.config.json'),
         JSON.stringify(config)
       );
 
-      expect(await FileSystem.exists(path.join(testDir, 'svger.config.json'))).toBe(true);
+      expect(
+        await FileSystem.exists(path.join(testDir, 'svger.config.json'))
+      ).toBe(true);
     });
   });
 
@@ -198,15 +199,12 @@ describe('Config Service', () => {
         plugins: [
           {
             name: 'custom-optimizer',
-            options: { level: 2 }
-          }
-        ]
+            options: { level: 2 },
+          },
+        ],
       };
 
-      await FileSystem.writeFile(
-        configPath,
-        JSON.stringify(config, null, 2)
-      );
+      await FileSystem.writeFile(configPath, JSON.stringify(config, null, 2));
 
       expect(config.plugins).toBeDefined();
       expect(config.plugins?.length).toBe(1);
@@ -220,8 +218,8 @@ describe('Config Service', () => {
         responsive: {
           mobile: 16,
           tablet: 20,
-          desktop: 24
-        }
+          desktop: 24,
+        },
       };
 
       expect(config.responsive).toBeDefined();
@@ -233,8 +231,8 @@ describe('Config Service', () => {
         framework: 'react',
         theme: {
           primary: '#007bff',
-          secondary: '#6c757d'
-        }
+          secondary: '#6c757d',
+        },
       };
 
       expect(config.theme).toBeDefined();

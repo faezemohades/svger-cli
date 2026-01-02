@@ -192,7 +192,7 @@ function transformSVGImport(
  * - On-demand: Transform SVG imports as they're encountered
  */
 export function svgerBabelPlugin(
-  api: any,
+  _api: any,
   options: BabelPluginOptions = {}
 ): any {
   const config = configService.readConfig();

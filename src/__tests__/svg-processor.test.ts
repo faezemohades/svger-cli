@@ -22,7 +22,7 @@ describe('SVG Processor', () => {
       const svgWithAttrs = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
         <path d="M12 2L2 7l10 5 10-5-10-5z"/>
       </svg>`;
-      
+
       const result = svgProcessor.process(svgWithAttrs);
       expect(result).toBeDefined();
       expect(result).toContain('svg');
@@ -40,7 +40,7 @@ describe('SVG Processor', () => {
       const svgWithExtra = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24" width="24" height="24">
         <circle cx="12" cy="12" r="10"/>
       </svg>`;
-      
+
       const result = svgProcessor.process(svgWithExtra);
       expect(result).toBeDefined();
     });
@@ -49,7 +49,7 @@ describe('SVG Processor', () => {
       const svgWithStyles = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10" style="fill: red;"/>
       </svg>`;
-      
+
       const result = svgProcessor.process(svgWithStyles);
       expect(result).toBeDefined();
     });
@@ -64,7 +64,7 @@ describe('SVG Processor', () => {
   describe('error handling', () => {
     it('should handle invalid SVG gracefully', () => {
       const invalidSVG = '<invalid>not svg</invalid>';
-      
+
       expect(() => {
         svgProcessor.process(invalidSVG);
       }).not.toThrow();
@@ -72,7 +72,7 @@ describe('SVG Processor', () => {
 
     it('should handle empty SVG', () => {
       const emptySVG = '';
-      
+
       expect(() => {
         svgProcessor.process(emptySVG);
       }).not.toThrow();
@@ -80,7 +80,7 @@ describe('SVG Processor', () => {
 
     it('should handle malformed SVG', () => {
       const malformedSVG = '<svg><unclosed';
-      
+
       expect(() => {
         svgProcessor.process(malformedSVG);
       }).not.toThrow();
@@ -100,7 +100,7 @@ describe('SVG Processor', () => {
           <path d="M12 2v20"/>
         </g>
       </svg>`;
-      
+
       const result = svgProcessor.process(nestedSVG);
       expect(result).toBeDefined();
       expect(result).toContain('g');

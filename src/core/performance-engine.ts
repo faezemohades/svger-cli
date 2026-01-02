@@ -1,6 +1,6 @@
 import os from 'os';
 import { logger } from '../core/logger.js';
-import { SVGProcessor, svgProcessor } from '../processors/svg-processor.js';
+import { svgProcessor } from '../processors/svg-processor.js';
 import { ComponentGenerationOptions } from '../types/index.js';
 
 /**
@@ -157,24 +157,19 @@ export class PerformanceEngine {
     level: 'fast' | 'balanced' | 'maximum' = 'balanced'
   ): string {
     const startTime = performance.now();
-    let optimized = content;
 
-    switch (level) {
-      case 'fast':
-        // Basic optimizations only
-        optimized = this.applyFastOptimizations(content);
-        break;
+    // Object lookup map for optimization strategies - O(1) performance
+    const optimizationStrategies: Record<string, (content: string) => string> =
+      {
+        fast: c => this.applyFastOptimizations(c),
+        balanced: c => this.applyBalancedOptimizations(c),
+        maximum: c => this.applyMaximumOptimizations(c),
+      };
 
-      case 'balanced':
-        // Standard optimizations with good performance/quality balance
-        optimized = this.applyBalancedOptimizations(content);
-        break;
-
-      case 'maximum':
-        // Comprehensive optimizations
-        optimized = this.applyMaximumOptimizations(content);
-        break;
-    }
+    const strategy = optimizationStrategies[level];
+    const optimized = strategy
+      ? strategy(content)
+      : this.applyBalancedOptimizations(content);
 
     const duration = performance.now() - startTime;
     const compressionRatio = (1 - optimized.length / content.length) * 100;

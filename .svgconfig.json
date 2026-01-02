@@ -1,4 +1,5 @@
 {
+  "version": "4.0.0",
   "source": "./svg-icons",
   "output": "./components/icons",
   "framework": "react",

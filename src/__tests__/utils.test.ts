@@ -1,5 +1,10 @@
 import { describe, it, expect } from '@jest/globals';
-import { toPascalCase, toCamelCase, toKebabCase, FileSystem } from '../utils/native.js';
+import {
+  toPascalCase,
+  toCamelCase,
+  toKebabCase,
+  FileSystem,
+} from '../utils/native.js';
 import path from 'path';
 
 /**
@@ -114,20 +119,20 @@ describe('FileSystem Utilities', () => {
     it('should write and read text file', async () => {
       await FileSystem.ensureDir(testDir);
       const content = 'Hello, World!';
-      
+
       await FileSystem.writeFile(testFile, content);
       const read = await FileSystem.readFile(testFile);
-      
+
       expect(read).toBe(content);
     });
 
     it('should handle UTF-8 content', async () => {
       await FileSystem.ensureDir(testDir);
       const content = '你好世界 🚀';
-      
+
       await FileSystem.writeFile(testFile, content);
       const read = await FileSystem.readFile(testFile);
-      
+
       expect(read).toBe(content);
     });
   });
@@ -154,7 +159,7 @@ describe('FileSystem Utilities', () => {
     it('should remove directory with files', async () => {
       await FileSystem.ensureDir(testDir);
       await FileSystem.writeFile(testFile, 'test');
-      
+
       await FileSystem.removeDir(testDir);
       expect(await FileSystem.exists(testDir)).toBe(false);
     });
@@ -164,9 +169,9 @@ describe('FileSystem Utilities', () => {
     it('should empty directory content', async () => {
       await FileSystem.ensureDir(testDir);
       await FileSystem.writeFile(testFile, 'test');
-      
+
       await FileSystem.emptyDir(testDir);
-      
+
       expect(await FileSystem.exists(testDir)).toBe(true);
       expect(await FileSystem.exists(testFile)).toBe(false);
     });

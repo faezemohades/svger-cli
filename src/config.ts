@@ -41,6 +41,9 @@ export async function initConfig() {
   }
 
   const defaultConfig = {
+    // Configuration Version (for migration compatibility)
+    version: '4.0.0',
+
     // Source & Output
     source: './src/assets/svg',
     output: './src/components/icons',
@@ -89,8 +92,10 @@ export async function initConfig() {
 
     animations: [],
 
-    // Advanced Options
+    // v4.0.0: Plugin System
     plugins: [],
+
+    // Advanced Options
     exclude: [],
     include: [],
 

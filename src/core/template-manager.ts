@@ -1,7 +1,7 @@
 import {
   Template,
   ComponentGenerationOptions,
-  TemplateConfig,
+  TemplateConfig as _TemplateConfig,
 } from '../types/index.js';
 import { logger } from '../core/logger.js';
 import { FileSystem } from '../utils/native.js';

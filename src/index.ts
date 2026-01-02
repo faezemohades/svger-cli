@@ -170,6 +170,11 @@ export type {
  */
 export type { SVGError, ErrorRecoveryStrategy } from './core/error-handler.js';
 
+/**
+ * Optimizer types - Available from optimizers
+ */
+export { OptLevel } from './optimizers/types.js';
+
 // ============================================================================
 // TEMPLATES
 // ============================================================================

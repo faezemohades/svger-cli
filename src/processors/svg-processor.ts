@@ -14,6 +14,20 @@ import {
 import { logger } from '../core/logger.js';
 import { performanceEngine } from '../core/performance-engine.js';
 import { frameworkTemplateEngine } from '../core/framework-templates.js';
+import { OptimizerPipeline } from '../optimizers/optimizer-pipeline.js';
+import { OptLevel, getDefaultOptConfig } from '../optimizers/types.js';
+import { basicCleaningStage } from '../optimizers/basic-cleaner.js';
+import { treeOptimizationStage } from '../optimizers/tree-stages.js';
+import {
+  numericStage,
+  styleStage,
+  transformStage,
+  pathOptimizationStage,
+  pathSimplificationStage,
+  advancedOptimizationStage,
+} from '../optimizers/advanced-stages.js';
+import { pathDeduplicationStage } from '../optimizers/path-deduplicator.js';
+import { shapeConversionStage } from '../optimizers/shape-conversion.js';
 
 /**
  * SVG content processor and component generator
@@ -22,8 +36,13 @@ export class SVGProcessor {
   private static instance: SVGProcessor;
   private processingQueue: Map<string, ProcessingJob> = new Map();
   private jobCounter = 0;
+  private optimizer: OptimizerPipeline | null = null;
 
-  private constructor() {}
+  private constructor() {
+    // Initialize optimizer pipeline with basic cleaning stage
+    this.optimizer = new OptimizerPipeline({ level: OptLevel.BASIC });
+    this.optimizer.registerStage('basic-cleaning', basicCleaningStage);
+  }
 
   public static getInstance(): SVGProcessor {
     if (!SVGProcessor.instance) {
@@ -33,11 +52,100 @@ export class SVGProcessor {
   }
 
   /**
-   * Clean and optimize SVG content
+   * Set optimization level for SVG processing
    */
-  public cleanSVGContent(svgContent: string): string {
+  public setOptimizationLevel(level: OptLevel): void {
+    if (!this.optimizer) {
+      this.optimizer = new OptimizerPipeline({ level });
+      this.registerOptimizationStages(level);
+    } else {
+      this.optimizer.clearStages();
+      // Update config with all properties for the level
+      this.optimizer.updateConfig(getDefaultOptConfig(level));
+      this.registerOptimizationStages(level);
+    }
+  }
+
+  /**
+   * Register optimization stages based on level
+   */
+  private registerOptimizationStages(level: OptLevel): void {
+    if (!this.optimizer) return;
+
+    // Always register basic cleaning
+    this.optimizer.registerStage('basic-cleaning', basicCleaningStage);
+
+    // BALANCED: Numeric + Style + Tree optimization (safe and fast)
+    if (level === OptLevel.BALANCED) {
+      this.optimizer.registerStage('numeric', numericStage);
+      this.optimizer.registerStage('style', styleStage);
+      this.optimizer.registerStage('tree-optimization', treeOptimizationStage);
+    }
+
+    // AGGRESSIVE: + Simple Transform + Medium precision + Path optimization
+    if (level === OptLevel.AGGRESSIVE) {
+      // CRITICAL: shape-conversion MUST run before numeric optimization
+      // Otherwise coordinates get rounded before conversion (e.g., x="10" → x="1")
+      this.optimizer.registerStage('shape-conversion', shapeConversionStage);
+      this.optimizer.registerStage('numeric', numericStage);
+      this.optimizer.registerStage('style', styleStage);
+      this.optimizer.registerStage('transform', transformStage);
+      this.optimizer.registerStage('path-optimization', pathOptimizationStage);
+      // DISABLED: tree-optimization causes malformed XML at this level
+      // this.optimizer.registerStage('tree-optimization', treeOptimizationStage);
+    }
+
+    // MAXIMUM: Everything enabled + Lower precision + Aggressive transformations
+    if (level === OptLevel.MAXIMUM) {
+      // Use combined advanced stage for maximum efficiency
+      this.optimizer.registerStage(
+        'advanced-optimization',
+        advancedOptimizationStage
+      );
+      // Add shape conversion before path optimization
+      this.optimizer.registerStage('shape-conversion', shapeConversionStage);
+      // Add path simplification after other optimizations
+      this.optimizer.registerStage(
+        'path-simplification',
+        pathSimplificationStage
+      );
+      // Add path deduplication for icon sets
+      this.optimizer.registerStage(
+        'path-deduplication',
+        pathDeduplicationStage
+      );
+      this.optimizer.registerStage('tree-optimization', treeOptimizationStage);
+    }
+  }
+
+  /**
+   * Clean and optimize SVG content using the optimizer pipeline
+   */
+  public async cleanSVGContent(svgContent: string): Promise<string> {
     logger.debug('Cleaning SVG content');
 
+    try {
+      if (this.optimizer) {
+        const result = await this.optimizer.optimize(svgContent);
+        logger.debug(
+          `Optimized SVG: ${result.reductionPercent.toFixed(2)}% size reduction`
+        );
+        return result.optimizedSvg;
+      }
+
+      // Fallback to legacy cleaning if optimizer is not initialized
+      return this.legacyCleanSVGContent(svgContent);
+    } catch (error) {
+      logger.warn('Optimizer failed, falling back to legacy cleaning:', error);
+      return this.legacyCleanSVGContent(svgContent);
+    }
+  }
+
+  /**
+   * Legacy cleaning method (for backward compatibility)
+   * @deprecated Use cleanSVGContent with optimizer pipeline instead
+   */
+  private legacyCleanSVGContent(svgContent: string): string {
     return (
       svgContent
         // Remove XML declaration
@@ -90,31 +198,25 @@ export class SVGProcessor {
   ): string {
     const baseName = path.basename(fileName, '.svg');
 
-    // Apply naming convention if specified, otherwise default to PascalCase
-    switch (namingConvention) {
-      case 'kebab':
-        // Keep kebab-case for filename, but component still needs PascalCase
-        return toPascalCase(baseName);
-
-      case 'camel': {
-        // Convert to camelCase
+    // Object lookup map for naming conventions - O(1) performance
+    const namingHandlers = {
+      kebab: () => toPascalCase(baseName),
+      camel: () => {
         const pascalName = toPascalCase(baseName);
         return pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
-      }
-
-      case 'pascal':
-      default: {
-        // Default to PascalCase
+      },
+      pascal: () => {
         const componentName = toPascalCase(baseName);
-
         // Ensure component name starts with uppercase letter
         if (!/^[A-Z]/.test(componentName)) {
           return `Svg${componentName}`;
         }
-
         return componentName;
-      }
-    }
+      },
+    };
+
+    const handler = namingHandlers[namingConvention || 'pascal'];
+    return handler ? handler() : namingHandlers.pascal();
   }
 
   /**
@@ -126,8 +228,8 @@ export class SVGProcessor {
     options: Partial<ComponentGenerationOptions> = {}
   ): Promise<string> {
     try {
-      // Clean and optimize SVG content
-      const cleanedContent = this.cleanSVGContent(svgContent);
+      // Clean and optimize SVG content (now async)
+      const cleanedContent = await this.cleanSVGContent(svgContent);
 
       // Apply plugins (no plugin configs for now, just process directly)
       const processedContent = cleanedContent;
@@ -241,23 +343,15 @@ export class SVGProcessor {
     extension: string,
     namingConvention?: NamingConvention
   ): string {
-    let fileName: string;
+    // Object lookup map for file naming - O(1) performance
+    const namingConverters: Record<string, (name: string) => string> = {
+      kebab: toKebabCase,
+      camel: toCamelCase,
+      pascal: (name: string) => name,
+    };
 
-    switch (namingConvention) {
-      case 'kebab':
-        fileName = toKebabCase(componentName);
-        break;
-
-      case 'camel':
-        fileName = toCamelCase(componentName);
-        break;
-
-      case 'pascal':
-      default:
-        // Default to PascalCase (same as component name)
-        fileName = componentName;
-        break;
-    }
+    const converter = namingConverters[namingConvention || 'pascal'];
+    const fileName = converter ? converter(componentName) : componentName;
 
     return `${fileName}.${extension}`;
   }

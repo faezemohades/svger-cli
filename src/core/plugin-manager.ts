@@ -26,12 +26,12 @@ export class PluginManager {
   private loadBuiltinPlugins(): void {
     // SVG Optimizer Plugin
     this.registerPlugin({
-      name: 'svg-optimizer',
+      name: 'optimize',
       version: '1.0.0',
-      process: async (content: string, options?: any) => {
-        return this.optimizeSVG(content, options);
+      process: async (content: string, _options?: any) => {
+        return this.optimizeSVG(content, _options);
       },
-      validate: (options?: any) => true,
+      validate: (_options?: any) => true,
     });
 
     // Color Theme Plugin

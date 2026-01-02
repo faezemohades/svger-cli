@@ -21,11 +21,8 @@ describe('CLI', () => {
     const testSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="10"/>
     </svg>`;
-    
-    await FileSystem.writeFile(
-      path.join(inputDir, 'test-icon.svg'),
-      testSVG
-    );
+
+    await FileSystem.writeFile(path.join(inputDir, 'test-icon.svg'), testSVG);
   });
 
   afterEach(async () => {
@@ -37,7 +34,7 @@ describe('CLI', () => {
   describe('build command', () => {
     it('should display help when --help is used', () => {
       const result = execSync('node bin/svg-tool.js --help', {
-        encoding: 'utf-8'
+        encoding: 'utf-8',
       });
 
       expect(result).toContain('Usage');
@@ -46,7 +43,7 @@ describe('CLI', () => {
 
     it('should display version when --version is used', () => {
       const result = execSync('node bin/svg-tool.js --version', {
-        encoding: 'utf-8'
+        encoding: 'utf-8',
       });
 
       expect(result).toMatch(/\d+\.\d+\.\d+/);
@@ -54,17 +51,17 @@ describe('CLI', () => {
 
     it('should process SVG files with build command', () => {
       const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react`;
-      
+
       const result = execSync(cmd, { encoding: 'utf-8' });
       expect(result).toBeDefined();
     });
 
     it('should accept framework option', () => {
       const frameworks = ['react', 'vue', 'angular', 'svelte'];
-      
+
       frameworks.forEach(framework => {
         const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework ${framework}`;
-        
+
         expect(() => {
           execSync(cmd, { encoding: 'utf-8' });
         }).not.toThrow();
@@ -73,7 +70,7 @@ describe('CLI', () => {
 
     it('should accept typescript flag', () => {
       const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react --typescript`;
-      
+
       expect(() => {
         execSync(cmd, { encoding: 'utf-8' });
       }).not.toThrow();
@@ -81,10 +78,10 @@ describe('CLI', () => {
 
     it('should accept naming convention option', () => {
       const conventions = ['pascal', 'camel', 'kebab'];
-      
+
       conventions.forEach(convention => {
         const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react --naming ${convention}`;
-        
+
         expect(() => {
           execSync(cmd, { encoding: 'utf-8' });
         }).not.toThrow();
@@ -113,7 +110,7 @@ describe('CLI', () => {
       // Note: We can't easily test watch mode in unit tests
       // This just verifies the command is recognized
       const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react --help`;
-      
+
       const result = execSync(cmd, { encoding: 'utf-8' });
       expect(result).toBeDefined();
     });
@@ -155,7 +152,7 @@ describe('CLI', () => {
         source: inputDir,
         output: outputDir,
         framework: 'react',
-        typescript: true
+        typescript: true,
       };
 
       await FileSystem.writeFile(configPath, JSON.stringify(config, null, 2));

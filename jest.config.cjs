@@ -5,16 +5,19 @@ module.exports = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
-      isolatedModules: true,
-    }]
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        isolatedModules: true,
+      },
+    ],
   },
   testEnvironment: 'node',
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',
-    '**/*.(test|spec).+(ts|tsx|js)'
+    '**/*.(test|spec).+(ts|tsx|js)',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -24,31 +27,25 @@ module.exports = {
     '/test-output/',
     '/test-config-output/',
     '/test-e2e-complete/',
-    'src/__tests__/fixtures.ts'
+    'src/__tests__/fixtures.ts',
   ],
+  transformIgnorePatterns: ['node_modules/(?!(pixelmatch|pngjs)/)'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/__tests__/**',
     '!src/**/index.ts',
-    '!src/__tests__/fixtures.ts'
+    '!src/__tests__/fixtures.ts',
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: [
-    'text',
-    'text-summary',
-    'lcov',
-    'html',
-    'json',
-    'clover'
-  ],
+  coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json', 'clover'],
   coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
       lines: 70,
-      statements: 70
-    }
+      statements: 70,
+    },
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
   verbose: true,
@@ -61,6 +58,6 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/tests/',
-    'test-temp'
-  ]
+    'test-temp',
+  ],
 };

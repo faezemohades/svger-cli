@@ -1,8 +1,6 @@
-import fs from 'fs';
 import path from 'path';
 import { generateSVG } from './builder.js';
 import { isLocked } from './lock.js';
-import { readConfig } from './config.js';
 import { FileSystem, FileWatcher } from './utils/native.js';
 
 /**
@@ -25,7 +23,6 @@ import { FileSystem, FileWatcher } from './utils/native.js';
 export async function watchSVGs(config: { src: string; out: string }) {
   const srcDir = path.resolve(config.src);
   const outDir = path.resolve(config.out);
-  const svgConfig = readConfig();
 
   if (!(await FileSystem.exists(srcDir))) {
     console.error('❌ Source folder not found:', srcDir);

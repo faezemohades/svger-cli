@@ -59,7 +59,7 @@ export const sampleSVGs = {
 
   empty: ``,
 
-  malformed: `<invalid>not an svg</invalid>`
+  malformed: `<invalid>not an svg</invalid>`,
 };
 
 export const sampleConfigs = {
@@ -67,25 +67,25 @@ export const sampleConfigs = {
     framework: 'react',
     typescript: true,
     naming: 'pascal',
-    generateIndex: true
+    generateIndex: true,
   },
 
   vue: {
     framework: 'vue',
     typescript: true,
     naming: 'kebab',
-    generateIndex: true
+    generateIndex: true,
   },
 
   angular: {
     framework: 'angular',
     typescript: true,
     naming: 'kebab',
-    generateIndex: true
+    generateIndex: true,
   },
 
   minimal: {
-    framework: 'react'
+    framework: 'react',
   },
 
   full: {
@@ -102,13 +102,13 @@ export const sampleConfigs = {
     responsive: {
       mobile: 16,
       tablet: 20,
-      desktop: 24
+      desktop: 24,
     },
     theme: {
       primary: '#007bff',
-      secondary: '#6c757d'
-    }
-  }
+      secondary: '#6c757d',
+    },
+  },
 };
 
 export const expectedOutputs = {
@@ -149,7 +149,7 @@ export const TestIcon = forwardRef<SVGSVGElement, TestIconProps>(
 
 TestIcon.displayName = 'TestIcon';
 
-export default TestIcon;`
+export default TestIcon;`,
   },
 
   vue: {
@@ -172,7 +172,7 @@ export default TestIcon;`
 export default {
   name: 'TestIcon'
 };
-</script>`
+</script>`,
   },
 
   angular: {
@@ -187,7 +187,7 @@ export default {
     </svg>
   \`
 })
-export class TestIconComponent {}`
+export class TestIconComponent {}`,
   },
 
   svelte: `<script lang="ts">
@@ -212,7 +212,7 @@ export { default as SettingsIcon } from './SettingsIcon';
  *
  * Import all components:
  * import * as Icons from './components';
- */`
+ */`,
 };
 
 export const mockFileStructure = {
@@ -220,15 +220,15 @@ export const mockFileStructure = {
     'home.svg': sampleSVGs.simple,
     'user.svg': sampleSVGs.withFill,
     'settings.svg': sampleSVGs.complex,
-    'nested/folder/icon.svg': sampleSVGs.nested
+    'nested/folder/icon.svg': sampleSVGs.nested,
   },
 
   expected: {
     'HomeIcon.tsx': expectedOutputs.react.ts,
     'UserIcon.tsx': expectedOutputs.react.ts,
     'SettingsIcon.tsx': expectedOutputs.react.ts,
-    'index.ts': expectedOutputs.indexFile
-  }
+    'index.ts': expectedOutputs.indexFile,
+  },
 };
 
 export const frameworks = [
@@ -240,7 +240,7 @@ export const frameworks = [
   'solid',
   'lit',
   'preact',
-  'vanilla'
+  'vanilla',
 ];
 
 export const namingConventions = ['pascal', 'camel', 'kebab'];
@@ -254,5 +254,5 @@ export const fileExtensions = {
   solid: { js: '.tsx', ts: '.tsx' },
   lit: { js: '.ts', ts: '.ts' },
   preact: { js: '.tsx', ts: '.tsx' },
-  vanilla: { js: '.ts', ts: '.ts' }
+  vanilla: { js: '.ts', ts: '.ts' },
 };

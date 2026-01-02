@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from '@jest/globals';
 import { FileSystem } from '../utils/native.js';
 import path from 'path';
 
@@ -34,10 +41,7 @@ describe('Builder Module', () => {
         <circle cx="12" cy="12" r="10"/>
       </svg>`;
 
-      await FileSystem.writeFile(
-        path.join(inputDir, 'test-icon.svg'),
-        testSVG
-      );
+      await FileSystem.writeFile(path.join(inputDir, 'test-icon.svg'), testSVG);
 
       // TODO: Import and test builder once it's available
       // const result = await builder.build({

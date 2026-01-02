@@ -93,7 +93,6 @@ export class LoggerService implements Logger {
   public success(message: string, ...args: any[]): void {
     if (this.shouldLog('info')) {
       const timestamp = new Date().toISOString();
-      const prefix = this.getPrefix('info');
       const successPrefix = this.enableColors ? '✅ [SUCCESS]' : '[SUCCESS]';
       console.log(`${timestamp} ${successPrefix} ${message}`, ...args);
     }
