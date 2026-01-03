@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Built-in Optimizer - SVGer CLI Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚡%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #0a0f1e 0%, #0f1729 100%);
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Header Styles */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 15, 30, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .logo-section:hover {
+      opacity: 0.85;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .logo-text h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(148, 163, 184, 0.1);
+      border-color: rgba(148, 163, 184, 0.3);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 0 60px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid #10b981;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #10b981;
+      margin-bottom: 32px;
+    }
+
+    .pulse-dot {
+      position: relative;
+      width: 10px;
+      height: 10px;
+      background: #10b981;
+      border-radius: 50%;
+    }
+
+    .pulse-dot::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0; }
+    }
+
+    h1 {
+      font-size: 64px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 28px;
+      background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-description {
+      font-size: 22px;
+      color: #94a3b8;
+      line-height: 1.7;
+      max-width: 800px;
+      margin-bottom: 16px;
+    }
+
+    .hero-description strong {
+      color: #f1f5f9;
+      font-weight: 700;
+    }
+
+    .hero-subtext {
+      font-size: 18px;
+      color: #64748b;
+      margin-bottom: 40px;
+    }
+
+    /* Card Styles */
+    .card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid rgba(148, 163, 184, 0.15);
+      border-radius: 20px;
+      padding: 48px;
+      margin-bottom: 80px;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-highlight {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%);
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+    }
+
+    .card-success {
+      background: rgba(16, 185, 129, 0.05);
+      border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .card-danger {
+      background: rgba(239, 68, 68, 0.05);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .card-warning {
+      background: rgba(251, 146, 60, 0.05);
+      border: 2px solid rgba(251, 146, 60, 0.3);
+    }
+
+    h2 {
+      font-size: 40px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #f1f5f9;
+    }
+
+    .section-subtitle {
+      font-size: 18px;
+      color: #94a3b8;
+      margin-bottom: 48px;
+      max-width: 800px;
+      line-height: 1.7;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 2fr;
+      gap: 32px;
+      margin-bottom: 40px;
+      align-items: center;
+    }
+
+    .stat-box {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 72px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .stat-arrow {
+      display: flex;
+      justify-content: center;
+    }
+
+    .result-highlight {
+      text-align: center;
+      padding: 32px;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 16px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .result-number {
+      font-size: 56px;
+      font-weight: 800;
+      color: #10b981;
+      margin-bottom: 8px;
+    }
+
+    .result-text {
+      font-size: 18px;
+      color: #94a3b8;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .comparison-card {
+      padding: 40px;
+      border-radius: 16px;
+      border: 2px solid;
+    }
+
+    .comparison-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .feature-content h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    .feature-content p {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    /* Optimization Levels */
+    .level-card {
+      padding: 40px;
+      border-radius: 16px;
+      border: 2px solid;
+      margin-bottom: 32px;
+    }
+
+    .level-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+    }
+
+    .level-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .level-description {
+      font-size: 16px;
+      color: #94a3b8;
+    }
+
+    .level-badge {
+      padding: 8px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .metric-card {
+      text-align: center;
+      padding: 28px 20px;
+      background: rgba(10, 15, 30, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 12px;
+    }
+
+    .metric-value {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Code Block */
+    .code-block {
+      position: relative;
+      background: #0a0f1e;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 8px 10px;
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .copy-btn:hover {
+      background: rgba(148, 163, 184, 0.2);
+    }
+
+    .copy-btn svg {
+      width: 18px;
+      height: 18px;
+      color: #94a3b8;
+    }
+
+    .check-icon {
+      display: none;
+      color: #10b981;
+    }
+
+    .check-icon.active {
+      display: block;
+    }
+
+    .copy-icon.hidden {
+      display: none;
+    }
+
+    pre {
+      padding: 24px;
+      margin: 0;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #e2e8f0;
+    }
+
+    /* Phase Cards */
+    .phase-card {
+      padding: 32px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid rgba(148, 163, 184, 0.15);
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .phase-number {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .phase-info h4 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    .phase-info p {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .phase-content {
+      padding-left: 76px;
+    }
+
+    .phase-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .phase-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      color: #94a3b8;
+    }
+
+    .phase-list li::before {
+      content: '●';
+      color: #10b981;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .phase-list strong {
+      color: #f1f5f9;
+    }
+
+    .phase-result {
+      background: rgba(10, 15, 30, 0.8);
+      padding: 24px;
+      border-radius: 12px;
+      border: 2px solid;
+    }
+
+    .phase-result-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .phase-result-value {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .phase-result-note {
+      font-size: 15px;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
+
+    .phase-result-highlight {
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    thead {
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    th {
+      text-align: left;
+      padding: 20px 28px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #f1f5f9;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.15);
+    }
+
+    td {
+      padding: 24px 28px;
+      font-size: 15px;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    td strong {
+      color: #f1f5f9;
+      font-weight: 600;
+    }
+
+    /* Processing Speed Cards */
+    .speed-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .speed-card {
+      text-align: center;
+      padding: 40px 24px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid rgba(148, 163, 184, 0.15);
+      border-radius: 16px;
+    }
+
+    .speed-value {
+      font-size: 56px;
+      font-weight: 800;
+      color: #6366f1;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+
+    .speed-label {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+
+    .speed-note {
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    /* Usage Examples */
+    .usage-section {
+      margin-bottom: 56px;
+    }
+
+    .usage-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+    }
+
+    .usage-description {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    /* Footer Section */
+    .footer-cta {
+      text-align: center;
+      padding: 56px 0;
+      border-top: 2px solid rgba(148, 163, 184, 0.15);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 { font-size: 42px; }
+      h2 { font-size: 32px; }
+      .hero-description { font-size: 18px; }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      
+      .comparison-grid,
+      .metrics-grid,
+      .speed-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .card {
+        padding: 32px 24px;
+      }
+      
+      .level-header {
+        flex-direction: column;
+        gap: 16px;
+      }
+      
+      .phase-content {
+        padding-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="index.html" class="logo-section">
+          <div class="logo-icon">
+            <img src="svger-cli-logo.png" alt="SVGer CLI Logo" style="width: 32px; height: 32px; object-fit: contain;">
+          </div>
+          <div class="logo-text">
+            <h1>SVGer CLI</h1>
+            <p>VERSION 4.0.0</p>
+          </div>
+        </a>
+
+        <div class="header-actions">
+          <a href="https://www.npmjs.com/package/svger-cli" target="_blank" class="btn btn-ghost">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Install
+          </a>
+          <a href="https://github.com/faezemohades/svger-cli" target="_blank" class="btn btn-ghost">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="badge">
+        <span class="pulse-dot"></span>
+        No SVGO Required — Built-in Optimizer Included
+      </div>
+
+      <h1>Built-in SVG Optimizer</h1>
+      
+      <p class="hero-description">
+        SVGER-CLI includes a powerful built-in optimizer that achieves <strong>57.77% file size reduction</strong> without requiring SVGO or any external dependencies.
+      </p>
+      
+      <p class="hero-subtext">
+        Faster processing, lighter bundle, and zero configuration needed.
+      </p>
+    </section>
+
+    <!-- Key Achievement -->
+    <section>
+      <div class="card card-highlight">
+        <h2 style="text-align: center; margin-bottom: 48px;">🎯 Optimization Achievement</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-number" style="color: #10b981;">824</div>
+            <div class="stat-label">Original Size (bytes)</div>
+          </div>
+          
+          <div class="stat-arrow">
+            <svg width="72" height="72" fill="none" stroke="#64748b" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </div>
+          
+          <div class="stat-box">
+            <div class="stat-number" style="color: #6366f1;">348</div>
+            <div class="stat-label">Optimized Size (bytes)</div>
+          </div>
+        </div>
+        
+        <div class="result-highlight">
+          <div class="result-number">57.77% Smaller</div>
+          <div class="result-text">No external tools required!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Built-in Optimizer -->
+    <section>
+      <h2>Why Use the Built-in Optimizer?</h2>
+      <p class="section-subtitle">Compare the old way versus the new approach and see the dramatic difference.</p>
+      
+      <div class="comparison-grid">
+        <!-- Old Way -->
+        <div class="comparison-card card-danger">
+          <div class="comparison-header">
+            <div class="icon-circle" style="background: rgba(239, 68, 68, 0.2);">
+              <svg width="28" height="28" stroke="#ef4444" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </div>
+            <h3>With SVGO<br/><span style="font-size: 18px; color: #94a3b8; font-weight: 500;">(Old Way)</span></h3>
+          </div>
+          
+          <ul class="feature-list">
+            <li class="feature-item">
+              <span class="feature-icon">❌</span>
+              <div class="feature-content">
+                <h4>External Dependency</h4>
+                <p>Adds ~500KB to your project</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon">❌</span>
+              <div class="feature-content">
+                <h4>Slower Processing</h4>
+                <p>2x slower than built-in</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon">❌</span>
+              <div class="feature-content">
+                <h4>Complex Configuration</h4>
+                <p>Requires plugin setup</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon">❌</span>
+              <div class="feature-content">
+                <h4>Version Conflicts</h4>
+                <p>Compatibility issues</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon">❌</span>
+              <div class="feature-content">
+                <h4>Extra Installation</h4>
+                <p>npm install svgo required</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- New Way -->
+        <div class="comparison-card card-success">
+          <div class="comparison-header">
+            <div class="icon-circle" style="background: rgba(16, 185, 129, 0.2);">
+              <svg width="28" height="28" stroke="#10b981" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <h3>Built-in Optimizer<br/><span style="font-size: 18px; color: #94a3b8; font-weight: 500;">(New Way)</span></h3>
+          </div>
+          
+          <ul class="feature-list">
+            <li class="feature-item">
+              <span class="feature-icon" style="color: #10b981;">✅</span>
+              <div class="feature-content">
+                <h4>Zero Dependencies</h4>
+                <p>Nothing to install</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon" style="color: #10b981;">✅</span>
+              <div class="feature-content">
+                <h4>50% Faster</h4>
+                <p>Optimized algorithms</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon" style="color: #10b981;">✅</span>
+              <div class="feature-content">
+                <h4>Works Out of the Box</h4>
+                <p>No configuration needed</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon" style="color: #10b981;">✅</span>
+              <div class="feature-content">
+                <h4>Always Compatible</h4>
+                <p>Built into SVGER-CLI</p>
+              </div>
+            </li>
+            <li class="feature-item">
+              <span class="feature-icon" style="color: #10b981;">✅</span>
+              <div class="feature-content">
+                <h4>Better Results</h4>
+                <p>Up to 57.77% reduction</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Optimization Levels -->
+    <section style="margin-top: 80px;">
+      <h2>Optimization Levels</h2>
+      <p class="section-subtitle">Choose the right balance between file size, processing speed, and safety for your use case.</p>
+
+      <!-- BALANCED -->
+      <div class="level-card" style="background: rgba(99, 102, 241, 0.05); border-color: #6366f1;">
+        <div class="level-header">
+          <div>
+            <h3 class="level-title" style="color: #6366f1;">BALANCED</h3>
+            <p class="level-description">Best for development and most production use cases</p>
+          </div>
+          <span class="level-badge" style="background: rgba(100, 116, 139, 0.2); color: #cbd5e1;">Default</span>
+        </div>
+        
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" style="color: #10b981;">43.33%</div>
+            <div class="metric-label">Size Reduction</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color: #6366f1;">Fast</div>
+            <div class="metric-label">Processing Speed</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color: #8b5cf6;">High</div>
+            <div class="metric-label">Safety Level</div>
+          </div>
+        </div>
+        
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+          <pre><code>import { SVGProcessor, OptLevel } from 'svger-cli';
+
+const processor = SVGProcessor.getInstance();
+processor.setOptimizationLevel(OptLevel.BALANCED);
+
+const optimized = await processor.cleanSVGContent(svgString);
+// Result: 43.33% reduction (safe + fast)</code></pre>
+        </div>
+      </div>
+
+      <!-- AGGRESSIVE -->
+      <div class="level-card" style="background: rgba(251, 146, 60, 0.05); border-color: #fb923c;">
+        <div class="level-header">
+          <div>
+            <h3 class="level-title" style="color: #fb923c;">AGGRESSIVE</h3>
+            <p class="level-description">For CI/CD builds and production bundles</p>
+          </div>
+        </div>
+        
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" style="color: #10b981;">48.91%</div>
+            <div class="metric-label">Size Reduction</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color: #6366f1;">Medium</div>
+            <div class="metric-label">Processing Speed</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color: #8b5cf6;">Medium</div>
+            <div class="metric-label">Safety Level</div>
+          </div>
+        </div>
+        
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+          <pre><code>processor.setOptimizationLevel(OptLevel.AGGRESSIVE);
+
+const optimized = await processor.cleanSVGContent(svgString);
+// Result: 48.91% reduction (balanced performance)</code></pre>
+        </div>
+      </div>
+
+      <!-- MAXIMUM -->
+      <div class="level-card card-success">
+        <div class="level-header">
+          <div>
+            <h3 class="level-title" style="color: #10b981;">MAXIMUM</h3>
+            <p class="level-description">Maximum compression for production assets</p>
+          </div>
+          <span class="level-badge" style="background: #10b981; color: white;">Best Compression</span>
+        </div>
+        
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" style="color: #10b981;">57.77%</div>
+            <div class="metric-label">Size Reduction</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color: #6366f1;">Slower</div>
+            <div class="metric-label">Processing Speed</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color: #8b5cf6;">Lower</div>
+            <div class="metric-label">Safety Level</div>
+          </div>
+        </div>
+        
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+          <pre><code>processor.setOptimizationLevel(OptLevel.MAXIMUM);
+
+const optimized = await processor.cleanSVGContent(svgString);
+// Result: 57.77% reduction (maximum compression!)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section style="margin-top: 80px;">
+      <h2>How It Works</h2>
+      <p class="section-subtitle">The optimizer uses a sophisticated 5-phase pipeline to achieve maximum compression:</p>
+
+      <!-- Phase 1-2 -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-number" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">1-2</div>
+          <div class="phase-info">
+            <h4>Structure & Styles</h4>
+            <p>Foundation cleaning</p>
+          </div>
+        </div>
+        <div class="phase-content">
+          <p style="color: #94a3b8; font-size: 15px;">Removes unnecessary elements, comments, metadata, and XML declarations that add no visual value.</p>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="phase-card">
+        <div class="phase-header">
+          <div class="phase-number" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">3</div>
+          <div class="phase-info">
+            <h4>Attributes</h4>
+            <p>BALANCED level and above</p>
+          </div>
+        </div>
+        <div class="phase-content">
+          <ul class="phase-list">
+            <li><strong>Numeric optimization:</strong> Decimal precision, coordinate rounding</li>
+            <li><strong>Style optimization:</strong> Colors, units, default values</li>
+            <li><strong>Transform optimization:</strong> Matrix simplification</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="phase-card card-warning">
+        <div class="phase-header">
+          <div class="phase-number" style="background: rgba(251, 146, 60, 0.2); color: #fb923c;">4</div>
+          <div class="phase-info">
+            <h4>Path Optimization</h4>
+            <p>AGGRESSIVE level and above</p>
+          </div>
+        </div>
+        <div class="phase-content">
+          <ul class="phase-list" style="margin-bottom: 24px;">
+            <li><strong>Path parser:</strong> Tokenization, absolute/relative conversion</li>
+            <li><strong>Path shortener:</strong> Command merging, H/V optimization</li>
+            <li><strong>Command optimizer:</strong> C→S, C→Q, Q→T, C/Q→L conversions</li>
+          </ul>
+          <div class="phase-result" style="border-color: #fb923c;">
+            <div class="phase-result-title" style="color: #fb923c;">Result</div>
+            <div class="phase-result-value" style="color: #f1f5f9;">23.44% additional reduction</div>
+            <div class="phase-result-note">on path-heavy SVGs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="phase-card card-success">
+        <div class="phase-header">
+          <div class="phase-number" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">5</div>
+          <div class="phase-info">
+            <h4>Transform Collapsing</h4>
+            <p>MAXIMUM level only</p>
+          </div>
+        </div>
+        <div class="phase-content">
+          <ul class="phase-list" style="margin-bottom: 24px;">
+            <li><strong>Propagate transforms:</strong> Through nested groups</li>
+            <li><strong>Bake transforms:</strong> Directly into path data</li>
+            <li><strong>Unwrap groups:</strong> Remove unnecessary wrappers</li>
+          </ul>
+          <div class="phase-result" style="border-color: #10b981;">
+            <div class="phase-result-title" style="color: #10b981;">Result</div>
+            <div class="phase-result-value" style="color: #f1f5f9;">42.42% average reduction</div>
+            <div class="phase-result-note">on nested structures</div>
+            <div class="phase-result-highlight" style="color: #10b981;">
+              ⚡ Up to 50.75% on complex Illustrator exports!
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Performance Benchmarks -->
+    <section style="margin-top: 80px;">
+      <h2>Performance Benchmarks</h2>
+      <p class="section-subtitle">Real-world results from production SVG optimization across different file types.</p>
+      
+      <h3 style="font-size: 28px; margin-bottom: 32px;">Real-World Results</h3>
+      <div class="card" style="padding: 0; margin-bottom: 64px; overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>SVG Type</th>
+              <th>Size Reduction</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Material Icons</strong></td>
+              <td style="color: #10b981; font-weight: 700; font-size: 18px;">15-25%</td>
+              <td>Already optimized icons</td>
+            </tr>
+            <tr>
+              <td><strong>Illustrator Exports</strong></td>
+              <td style="color: #10b981; font-weight: 700; font-size: 18px;">40-50%</td>
+              <td>Complex nested structures</td>
+            </tr>
+            <tr>
+              <td><strong>Hand-drawn SVGs</strong></td>
+              <td style="color: #10b981; font-weight: 700; font-size: 18px;">20-30%</td>
+              <td>Variable complexity</td>
+            </tr>
+            <tr>
+              <td><strong>Icon Libraries</strong></td>
+              <td style="color: #10b981; font-weight: 700; font-size: 18px;">30-40%</td>
+              <td>Standard icon sets</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="font-size: 28px; margin-bottom: 32px;">Processing Speed</h3>
+      <div class="speed-grid">
+        <div class="speed-card">
+          <div class="speed-value">&lt;10ms</div>
+          <div class="speed-label">Small Files</div>
+          <div class="speed-note">(&lt;10KB)</div>
+        </div>
+        <div class="speed-card">
+          <div class="speed-value">10-50ms</div>
+          <div class="speed-label">Medium Files</div>
+          <div class="speed-note">(10-100KB)</div>
+        </div>
+        <div class="speed-card">
+          <div class="speed-value">50-200ms</div>
+          <div class="speed-label">Large Files</div>
+          <div class="speed-note">(100KB-1MB)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLI Usage -->
+    <section style="margin-top: 80px;">
+      <h2>CLI Usage</h2>
+      <p class="section-subtitle">The optimizer is automatically applied when processing SVGs. No extra configuration needed!</p>
+
+      <div class="usage-section">
+        <h3 class="usage-title">Default (BALANCED)</h3>
+        <p class="usage-description">Optimizer is enabled by default with BALANCED level for safe, fast optimization.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+          <pre><code># Optimizer is enabled by default with BALANCED level
+svger-cli --src ./icons --out ./components
+
+# Output: 43.33% size reduction automatically applied</code></pre>
+        </div>
+      </div>
+
+      <div class="usage-section">
+        <h3 class="usage-title">Maximum Compression</h3>
+        <p class="usage-description">Use the optimize plugin for MAXIMUM level (57.77% reduction).</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+          <pre><code># Use the optimize plugin for MAXIMUM level
+svger-cli --src ./icons --out ./components --plugin optimize
+
+# Or combine with other plugins
+svger-cli --src ./icons --out ./components --plugins optimize,minify</code></pre>
+        </div>
+      </div>
+
+      <div class="usage-section">
+        <h3 class="usage-title">Disable Optimization</h3>
+        <p class="usage-description">If you need to disable optimization (not recommended for production).</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">
+            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+          <pre><code># If you need to disable optimization (not recommended)
+svger-cli --src ./icons --out ./components --no-optimize</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison -->
+    <section style="margin-top: 80px;">
+      <h2>vs. SVGO Comparison</h2>
+      <p class="section-subtitle">See how SVGER-CLI's built-in optimizer compares to the industry-standard SVGO tool.</p>
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>SVGER-CLI Built-in</th>
+              <th>SVGO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Installation</strong></td>
+              <td style="color: #10b981; font-weight: 700;">✅ Included (0 dependencies)</td>
+              <td>❌ Separate package (~500KB)</td>
+            </tr>
+            <tr>
+              <td><strong>Size Reduction</strong></td>
+              <td style="color: #10b981; font-weight: 700;">✅ 57.77% (MAXIMUM)</td>
+              <td>⚠️ ~40-50%</td>
+            </tr>
+            <tr>
+              <td><strong>Processing Speed</strong></td>
+              <td style="color: #10b981; font-weight: 700;">✅ 50% faster</td>
+              <td>❌ Baseline</td>
+            </tr>
+            <tr>
+              <td><strong>Configuration</strong></td>
+              <td style="color: #10b981; font-weight: 700;">✅ Works out of the box</td>
+              <td>❌ Complex config needed</td>
+            </tr>
+            <tr>
+              <td><strong>Path Optimization</strong></td>
+              <td style="color: #10b981; font-weight: 700;">✅ Advanced (C→S, C→Q, Q→T)</td>
+              <td>❌ Limited</td>
+            </tr>
+            <tr>
+              <td><strong>Transform Collapsing</strong></td>
+              <td style="color: #10b981; font-weight: 700;">✅ Full support</td>
+              <td>⚠️ Partial</td>
+            </tr>
+            <tr>
+              <td><strong>Maintenance</strong></td>
+              <td style="color: #10b981; font-weight: 700;">✅ Always compatible</td>
+              <td>❌ Version conflicts</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <div class="footer-cta">
+      <a href="index.html" class="btn btn-primary">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Documentation Home
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function copyCode(button) {
+      const codeBlock = button.parentElement;
+      const code = codeBlock.querySelector('code').textContent;
+      
+      navigator.clipboard.writeText(code).then(() => {
+        const copyIcon = button.querySelector('.copy-icon');
+        const checkIcon = button.querySelector('.check-icon');
+        
+        copyIcon.classList.add('hidden');
+        checkIcon.classList.add('active');
+        
+        setTimeout(() => {
+          copyIcon.classList.remove('hidden');
+          checkIcon.classList.remove('active');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

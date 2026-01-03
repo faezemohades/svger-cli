@@ -13,15 +13,29 @@ const navigation = [
     ],
   },
   {
-    title: "Core Documentation",
+    title: "Core Features",
     icon: `<svg class="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
     </svg>`,
     items: [
+      { title: "Built-in Optimizer (57.77%)", href: "optimizer.html", external: true },
       { title: "Feature Comparison", href: "#feature-comparison" },
-      { title: "Multi-Framework Guide", href: "#framework-guide" },
       { title: "CLI Reference", href: "#cli-reference" },
       { title: "Configuration", href: "#configuration" },
+    ],
+  },
+  {
+    title: "Frameworks",
+    icon: `<svg class="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+    </svg>`,
+    items: [
+      { title: "Multi-Framework Guide", href: "#framework-guide" },
+      { title: "React", href: "#react" },
+      { title: "Vue", href: "#vue" },
+      { title: "Angular", href: "#angular" },
+      { title: "Svelte", href: "#svelte" },
+      { title: "More Frameworks...", href: "#framework-guide" },
     ],
   },
   {
