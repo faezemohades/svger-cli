@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./assets/svger-cli.png" alt="SVGER-CLI Banner" width="100%" />
   
-  <h1>SVGER-CLI v4.0.0</h1>
+  <h1>SVGER-CLI v4.0.1</h1>
   <h3>Enterprise SVG Processing Framework with Plugin System</h3>
   
   <p>
@@ -135,9 +135,9 @@
 
 ---
 
-## � **Upgrade to v4.0.0 - Automatic Migration!**
+## � **Upgrade to v4.0.1 - Automatic Migration!**
 
-**v4.0.0 is here with powerful new features!** If you're upgrading from v3.x:
+**v4.0.1 is here with powerful new features!** If you're upgrading from v3.x:
 
 ✅ **Zero Breaking Changes** - All your existing code works  
 ✅ **Automatic Config Migration** - Your `.svgconfig.json` updates automatically  
@@ -146,20 +146,20 @@
 
 **Upgrade Now:**
 ```bash
-npm install -g svger-cli@4.0.0
+npm install -g svger-cli@4.0.1
 # or
-npm install --save-dev svger-cli@4.0.0
+npm install --save-dev svger-cli@4.0.1
 ```
 
 **[See What's New →](#-whats-new-in-v400)** | **[Migration Guide →](#-migration-guide)**
 
 ---
 
-## �🌟 **What's New in v4.0.0**
+## �🌟 **What's New in v4.0.1**
 
 ### **🔌 Extensible Plugin System**
 
-v4.0.0 introduces a powerful plugin architecture that allows you to extend and customize SVG processing:
+v4.0.1 introduces a powerful plugin architecture that allows you to extend and customize SVG processing:
 
 ```bash
 # Use built-in plugins
@@ -337,7 +337,7 @@ node test-visual-integration.js                 # Integration tests (16/16 passi
 > Includes: Benchmark methodology, dependency analysis, Webpack integration guide, and all 28
 > configuration options explained.
 
-| **Feature**                | **SVGER-CLI v4.0.0**       | **SVGR (React)** | **vite-svg-loader (Vue)** | **svelte-svg (Svelte)** | **SVGO**            |
+| **Feature**                | **SVGER-CLI v4.0.1**       | **SVGR (React)** | **vite-svg-loader (Vue)** | **svelte-svg (Svelte)** | **SVGO**            |
 | -------------------------- | -------------------------- | ---------------- | ------------------------- | ----------------------- | ------------------- |
 | **Dependencies**           | ✅ **Zero**                | ❌ 15+ deps      | ❌ 9+ deps                | ❌ 7+ deps              | ❌ 8+ deps          |
 | **Auto-Generated Exports** | ✅ **Full Support**        | ❌ Manual        | ❌ Manual                 | ❌ Manual               | ❌ N/A              |
@@ -351,7 +351,7 @@ node test-visual-integration.js                 # Integration tests (16/16 passi
 | **TypeScript**             | ✅ **Native**              | Plugin           | Limited                   | Limited                 | None                |
 | **Batch Processing**       | ✅ **Optimized**           | Basic            | None                      | None                    | None                |
 | **Plugin System**          | ✅ **Extensible**          | Limited          | None                      | None                    | None                |
-| **Auto Migration**         | ✅ **v3.x → v4.0.0**       | ❌ Manual        | ❌ N/A                    | ❌ N/A                  | ❌ N/A              |
+| **Auto Migration**         | ✅ **v3.x → v4.0.1**       | ❌ Manual        | ❌ N/A                    | ❌ N/A                  | ❌ N/A              |
 | **Configuration Schema**   | ✅ **28 Options**          | ❌ 8 Options     | ❌ 4 Options              | ❌ 3 Options            | ❌ N/A              |
 | **Responsive Design**      | ✅ **Built-in**            | ❌ Manual        | ❌ None                   | ❌ None                 | ❌ None             |
 | **Theme System**           | ✅ **Auto Dark/Light**     | ❌ Manual        | ❌ None                   | ❌ None                 | ❌ None             |
@@ -1403,7 +1403,7 @@ svger-cli build [options]
 - `--styled-components` - Generate styled-components (React/Solid)
 - `--css-modules` - Enable CSS Modules support
 
-**Plugin Options (NEW in v4.0.0):**
+**Plugin Options (NEW in v4.0.1):**
 
 - `--plugin <name>` - Apply single plugin (can be repeated)
 - `--plugins <list>` - Apply multiple plugins (comma-separated)
@@ -2642,7 +2642,7 @@ Vue, Angular, and other frameworks.
 > **Real-world test:** 606 production SVG icons (brand logos, UI icons, social media icons)  
 > **[→ View Complete Benchmark Report](./docs/performance/REAL-WORLD-BENCHMARKS.md)**
 
-| **Operation**           | **SVGER v4.0.0** | **SVGR** | **SVGO** | **Improvement** |
+| **Operation**           | **SVGER v4.0.1** | **SVGR** | **SVGO** | **Improvement** |
 | ----------------------- | ---------------- | -------- | -------- | --------------- |
 | **606 files batch**     | **30.31s**       | ~63.64s  | ~45.46s  | **52% faster than SVGR**  |
 | **Per file average**    | **50.01ms**      | ~105ms   | ~75ms    | **52% faster than SVGR**  |
@@ -2656,7 +2656,7 @@ Vue, Angular, and other frameworks.
 
 ### **Framework-Specific Performance**
 
-All frameworks show consistent performance with v4.0.0 optimizations:
+All frameworks show consistent performance with v4.0.1 optimizations:
 
 | Framework | Time | Files | Speed/File | Throughput |
 |-----------|------|-------|------------|------------|
@@ -2667,9 +2667,9 @@ All frameworks show consistent performance with v4.0.0 optimizations:
 
 **Consistent Performance:** ~50ms per file across all frameworks
 
-### **SVG Optimization Performance (v4.0.0)**
+### **SVG Optimization Performance (v4.0.1)**
 
-SVGER-CLI v4.0.0 includes visual diff testing to guarantee pixel-perfect optimization quality:
+SVGER-CLI v4.0.1 includes visual diff testing to guarantee pixel-perfect optimization quality:
 
 | **Optimization Level** | **Size Reduction** | **Processing Time** | **Visual Quality** | **Memory Usage** |
 |------------------------|-------------------|---------------------|-------------------|------------------|
@@ -2690,7 +2690,7 @@ SVGER-CLI v4.0.0 includes visual diff testing to guarantee pixel-perfect optimiz
 - Complex paths (lossy): 14.3% with path simplification
 - Text rendering: 0.95% font variation acceptable
 
-### **SVG Optimization Levels (v4.0.0)**
+### **SVG Optimization Levels (v4.0.1)**
 
 SVGER-CLI includes a powerful multi-phase optimization engine with configurable levels:
 
@@ -2719,7 +2719,7 @@ svger-cli optimize input.svg --level maximum    # → 348 bytes (57.77%)
 
 ### **Real-World Performance Testing**
 
-SVGER-CLI v4.0.0 has been tested with 606 production SVG icons including:
+SVGER-CLI v4.0.1 has been tested with 606 production SVG icons including:
 - Brand logos (Google, Apple, Microsoft, etc.)
 - UI icons (arrows, buttons, navigation)
 - Social media icons (Twitter, Facebook, LinkedIn, etc.)
@@ -3055,9 +3055,9 @@ svger-cli build --performance --memory
 
 ## 📚 **Migration Guide**
 
-### **Upgrading to v4.0.0 (Automatic)**
+### **Upgrading to v4.0.1 (Automatic)**
 
-**Good News:** v4.0.0 includes automatic configuration migration! Your existing config will be upgraded seamlessly on first run.
+**Good News:** v4.0.1 includes automatic configuration migration! Your existing config will be upgraded seamlessly on first run.
 
 #### **What Happens Automatically**
 
@@ -3069,8 +3069,8 @@ svger build --src ./svgs --out ./components
 
 The tool will:
 1. ✅ Detect your v3.x configuration
-2. ✅ Automatically migrate to v4.0.0 format
-3. ✅ Add new `version: "4.0.0"` field
+2. ✅ Automatically migrate to v4.0.1 format
+3. ✅ Add new `version: "4.0.1"` field
 4. ✅ Convert `plugin` (singular) → `plugins` (array)
 5. ✅ Update optimization levels (see mapping below)
 6. ✅ Save the migrated config
@@ -3088,9 +3088,9 @@ The tool will:
   "performance": { "optimization": "basic" }
 }
 
-// Automatically becomes v4.0.0:
+// Automatically becomes v4.0.1:
 {
-  "version": "4.0.0",
+  "version": "4.0.1",
   "source": "./src/assets/svg",
   "output": "./src/components/icons",
   "framework": "react",
@@ -3101,7 +3101,7 @@ The tool will:
 
 #### **Optimization Level Mapping**
 
-| v3.x | v4.0.0 | Description |
+| v3.x | v4.0.1 | Description |
 |------|--------|-------------|
 | `none` | `fast` | Quick optimization |
 | `basic` | `fast` | Quick optimization |
@@ -3109,7 +3109,7 @@ The tool will:
 | `aggressive` | `maximum` | Maximum compression |
 | `maximum` | `maximum` | Maximum compression |
 
-#### **What's New in v4.0.0**
+#### **What's New in v4.0.1**
 
 - 🔌 **Plugin System**: Use `--plugin optimize` or `--plugins optimize,minify`
 - ⚡ **50% Faster**: O(1) object lookups replace O(n) switch statements
@@ -3121,12 +3121,12 @@ The tool will:
 If you prefer to update your config manually:
 
 ```bash
-# Initialize new v4.0.0 config
+# Initialize new v4.0.1 config
 svger init
 
 # Or manually edit .svgconfig.json and add:
 {
-  "version": "4.0.0",
+  "version": "4.0.1",
   "plugins": [],  // Add this array
   // ... rest of your config
 }
@@ -3174,7 +3174,7 @@ svger-cli build --framework react --responsive --theme dark
 
 ### **Comprehensive Test Suite**
 
-SVGER-CLI v4.0.0 includes a production-ready test suite with **114+ automated tests** covering:
+SVGER-CLI v4.0.1 includes a production-ready test suite with **114+ automated tests** covering:
 
 - ✅ **Unit Tests** - Core modules, utilities, and processors
 - ✅ **Integration Tests** - Complete workflows and multi-framework support
