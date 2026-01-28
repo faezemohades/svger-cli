@@ -146,8 +146,11 @@ export class SVGProcessor {
    * @deprecated Use cleanSVGContent with optimizer pipeline instead
    */
   private legacyCleanSVGContent(svgContent: string): string {
+    // First, convert inline styles to React style objects for React-based frameworks
+    const cleaned = this.convertInlineStylesToReact(svgContent);
+
     return (
-      svgContent
+      cleaned
         // Remove XML declaration
         .replace(/<\?xml.*?\?>/g, '')
         // Remove DOCTYPE declaration
@@ -157,8 +160,6 @@ export class SVGProcessor {
         // Normalize whitespace
         .replace(/\r?\n|\r/g, '')
         .replace(/\s{2,}/g, ' ')
-        // Remove inline styles (they interfere with React styling)
-        .replace(/style="[^"]*"/g, '')
         // Remove xmlns attributes (React will handle these)
         .replace(/\s+xmlns(:xlink)?="[^"]*"/g, '')
         // Convert attributes to camelCase for React
@@ -174,11 +175,52 @@ export class SVGProcessor {
         .replace(/font-size/g, 'fontSize')
         .replace(/font-weight/g, 'fontWeight')
         .replace(/text-anchor/g, 'textAnchor')
+        // Remove width/height with px units (React doesn't accept these in numeric attributes)
+        .replace(/\s(width|height)=["'](\d+)px["']/g, ' $1={$2}')
         // Remove outer SVG tag and keep inner content
         .trim()
         .replace(/^<svg[^>]*>([\s\S]*)<\/svg>$/i, '$1')
         .trim()
     );
+  }
+
+  /**
+   * Convert inline CSS style attributes to React style objects
+   * Converts style="fill: #000; stroke-width: 2px;" to style={{fill: '#000', strokeWidth: '2px'}}
+   */
+  private convertInlineStylesToReact(svgContent: string): string {
+    return svgContent.replace(/style="([^"]*)"/g, (_match, styleString) => {
+      // Parse CSS string into object
+      const styles: Record<string, string> = {};
+      const declarations = styleString
+        .split(';')
+        .filter((s: string) => s.trim());
+
+      declarations.forEach((declaration: string) => {
+        const [property, value] = declaration
+          .split(':')
+          .map((s: string) => s.trim());
+        if (property && value) {
+          // Convert CSS property to camelCase (e.g., stroke-width -> strokeWidth)
+          const camelProperty = property.replace(/-([a-z])/g, (g: string) =>
+            g[1].toUpperCase()
+          );
+          styles[camelProperty] = value;
+        }
+      });
+
+      // If empty styles, return empty string to remove attribute
+      if (Object.keys(styles).length === 0) {
+        return '';
+      }
+
+      // Convert to React inline style object syntax
+      const styleEntries = Object.entries(styles)
+        .map(([key, value]) => `${key}: '${value}'`)
+        .join(', ');
+
+      return `style={{${styleEntries}}}`;
+    });
   }
 
   /**

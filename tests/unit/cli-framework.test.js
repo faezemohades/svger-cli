@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { svgProcessor } from './dist/processors/svg-processor.js';
-import { frameworkTemplateEngine } from './dist/index.js';
+import { svgProcessor } from '../../dist/processors/svg-processor.js';
+import { frameworkTemplateEngine } from '../../dist/index.js';
 
 // Test file extension generation
 console.log('\n📋 Testing File Extension Generation:\n');

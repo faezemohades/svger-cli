@@ -2,7 +2,7 @@
  * Test for Phase 1: Optimizer Pipeline
  */
 
-import { createOptimizerPipeline, OptLevel, basicCleaningStage } from './dist/optimizers/index.js';
+import { createOptimizerPipeline, OptLevel, basicCleaningStage } from '../../dist/optimizers/index.js';
 
 console.log('🚀 SVGER-CLI Optimizer Pipeline Test (Phase 1)\n');
 console.log('================================================================================\n');

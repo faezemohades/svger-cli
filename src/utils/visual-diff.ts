@@ -5,14 +5,48 @@
  * to ensure zero visual regression.
  *
  * Uses:
- * - sharp: SVG → PNG rendering (via librsvg)
- * - pixelmatch: Pixel-by-pixel comparison
- * - pngjs: PNG buffer handling
+ * - sharp: SVG → PNG rendering (via librsvg) [OPTIONAL]
+ * - pixelmatch: Pixel-by-pixel comparison [OPTIONAL]
+ * - pngjs: PNG buffer handling [OPTIONAL]
+ *
+ * These dependencies are lazy-loaded and optional.
+ * Install them only if you need visual validation:
+ * npm install --save-dev sharp pixelmatch pngjs
  */
 
-import sharp from 'sharp';
-import pixelmatch from 'pixelmatch';
-import { PNG } from 'pngjs';
+// Lazy imports - only loaded when visual validation is used
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let sharp: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pixelmatch: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let PNG: any = null;
+
+/**
+ * Lazy-load optional visual diff dependencies
+ */
+async function loadVisualDiffDependencies() {
+  if (sharp && pixelmatch && PNG) {
+    return; // Already loaded
+  }
+
+  try {
+    const sharpModule = await import('sharp');
+    sharp = sharpModule.default;
+
+    const pixelmatchModule = await import('pixelmatch');
+    pixelmatch = pixelmatchModule.default;
+
+    const pngjsModule = await import('pngjs');
+    PNG = pngjsModule.PNG;
+  } catch (error) {
+    throw new Error(
+      'Visual diff validation requires optional dependencies. Install them with:\n' +
+        'npm install --save-dev sharp pixelmatch pngjs\n\n' +
+        'Or skip visual validation by removing the --validate flag.'
+    );
+  }
+}
 
 // ============================================================================
 // Type Definitions
@@ -129,6 +163,8 @@ export async function renderSVG(
   svgContent: string,
   config?: Partial<RenderConfig>
 ): Promise<Buffer> {
+  await loadVisualDiffDependencies();
+
   const renderConfig: RenderConfig = { ...DEFAULT_RENDER_CONFIG, ...config };
 
   try {
@@ -173,6 +209,8 @@ export async function comparePixels(
   totalPixels: number;
   diffImage?: Buffer;
 }> {
+  await loadVisualDiffDependencies();
+
   const diffConfig: DiffConfig = { ...DEFAULT_DIFF_CONFIG, ...config };
 
   try {

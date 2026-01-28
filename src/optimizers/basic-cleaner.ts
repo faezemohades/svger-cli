@@ -14,6 +14,14 @@ export function removeXMLDeclaration(svg: string, config: OptConfig): string {
 }
 
 /**
+ * Remove px units from width and height attributes for React compatibility
+ */
+export function removePxUnits(svg: string): string {
+  // Convert width="24px" to width={24} for React
+  return svg.replace(/\s(width|height)=["'](\d+)px["']/g, ' $1={$2}');
+}
+
+/**
  * Remove DOCTYPE declarations from SVG content
  */
 export function removeDoctype(svg: string, config: OptConfig): string {
@@ -102,10 +110,54 @@ export function removeXMLNamespaces(svg: string, config: OptConfig): string {
  * Note: This can be aggressive - use with caution
  */
 export function removeInlineStyles(svg: string, config: OptConfig): string {
-  if (!config.inlineStyles) return svg;
+  // When inlineStyles is true, remove them completely
+  // When false (default), convert to React style objects for React compatibility
+  if (config.inlineStyles) {
+    // Remove style attributes completely
+    return svg.replace(/\s+style="[^"]*"/g, '');
+  }
 
-  // Remove style attributes
-  return svg.replace(/\s+style="[^"]*"/g, '');
+  // Convert inline CSS styles to React style objects for React compatibility
+  return svg.replace(/\s+style="([^"]*)"/g, (_match, styleString) => {
+    // Handle empty style attributes
+    if (!styleString.trim()) {
+      return '';
+    }
+
+    const styles: Record<string, string> = {};
+
+    // Parse CSS declarations
+    const declarations = styleString
+      .split(';')
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.length > 0);
+
+    declarations.forEach((declaration: string) => {
+      const [property, value] = declaration
+        .split(':')
+        .map((s: string) => s.trim());
+
+      if (property && value) {
+        // Convert CSS property names to camelCase (stroke-width → strokeWidth)
+        const camelProperty = property.replace(/-([a-z])/g, (g: string) =>
+          g[1].toUpperCase()
+        );
+        styles[camelProperty] = value;
+      }
+    });
+
+    // If no valid styles, remove the attribute
+    if (Object.keys(styles).length === 0) {
+      return '';
+    }
+
+    // Generate React inline style object syntax
+    const styleEntries = Object.entries(styles)
+      .map(([key, value]) => `${key}: '${value}'`)
+      .join(', ');
+
+    return ` style={{${styleEntries}}}`;
+  });
 }
 
 /**
@@ -217,6 +269,7 @@ export async function basicCleaningStage(
   result = removeXMLNamespaces(result, config);
   result = removeInlineStyles(result, config);
   result = convertToCamelCase(result, config);
+  result = removePxUnits(result); // Remove px units for React compatibility
   result = shortenColors(result, config);
   result = roundFloats(result, config);
   result = removeEmptyContainers(result, config);

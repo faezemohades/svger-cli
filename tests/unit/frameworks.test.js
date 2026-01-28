@@ -5,7 +5,7 @@
  * Tests all 9 supported frameworks: React, React Native, Vue, Svelte, Angular, Solid, Preact, Lit, Vanilla
  */
 
-import { frameworkTemplateEngine } from './dist/index.js';
+import { frameworkTemplateEngine } from '../../dist/index.js';
 import fs from 'fs';
 import path from 'path';
 

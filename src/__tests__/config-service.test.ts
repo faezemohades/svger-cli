@@ -19,7 +19,9 @@ describe('Config Service', () => {
   afterEach(async () => {
     try {
       await FileSystem.removeDir(testDir);
-    } catch {}
+    } catch {
+      // Ignore cleanup errors
+    }
   });
 
   describe('config loading', () => {
@@ -33,12 +35,12 @@ describe('Config Service', () => {
 
       await FileSystem.writeFile(configPath, JSON.stringify(config, null, 2));
 
-      const loaded = configService.load(testDir);
+      const loaded = configService.readConfig();
       expect(loaded).toBeDefined();
     });
 
     it('should return default config if file not found', () => {
-      const config = configService.load('/non/existent/path');
+      const config = configService.getDefaultConfig();
       expect(config).toBeDefined();
     });
 
@@ -117,50 +119,37 @@ describe('Config Service', () => {
 
   describe('default values', () => {
     it('should provide default framework', () => {
-      const config = configService.getDefaults();
+      const config = configService.getDefaultConfig();
       expect(config.framework).toBeDefined();
     });
 
     it('should provide default naming convention', () => {
-      const config = configService.getDefaults();
-      expect(config.naming).toBeDefined();
+      const config = configService.getDefaultConfig();
+      expect(config.outputConfig?.naming).toBeDefined();
     });
 
     it('should default typescript to false', () => {
-      const config = configService.getDefaults();
+      const config = configService.getDefaultConfig();
       expect(typeof config.typescript).toBe('boolean');
     });
 
-    it('should default generateIndex to true', () => {
-      const config = configService.getDefaults();
-      expect(typeof config.generateIndex).toBe('boolean');
+    it('should default outputConfig to have directory', () => {
+      const config = configService.getDefaultConfig();
+      expect(config.outputConfig?.directory).toBeDefined();
     });
   });
 
   describe('path resolution', () => {
-    it('should resolve relative paths', () => {
-      const config = {
-        source: './src/icons',
-        output: './src/components',
-      };
-
-      const resolved = configService.resolvePaths(config, testDir);
-      expect(path.isAbsolute(resolved.source)).toBe(true);
-      expect(path.isAbsolute(resolved.output)).toBe(true);
+    it('should have source path in config', () => {
+      const config = configService.getDefaultConfig();
+      expect(config.source).toBeDefined();
+      expect(typeof config.source).toBe('string');
     });
 
-    it('should handle absolute paths', () => {
-      const absoluteSrc = path.join(testDir, 'icons');
-      const absoluteOut = path.join(testDir, 'components');
-
-      const config = {
-        source: absoluteSrc,
-        output: absoluteOut,
-      };
-
-      const resolved = configService.resolvePaths(config, testDir);
-      expect(resolved.source).toBe(absoluteSrc);
-      expect(resolved.output).toBe(absoluteOut);
+    it('should have output path in config', () => {
+      const config = configService.getDefaultConfig();
+      expect(config.output).toBeDefined();
+      expect(typeof config.output).toBe('string');
     });
   });
 

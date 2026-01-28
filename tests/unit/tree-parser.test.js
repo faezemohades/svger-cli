@@ -2,8 +2,8 @@
  * Test SVG Tree Parser & Serializer Round-Trip
  */
 
-import { parseSVG, traverseTree, findNodesByTag, getAllIds } from './dist/optimizers/svg-tree-parser.js';
-import { serializeSVG, serializeSVGMinified, serializeSVGPretty, calculateReduction } from './dist/optimizers/tree-serializer.js';
+import { parseSVG, traverseTree, findNodesByTag, getAllIds } from '../../dist/optimizers/svg-tree-parser.js';
+import { serializeSVG, serializeSVGMinified, serializeSVGPretty, calculateReduction } from '../../dist/optimizers/tree-serializer.js';
 
 console.log('🚀 SVGER-CLI Phase 2: Tree Parser & Serializer Test\n');
 console.log('================================================================================\n');

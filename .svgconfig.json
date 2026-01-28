@@ -1,7 +1,7 @@
 {
   "version": "4.0.0",
-  "source": "./svg-icons",
-  "output": "./components/icons",
+  "source": "./test-svgs",
+  "output": "./test-output",
   "framework": "react",
   "typescript": true,
   "componentType": "functional",
@@ -10,13 +10,13 @@
   "batchSize": 10,
   "maxConcurrency": 4,
   "cache": true,
-  "defaultWidth": 48,
-  "defaultHeight": 48,
-  "defaultFill": "#000000",
+  "defaultWidth": 32,
+  "defaultHeight": 32,
+  "defaultFill": "currentColor",
   "defaultStroke": "none",
   "defaultStrokeWidth": 1,
   "styleRules": {
-    "fill": "currentColor",
+    "fill": "inherit",
     "stroke": "none"
   },
   "responsive": {
@@ -51,9 +51,7 @@
   },
   "animations": [],
   "plugins": [],
-  "exclude": [
-    "test.svg"
-  ],
+  "exclude": [],
   "include": [],
   "errorHandling": {
     "strategy": "continue",
