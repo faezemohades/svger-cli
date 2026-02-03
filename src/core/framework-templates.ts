@@ -117,6 +117,10 @@ export class FrameworkTemplateEngine {
     const attrRegex = /(\w+(?:-\w+)*)="([^"]*)"/g;
     let match;
     while ((match = attrRegex.exec(attributesString)) !== null) {
+      // Prevent infinite loop if regex doesn't advance
+      if (match.index === attrRegex.lastIndex) {
+        attrRegex.lastIndex++;
+      }
       attributes[match[1]] = match[2];
     }
 

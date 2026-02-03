@@ -88,6 +88,11 @@ function parseAttributes(attrString: string): Map<string, string> {
   let match;
 
   while ((match = attrRegex.exec(attrString)) !== null) {
+    // Prevent infinite loop if regex doesn't advance
+    if (match.index === attrRegex.lastIndex) {
+      attrRegex.lastIndex++;
+    }
+
     const [, name, value] = match;
     attrs.set(name, value);
   }

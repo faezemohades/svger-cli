@@ -34,7 +34,7 @@ export class SVGService {
   /**
    * Set optimizer level for SVG processing
    */
-  private setOptimizerLevel(level: string): void {
+  public setOptimizerLevel(level: string): void {
     const validLevels = ['none', 'basic', 'balanced', 'aggressive', 'maximum'];
     if (!validLevels.includes(level.toLowerCase())) {
       logger.warn(
@@ -160,19 +160,27 @@ export class SVGService {
       }
     }
 
-    // Log summary
-    const successful = results.filter(r => r.success).length;
-    const failed = results.filter(r => !r.success).length;
+    // Log summary - single pass through results
+    const successfulResults: typeof results = [];
+    const failedResults: typeof results = [];
 
-    logger.info(`Build complete: ${successful} successful, ${failed} failed`);
+    for (const result of results) {
+      if (result.success) {
+        successfulResults.push(result);
+      } else {
+        failedResults.push(result);
+      }
+    }
 
-    if (failed > 0) {
+    logger.info(
+      `Build complete: ${successfulResults.length} successful, ${failedResults.length} failed`
+    );
+
+    if (failedResults.length > 0) {
       logger.warn('Some files failed to process:');
-      results
-        .filter(r => !r.success)
-        .forEach(r => {
-          logger.warn(`  - ${r.file}: ${r.error?.message}`);
-        });
+      failedResults.forEach(r => {
+        logger.warn(`  - ${r.file}: ${r.error?.message}`);
+      });
     }
 
     // Generate index.ts file with all component exports
@@ -281,7 +289,7 @@ export class SVGService {
       },
       unlink: async () => {
         logger.info(`SVG removed: ${fileName}`);
-        await this.handleFileRemoval(event.filePath, outDir);
+        await this.handleFileRemoval(event.filePath, outDir, config);
       },
     };
 

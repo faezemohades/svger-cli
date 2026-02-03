@@ -31,6 +31,7 @@ interface PluginMetrics {
 export class EnhancedPluginManager {
   private plugins: Map<string, EnhancedPlugin> = new Map();
   private executionMetrics: PluginMetrics[] = [];
+  private readonly MAX_METRICS_SIZE = 1000; // Cap at 1000 entries to prevent memory leak
   private enableVisualValidation = true;
 
   constructor() {
@@ -42,16 +43,16 @@ export class EnhancedPluginManager {
    */
   registerPlugin(plugin: EnhancedPlugin): void {
     if (this.plugins.has(plugin.name)) {
-      logger.warn(
-        `Plugin "${plugin.name}" is already registered. Skipping duplicate.`
-      );
-      return;
+      const errorMsg = `Plugin "${plugin.name}" is already registered. Cannot register duplicate plugins with the same name.`;
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
     }
 
     // Validate plugin structure
     if (!this.validatePlugin(plugin)) {
-      logger.error(`Plugin "${plugin.name}" failed validation. Skipping.`);
-      return;
+      const errorMsg = `Plugin "${plugin.name}" failed validation. Cannot register invalid plugin.`;
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
     }
 
     // Initialize plugin if it has init method
@@ -212,14 +213,24 @@ export class EnhancedPluginManager {
         validationPassed = visualDiff <= maxDiff;
 
         if (!validationPassed) {
-          logger.warn(
-            `Plugin "${plugin.name}" exceeded visual diff threshold: ${visualDiff.toFixed(4)}% > ${maxDiff}%`
-          );
-        } else {
-          logger.debug(
-            `Plugin "${plugin.name}" visual validation passed: ${visualDiff.toFixed(4)}% <= ${maxDiff}%`
-          );
+          const errorMsg = `Plugin "${plugin.name}" exceeded visual diff threshold: ${visualDiff.toFixed(4)}% > ${maxDiff}%`;
+          logger.error(errorMsg);
+
+          // Return original content and stop execution on validation failure
+          return {
+            content: originalContent,
+            skipRemaining: true,
+            metadata: {
+              visualDiff,
+              validationPassed: false,
+              error: errorMsg,
+            },
+          };
         }
+
+        logger.debug(
+          `Plugin "${plugin.name}" visual validation passed: ${visualDiff.toFixed(4)}% <= ${maxDiff}%`
+        );
       } catch (error) {
         logger.warn(
           `Plugin "${plugin.name}" visual validation failed:`,
@@ -237,6 +248,11 @@ export class EnhancedPluginManager {
       visualDiff: visualDiff > 0 ? visualDiff : undefined,
       validationPassed,
     });
+
+    // Implement circular buffer to prevent memory leak in long-running watch mode
+    if (this.executionMetrics.length > this.MAX_METRICS_SIZE) {
+      this.executionMetrics.shift(); // Remove oldest entry
+    }
 
     logger.debug(
       `Plugin "${plugin.name}" completed in ${executionTime.toFixed(2)}ms` +
@@ -335,17 +351,21 @@ export class EnhancedPluginManager {
     validationsPassed: number;
     validationsFailed: number;
   } {
+    // Single pass through metrics instead of multiple filters
+    let totalExecutionTime = 0;
+    let validationsPassed = 0;
+    let validationsFailed = 0;
+
+    for (const metric of this.executionMetrics) {
+      totalExecutionTime += metric.executionTime;
+      if (metric.validationPassed) {
+        validationsPassed++;
+      } else {
+        validationsFailed++;
+      }
+    }
+
     const totalExecutions = this.executionMetrics.length;
-    const totalExecutionTime = this.executionMetrics.reduce(
-      (sum, m) => sum + m.executionTime,
-      0
-    );
-    const validationsPassed = this.executionMetrics.filter(
-      m => m.validationPassed
-    ).length;
-    const validationsFailed = this.executionMetrics.filter(
-      m => !m.validationPassed
-    ).length;
 
     return {
       totalPlugins: this.plugins.size,

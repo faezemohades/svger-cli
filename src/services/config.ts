@@ -2,6 +2,17 @@ import path from 'path';
 import { FileSystem } from '../utils/native.js';
 import { SVGConfig } from '../types/index.js';
 import { logger } from '../core/logger.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Get package version dynamically
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(
+  readFileSync(join(__dirname, '../../package.json'), 'utf-8')
+);
+const CURRENT_VERSION = packageJson.version;
 
 /**
  * Professional configuration management service
@@ -26,7 +37,7 @@ export class ConfigService {
   public getDefaultConfig(): SVGConfig {
     return {
       // Configuration Version (for migration compatibility)
-      version: '4.0.0',
+      version: CURRENT_VERSION,
 
       // Source & Output
       source: './src/assets/svg',
@@ -156,7 +167,7 @@ export class ConfigService {
       }
 
       // Check if migration is needed
-      if (!configData.version || configData.version !== '4.0.0') {
+      if (!configData.version || configData.version !== CURRENT_VERSION) {
         logger.info('Detected older configuration version, migrating...');
         const migratedConfig = this.migrateConfig(configData);
         this.cachedConfig = migratedConfig;
@@ -261,20 +272,28 @@ export class ConfigService {
    * Migrate configuration from older versions to v4.0.0
    */
   public migrateConfig(config: any): SVGConfig {
-    const currentVersion = config.version || '3.0.0';
-
-    // No migration needed if already v4.0.0
-    if (currentVersion === '4.0.0') {
-      return config;
+    // Validate config is not null/undefined
+    if (!config || typeof config !== 'object') {
+      logger.warn('Invalid config provided for migration, using defaults');
+      return this.getDefaultConfig();
     }
 
-    logger.info(`Migrating configuration from ${currentVersion} to 4.0.0...`);
+    const currentVersion = config.version || '3.0.0';
+
+    // No migration needed if already current version
+    if (currentVersion === CURRENT_VERSION) {
+      return { ...this.getDefaultConfig(), ...config };
+    }
+
+    logger.info(
+      `Migrating configuration from ${currentVersion} to ${CURRENT_VERSION}...`
+    );
 
     // Migration from v3.x to v4.0.0
     const migratedConfig: any = { ...config };
 
     // Add version field
-    migratedConfig.version = '4.0.0';
+    migratedConfig.version = CURRENT_VERSION;
 
     // Ensure plugins array exists (new in v4.0.0)
     if (!migratedConfig.plugins) {

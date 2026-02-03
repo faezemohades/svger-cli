@@ -1,11 +1,24 @@
 #!/usr/bin/env node
-import { CLI } from './utils/native.js';
+import { CLI, FileSystem } from './utils/native.js';
 import { svgService } from './services/svg-service.js';
 import { configService } from './services/config.js';
 import { logger } from './core/logger.js';
 import { getPluginManager } from './core/enhanced-plugin-manager.js';
+import { svgProcessor } from './processors/svg-processor.js';
 import { resolve } from 'path';
 import { pathToFileURL } from 'url';
+import path from 'path';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Read version dynamically from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(
+  readFileSync(join(__dirname, '../package.json'), 'utf-8')
+);
+const CLI_VERSION = packageJson.version;
 
 const program = new CLI();
 
@@ -98,7 +111,7 @@ program
   .description(
     'Custom SVG to Angular, React, Vue, Svelte, Solid, and other component converter'
   )
-  .version('4.0.0');
+  .version(CLI_VERSION);
 
 // -------- Build Command --------
 /**
@@ -143,6 +156,46 @@ program
       }
 
       const [src, out] = args;
+
+      // Validate required arguments
+      if (!src || !out) {
+        logger.error('Error: Both <src> and <out> paths are required');
+        process.exit(1);
+      }
+
+      // Validate framework type if provided
+      const validFrameworks = [
+        'react',
+        'react-native',
+        'vue',
+        'svelte',
+        'angular',
+        'solid',
+        'preact',
+        'lit',
+        'vanilla',
+      ];
+      if (opts.framework && !validFrameworks.includes(opts.framework)) {
+        logger.error(
+          `Error: Invalid framework "${opts.framework}". Valid options: ${validFrameworks.join(', ')}`
+        );
+        process.exit(1);
+      }
+
+      // Validate optimization level if provided
+      const validOptLevels = [
+        'none',
+        'basic',
+        'balanced',
+        'aggressive',
+        'maximum',
+      ];
+      if (opts.optimize && !validOptLevels.includes(opts.optimize)) {
+        logger.error(
+          `Error: Invalid optimization level "${opts.optimize}". Valid options: ${validOptLevels.join(', ')}`
+        );
+        process.exit(1);
+      }
 
       // Build config from CLI options
       const buildConfig: any = { src, out };
@@ -195,6 +248,12 @@ program
   .action(async (args: string[]) => {
     try {
       const [src, out] = args;
+
+      // Validate required arguments
+      if (!src || !out) {
+        logger.error('Error: Both <src> and <out> paths are required');
+        process.exit(1);
+      }
       await svgService.startWatching({ src, out });
 
       // Keep the process running
@@ -317,11 +376,27 @@ program
           logger.error('Invalid format. Use key=value');
           process.exit(1);
         }
-        const parsedValue = !isNaN(Number(value)) ? Number(value) : value;
+
+        // Parse value with proper type conversion
+        let parsedValue: any = value;
+
+        // Parse booleans
+        if (value === 'true') {
+          parsedValue = true;
+        } else if (value === 'false') {
+          parsedValue = false;
+        }
+        // Parse numbers
+        else if (!isNaN(Number(value)) && value.trim() !== '') {
+          parsedValue = Number(value);
+        }
+        // Keep as string otherwise
+
         return configService.setConfig(key, parsedValue);
       }
       if (opts.show) return configService.showConfig();
       logger.error('No option provided. Use --init, --set, or --show');
+      process.exit(1);
     } catch (error) {
       logger.error('Config operation failed:', error);
       process.exit(1);
@@ -369,19 +444,84 @@ program
   .option('--in-place', 'Optimize files in-place (overwrite originals)')
   .action(async (args: string[], opts: Record<string, any>) => {
     try {
-      const [input, output = input] = args;
+      const [input, output = opts.inPlace ? input : args[1] || input] = args;
+
+      if (!input) {
+        logger.error('Error: Input path is required');
+        process.exit(1);
+      }
+
+      // Validate optimization level if provided
+      const validOptLevels = ['basic', 'balanced', 'aggressive', 'maximum'];
       const level = opts.level || 'balanced';
 
-      logger.info(`Optimizing SVG files at ${level.toUpperCase()} level...`);
-      logger.info(`Input: ${input}, Output: ${output}`);
+      if (!validOptLevels.includes(level)) {
+        logger.error(
+          `Error: Invalid optimization level "${level}". Valid options: ${validOptLevels.join(', ')}`
+        );
+        process.exit(1);
+      }
 
-      // Implementation would go through svg-processor
-      // For now, show success message
-      logger.success(`Optimization complete!`);
+      const inputDir = path.resolve(input);
+      const outputDir = opts.inPlace ? inputDir : path.resolve(output);
+
+      // Validate input directory
+      if (!(await FileSystem.exists(inputDir))) {
+        logger.error(`Error: Input directory not found: ${inputDir}`);
+        process.exit(1);
+      }
+
+      // Set optimization level
+      svgService.setOptimizerLevel(level);
+
+      logger.info(`Optimizing SVG files at ${level.toUpperCase()} level...`);
+      logger.info(`Input: ${inputDir}`);
+      logger.info(`Output: ${outputDir}`);
+
+      // Ensure output directory exists
+      await FileSystem.ensureDir(outputDir);
+
+      // Read all SVG files
+      const files = await FileSystem.readDir(inputDir);
+      const svgFiles = files.filter((file: string) => file.endsWith('.svg'));
+
+      if (svgFiles.length === 0) {
+        logger.warn('No SVG files found in input directory');
+        return;
+      }
+
+      let optimized = 0;
+      let failed = 0;
+
+      // Process each SVG file
+      for (const file of svgFiles) {
+        try {
+          const inputPath = path.join(inputDir, file);
+          const outputPath = path.join(outputDir, file);
+
+          const content = await FileSystem.readFile(inputPath, 'utf-8');
+          const optimizedContent = await svgProcessor.cleanSVGContent(content);
+
+          await FileSystem.writeFile(outputPath, optimizedContent, 'utf-8');
+          optimized++;
+
+          logger.info(`✓ Optimized: ${file}`);
+        } catch (error) {
+          failed++;
+          logger.error(
+            `✗ Failed: ${file} - ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
+      }
+
+      logger.success(
+        `Optimization complete! ${optimized} optimized, ${failed} failed`
+      );
 
       if (opts.validate) {
-        logger.info('Running visual validation...');
-        logger.success('Visual validation passed! ✅');
+        logger.warn(
+          'Visual validation not yet implemented for optimize command'
+        );
       }
     } catch (error) {
       logger.error('Optimization failed:', error);

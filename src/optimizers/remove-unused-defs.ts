@@ -45,6 +45,10 @@ function findReferencedIds(root: SVGNode): Set<string> {
         let match;
         URL_REFERENCE_REGEX.lastIndex = 0;
         while ((match = URL_REFERENCE_REGEX.exec(attrValue)) !== null) {
+          // Prevent infinite loop if regex doesn't advance
+          if (match.index === URL_REFERENCE_REGEX.lastIndex) {
+            URL_REFERENCE_REGEX.lastIndex++;
+          }
           referencedIds.add(match[1]);
         }
 
@@ -52,6 +56,10 @@ function findReferencedIds(root: SVGNode): Set<string> {
         if (attrName === 'href' || attrName === 'xlink:href') {
           HREF_REFERENCE_REGEX.lastIndex = 0;
           while ((match = HREF_REFERENCE_REGEX.exec(attrValue)) !== null) {
+            // Prevent infinite loop if regex doesn't advance
+            if (match.index === HREF_REFERENCE_REGEX.lastIndex) {
+              HREF_REFERENCE_REGEX.lastIndex++;
+            }
             referencedIds.add(match[1]);
           }
         }
@@ -64,6 +72,10 @@ function findReferencedIds(root: SVGNode): Set<string> {
       let match;
       URL_REFERENCE_REGEX.lastIndex = 0;
       while ((match = URL_REFERENCE_REGEX.exec(style)) !== null) {
+        // Prevent infinite loop if regex doesn't advance
+        if (match.index === URL_REFERENCE_REGEX.lastIndex) {
+          URL_REFERENCE_REGEX.lastIndex++;
+        }
         referencedIds.add(match[1]);
       }
     }
@@ -73,6 +85,10 @@ function findReferencedIds(root: SVGNode): Set<string> {
       let match;
       URL_REFERENCE_REGEX.lastIndex = 0;
       while ((match = URL_REFERENCE_REGEX.exec(node.content)) !== null) {
+        // Prevent infinite loop if regex doesn't advance
+        if (match.index === URL_REFERENCE_REGEX.lastIndex) {
+          URL_REFERENCE_REGEX.lastIndex++;
+        }
         referencedIds.add(match[1]);
       }
     }

@@ -60,6 +60,11 @@ export function parseTransformList(transformStr: string): Transform[] {
   let match;
 
   while ((match = regex.exec(transformStr)) !== null) {
+    // Prevent infinite loop if regex doesn't advance
+    if (match.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+
     const cmd = parseTransformCommand(match[0]);
     if (cmd) {
       transforms.push(cmd);

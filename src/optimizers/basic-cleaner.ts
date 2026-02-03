@@ -235,6 +235,10 @@ export function sortAttributes(svg: string, config: OptConfig): string {
       let attrMatch;
 
       while ((attrMatch = attrRegex.exec(attrs)) !== null) {
+        // Prevent infinite loop if regex doesn't advance
+        if (attrMatch.index === attrRegex.lastIndex) {
+          attrRegex.lastIndex++;
+        }
         attrPairs.push([attrMatch[1], attrMatch[2]]);
       }
 

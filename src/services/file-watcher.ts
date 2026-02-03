@@ -88,10 +88,14 @@ export class FileWatcherService {
       clearTimeout(this.debounceTimers.get(debounceKey)!);
     }
 
-    // Set new timer
+    // Set new timer with error handling
     const timer = setTimeout(async () => {
       this.debounceTimers.delete(debounceKey);
-      await this.processFileEvent(watchId, eventType, filePath);
+      try {
+        await this.processFileEvent(watchId, eventType, filePath);
+      } catch (error) {
+        logger.error(`Failed to process file event for ${filePath}:`, error);
+      }
     }, this.debounceDelay);
 
     this.debounceTimers.set(debounceKey, timer);
@@ -176,7 +180,7 @@ export class FileWatcherService {
       this.watchers.delete(watchId);
       this.eventHandlers.delete(watchId);
 
-      // Clear any pending debounce timers for this watcher
+      // Clear all pending debounce timers for this watcher to prevent orphaned timers
       for (const [key, timer] of this.debounceTimers.entries()) {
         if (key.startsWith(`${watchId}-`)) {
           clearTimeout(timer);

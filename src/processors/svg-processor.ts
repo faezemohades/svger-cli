@@ -505,13 +505,34 @@ export class SVGProcessor {
     failed: number;
   } {
     const jobs = Array.from(this.processingQueue.values());
-    return {
+
+    // Single pass through jobs instead of 4 separate filters
+    const stats = {
       total: jobs.length,
-      pending: jobs.filter(j => j.status === 'pending').length,
-      processing: jobs.filter(j => j.status === 'processing').length,
-      completed: jobs.filter(j => j.status === 'completed').length,
-      failed: jobs.filter(j => j.status === 'failed').length,
+      pending: 0,
+      processing: 0,
+      completed: 0,
+      failed: 0,
     };
+
+    for (const job of jobs) {
+      switch (job.status) {
+        case 'pending':
+          stats.pending++;
+          break;
+        case 'processing':
+          stats.processing++;
+          break;
+        case 'completed':
+          stats.completed++;
+          break;
+        case 'failed':
+          stats.failed++;
+          break;
+      }
+    }
+
+    return stats;
   }
 
   /**

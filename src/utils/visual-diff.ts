@@ -166,19 +166,29 @@ export async function renderSVG(
   await loadVisualDiffDependencies();
 
   const renderConfig: RenderConfig = { ...DEFAULT_RENDER_CONFIG, ...config };
+  const RENDER_TIMEOUT_MS = 30000; // 30 seconds
 
   try {
     // Create SVG buffer
     const svgBuffer = Buffer.from(svgContent, 'utf-8');
 
-    // Render to PNG using sharp
-    const pngBuffer = await sharp(svgBuffer, { density: renderConfig.density })
+    // Render to PNG using sharp with timeout protection
+    const renderPromise = sharp(svgBuffer, { density: renderConfig.density })
       .resize(renderConfig.width, renderConfig.height, {
         fit: 'contain',
         background: renderConfig.background,
       })
       .png()
       .toBuffer();
+
+    const timeoutPromise = new Promise<never>((_resolve, reject) => {
+      setTimeout(
+        () => reject(new Error(`Render timeout after ${RENDER_TIMEOUT_MS}ms`)),
+        RENDER_TIMEOUT_MS
+      );
+    });
+
+    const pngBuffer = await Promise.race([renderPromise, timeoutPromise]);
 
     return pngBuffer;
   } catch (error) {

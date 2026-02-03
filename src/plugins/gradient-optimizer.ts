@@ -74,6 +74,11 @@ function removeDuplicateStops(gradientContent: string): string {
 
   let match;
   while ((match = stopRegex.exec(gradientContent)) !== null) {
+    // Prevent infinite loop if regex doesn't advance
+    if (match.index === stopRegex.lastIndex) {
+      stopRegex.lastIndex++;
+    }
+
     const stopTag = match[0];
     const normalized = stopTag.replace(/\s+/g, ' ').trim();
 

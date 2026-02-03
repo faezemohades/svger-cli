@@ -50,6 +50,11 @@ function parseCSSRules(cssText: string): Map<string, Map<string, string>> {
   let match;
 
   while ((match = ruleRegex.exec(cleaned)) !== null) {
+    // Prevent infinite loop if regex doesn't advance
+    if (match.index === ruleRegex.lastIndex) {
+      ruleRegex.lastIndex++;
+    }
+    
     const selector = match[1].trim();
     const declarationsText = match[2].trim();
 

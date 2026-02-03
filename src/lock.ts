@@ -9,7 +9,7 @@ const LOCK_FILE = '.svg-lock';
  * @returns {string} Absolute path to .svg-lock
  */
 function getLockFilePath(): string {
-  return path.resolve(LOCK_FILE);
+  return path.resolve(process.cwd(), LOCK_FILE);
 }
 
 /**
