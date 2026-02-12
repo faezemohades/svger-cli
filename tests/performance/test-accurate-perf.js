@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Accurate Performance Test for SVGER-CLI v4.0.0
+ * Accurate Performance Test for SVGER-CLI v4.0.3
  * Tests 606 real SVG icons from assets/svges
  */
 
@@ -103,7 +103,7 @@ async function runTest(name, cmd) {
 
 async function main() {
   log('\n' + '='.repeat(70), 'bright');
-  log('🚀 SVGER-CLI v4.0.0 - Real Performance Test', 'bright');
+  log('🚀 SVGER-CLI v4.0.3 - Real Performance Test', 'bright');
   log('='.repeat(70) + '\n', 'bright');
 
   const input = getInputStats();
@@ -164,7 +164,7 @@ async function main() {
 
     // Comparison with competitors
     log(`\n📊 vs Competitors (${input.count} files):`, 'bright');
-    log(`   SVGER v4.0.0:  ${formatTime(avgTime)} | ${avgMem.toFixed(2)}MB`, 'green');
+    log(`   SVGER v4.0.3:  ${formatTime(avgTime)} | ${avgMem.toFixed(2)}MB`, 'green');
     log(`   SVGR (est):    ${formatTime(avgTime * 2.1)} | ${(avgMem * 3.2).toFixed(2)}MB`, 'yellow');
     log(`   SVGO (est):    ${formatTime(avgTime * 1.5)} | ${(avgMem * 2.1).toFixed(2)}MB`, 'yellow');
     
@@ -173,7 +173,7 @@ async function main() {
     log(`✨ ${((1 - avgMem / (avgMem * 3.2)) * 100).toFixed(0)}% less memory than SVGR\n`, 'green');
 
     // Save detailed report
-    let report = `# SVGER-CLI v4.0.0 Performance Report\n\n`;
+    let report = `# SVGER-CLI v4.0.3 Performance Report\n\n`;
     report += `**Date:** ${new Date().toISOString()}\n`;
     report += `**Node.js:** ${process.version}\n`;
     report += `**Platform:** ${process.platform} ${process.arch}\n\n`;
@@ -194,7 +194,7 @@ async function main() {
     report += `\n## vs Competitors\n\n`;
     report += `| Tool | Time | Memory | Improvement |\n`;
     report += `|------|------|--------|-------------|\n`;
-    report += `| **SVGER v4.0.0** | **${formatTime(avgTime)}** | **${avgMem.toFixed(2)}MB** | **Baseline** |\n`;
+    report += `| **SVGER v4.0.3** | **${formatTime(avgTime)}** | **${avgMem.toFixed(2)}MB** | **Baseline** |\n`;
     report += `| SVGR (estimated) | ${formatTime(avgTime * 2.1)} | ${(avgMem * 3.2).toFixed(2)}MB | ${improvement}% slower |\n`;
     report += `| SVGO (estimated) | ${formatTime(avgTime * 1.5)} | ${(avgMem * 2.1).toFixed(2)}MB | ${((1 - avgTime / (avgTime * 1.5)) * 100).toFixed(0)}% slower |\n`;
 

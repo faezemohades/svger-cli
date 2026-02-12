@@ -97,36 +97,28 @@ function multiplyMatrices(m1: Matrix, m2: Matrix): Matrix {
 function transformToMatrix(transform: Transform): Matrix {
   const { type, values } = transform;
 
-  switch (type) {
-    case 'matrix':
-      if (values.length === 6) {
-        return values as Matrix;
-      }
-      return IDENTITY_MATRIX;
-
-    case 'translate': {
+  // O(1) object lookup for transform type → matrix factory
+  const matrixFactories: Record<string, () => Matrix> = {
+    matrix: () => (values.length === 6 ? (values as Matrix) : IDENTITY_MATRIX),
+    translate: () => {
       const tx = values[0] || 0;
       const ty = values[1] || 0;
       return [1, 0, 0, 1, tx, ty];
-    }
-
-    case 'scale': {
+    },
+    scale: () => {
       const sx = values[0] || 1;
       const sy = values[1] !== undefined ? values[1] : sx;
       return [sx, 0, 0, sy, 0, 0];
-    }
-
-    case 'rotate': {
+    },
+    rotate: () => {
       const angle = values[0] || 0;
       const rad = (angle * Math.PI) / 180;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
 
-      // Rotate around point (cx, cy) if provided
       if (values.length === 3) {
         const cx = values[1];
         const cy = values[2];
-        // translate(-cx, -cy) × rotate(angle) × translate(cx, cy)
         return [
           cos,
           sin,
@@ -138,25 +130,23 @@ function transformToMatrix(transform: Transform): Matrix {
       }
 
       return [cos, sin, -sin, cos, 0, 0];
-    }
-
-    case 'skewX': {
+    },
+    skewX: () => {
       const angle = values[0] || 0;
       const rad = (angle * Math.PI) / 180;
       const tan = Math.tan(rad);
       return [1, 0, tan, 1, 0, 0];
-    }
-
-    case 'skewY': {
+    },
+    skewY: () => {
       const angle = values[0] || 0;
       const rad = (angle * Math.PI) / 180;
       const tan = Math.tan(rad);
       return [1, tan, 0, 1, 0, 0];
-    }
+    },
+  };
 
-    default:
-      return IDENTITY_MATRIX;
-  }
+  const factory = matrixFactories[type];
+  return factory ? factory() : IDENTITY_MATRIX;
 }
 
 /**

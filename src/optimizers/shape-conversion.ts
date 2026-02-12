@@ -201,8 +201,9 @@ function convertShapeToPath(
 
   let pathData: string | null = null;
 
-  switch (tag) {
-    case 'rect': {
+  // O(1) object lookup for shape tag → path converter
+  const shapeConverters: Record<string, () => string | null> = {
+    rect: () => {
       const x = parseFloat(node.attrs.get('x') || '0');
       const y = parseFloat(node.attrs.get('y') || '0');
       const width = parseFloat(node.attrs.get('width') || '0');
@@ -213,49 +214,36 @@ function convertShapeToPath(
       const ry = node.attrs.has('ry')
         ? parseFloat(node.attrs.get('ry')!)
         : undefined;
-
-      pathData = rectToPath(x, y, width, height, rx, ry);
-      break;
-    }
-
-    case 'circle': {
+      return rectToPath(x, y, width, height, rx, ry);
+    },
+    circle: () => {
       const cx = parseFloat(node.attrs.get('cx') || '0');
       const cy = parseFloat(node.attrs.get('cy') || '0');
       const r = parseFloat(node.attrs.get('r') || '0');
-
-      pathData = circleToPath(cx, cy, r);
-      break;
-    }
-
-    case 'ellipse': {
+      return circleToPath(cx, cy, r);
+    },
+    ellipse: () => {
       const cx = parseFloat(node.attrs.get('cx') || '0');
       const cy = parseFloat(node.attrs.get('cy') || '0');
       const rx = parseFloat(node.attrs.get('rx') || '0');
       const ry = parseFloat(node.attrs.get('ry') || '0');
-
-      pathData = ellipseToPath(cx, cy, rx, ry);
-      break;
-    }
-
-    case 'polygon': {
+      return ellipseToPath(cx, cy, rx, ry);
+    },
+    polygon: () => {
       const points = node.attrs.get('points');
-      if (points) {
-        pathData = polygonToPath(points);
-      }
-      break;
-    }
-
-    case 'polyline': {
+      return points ? polygonToPath(points) : null;
+    },
+    polyline: () => {
       const points = node.attrs.get('points');
-      if (points) {
-        pathData = polylineToPath(points);
-      }
-      break;
-    }
+      return points ? polylineToPath(points) : null;
+    },
+  };
 
-    default:
-      return { converted: false, savings: 0 };
+  const converter = shapeConverters[tag];
+  if (!converter) {
+    return { converted: false, savings: 0 };
   }
+  pathData = converter();
 
   // Check if conversion was possible
   if (!pathData) {

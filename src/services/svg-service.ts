@@ -35,8 +35,15 @@ export class SVGService {
    * Set optimizer level for SVG processing
    */
   public setOptimizerLevel(level: string): void {
-    const validLevels = ['none', 'basic', 'balanced', 'aggressive', 'maximum'];
-    if (!validLevels.includes(level.toLowerCase())) {
+    // O(1) Set lookup instead of O(n) Array.includes()
+    const validLevels = new Set([
+      'none',
+      'basic',
+      'balanced',
+      'aggressive',
+      'maximum',
+    ]);
+    if (!validLevels.has(level.toLowerCase())) {
       logger.warn(
         `Invalid optimization level "${level}". Using "basic" instead.`
       );

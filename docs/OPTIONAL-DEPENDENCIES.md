@@ -158,4 +158,4 @@ If you encounter any issues with optional dependencies:
 
 ---
 
-**Last Updated**: January 28, 2026 (v4.0.1)
+**Last Updated**: January 28, 2026 (v4.0.3)

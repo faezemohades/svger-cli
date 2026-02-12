@@ -89,17 +89,58 @@ const COMMAND_PARAMS: Record<string, number> = {
 };
 
 /**
- * Check if character is a path command letter
+ * Check if character is a path command letter - O(1) Set lookup
  */
+const COMMAND_LETTERS = new Set([
+  'M',
+  'm',
+  'L',
+  'l',
+  'H',
+  'h',
+  'V',
+  'v',
+  'C',
+  'c',
+  'S',
+  's',
+  'Q',
+  'q',
+  'T',
+  't',
+  'A',
+  'a',
+  'Z',
+  'z',
+]);
+
 function isCommandLetter(char: string): boolean {
-  return /[MmLlHhVvCcSsQqTtAaZz]/.test(char);
+  return COMMAND_LETTERS.has(char);
 }
 
 /**
- * Check if character is numeric (digit, decimal, sign, exponent)
+ * Check if character is numeric (digit, decimal, sign, exponent) - O(1) Set lookup
  */
+const NUMERIC_CHARS = new Set([
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '.',
+  'e',
+  'E',
+  '+',
+  '-',
+]);
+
 function isNumericChar(char: string): boolean {
-  return /[\d.eE+-]/.test(char);
+  return NUMERIC_CHARS.has(char);
 }
 
 /**
@@ -234,67 +275,89 @@ export function parsePath(pathData: string): ParsedPath {
       continue;
     }
 
-    // Update current position
+    // Update current position using O(1) object lookup instead of switch
     const isUpperCase = currentCommand === currentCommand.toUpperCase();
 
     if (isUpperCase) {
-      // Absolute commands
-      switch (currentCommand) {
-        case 'M':
-        case 'L':
-        case 'T':
-          currentX = values[values.length - 2];
-          currentY = values[values.length - 1];
-          break;
-        case 'H':
-          currentX = values[values.length - 1];
-          break;
-        case 'V':
-          currentY = values[values.length - 1];
-          break;
-        case 'C':
-          currentX = values[values.length - 2];
-          currentY = values[values.length - 1];
-          break;
-        case 'S':
-        case 'Q':
-          currentX = values[values.length - 2];
-          currentY = values[values.length - 1];
-          break;
-        case 'A':
-          currentX = values[values.length - 2];
-          currentY = values[values.length - 1];
-          break;
-      }
+      // Absolute position update handlers
+      const absoluteHandlers: Record<string, (v: number[]) => void> = {
+        M: v => {
+          currentX = v[v.length - 2];
+          currentY = v[v.length - 1];
+        },
+        L: v => {
+          currentX = v[v.length - 2];
+          currentY = v[v.length - 1];
+        },
+        T: v => {
+          currentX = v[v.length - 2];
+          currentY = v[v.length - 1];
+        },
+        H: v => {
+          currentX = v[v.length - 1];
+        },
+        V: v => {
+          currentY = v[v.length - 1];
+        },
+        C: v => {
+          currentX = v[v.length - 2];
+          currentY = v[v.length - 1];
+        },
+        S: v => {
+          currentX = v[v.length - 2];
+          currentY = v[v.length - 1];
+        },
+        Q: v => {
+          currentX = v[v.length - 2];
+          currentY = v[v.length - 1];
+        },
+        A: v => {
+          currentX = v[v.length - 2];
+          currentY = v[v.length - 1];
+        },
+      };
+
+      absoluteHandlers[currentCommand]?.(values);
     } else {
-      // Relative commands
-      switch (currentCommand) {
-        case 'm':
-        case 'l':
-        case 't':
-          currentX += values[values.length - 2];
-          currentY += values[values.length - 1];
-          break;
-        case 'h':
-          currentX += values[values.length - 1];
-          break;
-        case 'v':
-          currentY += values[values.length - 1];
-          break;
-        case 'c':
-          currentX += values[values.length - 2];
-          currentY += values[values.length - 1];
-          break;
-        case 's':
-        case 'q':
-          currentX += values[values.length - 2];
-          currentY += values[values.length - 1];
-          break;
-        case 'a':
-          currentX += values[values.length - 2];
-          currentY += values[values.length - 1];
-          break;
-      }
+      // Relative position update handlers
+      const relativeHandlers: Record<string, (v: number[]) => void> = {
+        m: v => {
+          currentX += v[v.length - 2];
+          currentY += v[v.length - 1];
+        },
+        l: v => {
+          currentX += v[v.length - 2];
+          currentY += v[v.length - 1];
+        },
+        t: v => {
+          currentX += v[v.length - 2];
+          currentY += v[v.length - 1];
+        },
+        h: v => {
+          currentX += v[v.length - 1];
+        },
+        v: v => {
+          currentY += v[v.length - 1];
+        },
+        c: v => {
+          currentX += v[v.length - 2];
+          currentY += v[v.length - 1];
+        },
+        s: v => {
+          currentX += v[v.length - 2];
+          currentY += v[v.length - 1];
+        },
+        q: v => {
+          currentX += v[v.length - 2];
+          currentY += v[v.length - 1];
+        },
+        a: v => {
+          currentX += v[v.length - 2];
+          currentY += v[v.length - 1];
+        },
+      };
+
+      relativeHandlers[currentCommand]?.(values);
     }
 
     // Store command with absolute position
@@ -333,37 +396,41 @@ export function toAbsolute(
     return cmd;
   }
 
-  // Convert relative to absolute
+  // Convert relative to absolute using O(1) lookup
   const absoluteType = type.toUpperCase() as PathCommandType;
   const values = [...cmd.values];
 
-  switch (type) {
-    case 'm':
-    case 'l':
-    case 't':
-      // x y → x+prevX y+prevY
+  // Transformation strategies keyed by command letter
+  const transformers: Record<string, () => void> = {
+    m: () => {
       for (let i = 0; i < values.length; i += 2) {
         values[i] += prevX;
         values[i + 1] += prevY;
       }
-      break;
-
-    case 'h':
-      // x → x+prevX
+    },
+    l: () => {
+      for (let i = 0; i < values.length; i += 2) {
+        values[i] += prevX;
+        values[i + 1] += prevY;
+      }
+    },
+    t: () => {
+      for (let i = 0; i < values.length; i += 2) {
+        values[i] += prevX;
+        values[i + 1] += prevY;
+      }
+    },
+    h: () => {
       for (let i = 0; i < values.length; i++) {
         values[i] += prevX;
       }
-      break;
-
-    case 'v':
-      // y → y+prevY
+    },
+    v: () => {
       for (let i = 0; i < values.length; i++) {
         values[i] += prevY;
       }
-      break;
-
-    case 'c':
-      // x1 y1 x2 y2 x y → all +prev
+    },
+    c: () => {
       for (let i = 0; i < values.length; i += 6) {
         values[i] += prevX;
         values[i + 1] += prevY;
@@ -372,31 +439,35 @@ export function toAbsolute(
         values[i + 4] += prevX;
         values[i + 5] += prevY;
       }
-      break;
-
-    case 's':
-    case 'q':
-      // x1 y1 x y → all +prev
+    },
+    s: () => {
       for (let i = 0; i < values.length; i += 4) {
         values[i] += prevX;
         values[i + 1] += prevY;
         values[i + 2] += prevX;
         values[i + 3] += prevY;
       }
-      break;
-
-    case 'a':
-      // rx ry rotation large-arc sweep x y → only x,y +prev
+    },
+    q: () => {
+      for (let i = 0; i < values.length; i += 4) {
+        values[i] += prevX;
+        values[i + 1] += prevY;
+        values[i + 2] += prevX;
+        values[i + 3] += prevY;
+      }
+    },
+    a: () => {
       for (let i = 0; i < values.length; i += 7) {
         values[i + 5] += prevX;
         values[i + 6] += prevY;
       }
-      break;
+    },
+    z: () => {
+      /* No conversion needed */
+    },
+  };
 
-    case 'z':
-      // No conversion needed
-      break;
-  }
+  transformers[type]?.();
 
   return {
     type: absoluteType,
@@ -420,37 +491,40 @@ export function toRelative(
     return cmd;
   }
 
-  // Convert absolute to relative
+  // Convert absolute to relative using O(1) lookup
   const relativeType = type.toLowerCase() as PathCommandType;
   const values = [...cmd.values];
 
-  switch (type) {
-    case 'M':
-    case 'L':
-    case 'T':
-      // x y → x-prevX y-prevY
+  const transformers: Record<string, () => void> = {
+    M: () => {
       for (let i = 0; i < values.length; i += 2) {
         values[i] -= prevX;
         values[i + 1] -= prevY;
       }
-      break;
-
-    case 'H':
-      // x → x-prevX
+    },
+    L: () => {
+      for (let i = 0; i < values.length; i += 2) {
+        values[i] -= prevX;
+        values[i + 1] -= prevY;
+      }
+    },
+    T: () => {
+      for (let i = 0; i < values.length; i += 2) {
+        values[i] -= prevX;
+        values[i + 1] -= prevY;
+      }
+    },
+    H: () => {
       for (let i = 0; i < values.length; i++) {
         values[i] -= prevX;
       }
-      break;
-
-    case 'V':
-      // y → y-prevY
+    },
+    V: () => {
       for (let i = 0; i < values.length; i++) {
         values[i] -= prevY;
       }
-      break;
-
-    case 'C':
-      // x1 y1 x2 y2 x y → all -prev
+    },
+    C: () => {
       for (let i = 0; i < values.length; i += 6) {
         values[i] -= prevX;
         values[i + 1] -= prevY;
@@ -459,31 +533,35 @@ export function toRelative(
         values[i + 4] -= prevX;
         values[i + 5] -= prevY;
       }
-      break;
-
-    case 'S':
-    case 'Q':
-      // x1 y1 x y → all -prev
+    },
+    S: () => {
       for (let i = 0; i < values.length; i += 4) {
         values[i] -= prevX;
         values[i + 1] -= prevY;
         values[i + 2] -= prevX;
         values[i + 3] -= prevY;
       }
-      break;
-
-    case 'A':
-      // rx ry rotation large-arc sweep x y → only x,y -prev
+    },
+    Q: () => {
+      for (let i = 0; i < values.length; i += 4) {
+        values[i] -= prevX;
+        values[i + 1] -= prevY;
+        values[i + 2] -= prevX;
+        values[i + 3] -= prevY;
+      }
+    },
+    A: () => {
       for (let i = 0; i < values.length; i += 7) {
         values[i + 5] -= prevX;
         values[i + 6] -= prevY;
       }
-      break;
+    },
+    Z: () => {
+      /* No conversion needed */
+    },
+  };
 
-    case 'Z':
-      // No conversion needed
-      break;
-  }
+  transformers[type]?.();
 
   return {
     type: relativeType,

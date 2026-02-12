@@ -1,4 +1,5 @@
 import os from 'os';
+import fs from 'fs';
 import { logger } from '../core/logger.js';
 import { svgProcessor } from '../processors/svg-processor.js';
 import { ComponentGenerationOptions } from '../types/index.js';
@@ -85,7 +86,11 @@ export class PerformanceEngine {
     }
 
     const totalDuration = Date.now() - startTime;
-    const successful = results.filter(r => r.success).length;
+    // Single-pass counter instead of results.filter().length — O(n) → O(n) but avoids intermediate array allocation
+    let successful = 0;
+    for (let i = 0; i < results.length; i++) {
+      if (results[i].success) successful++;
+    }
 
     logger.info(
       `Batch processing complete: ${successful}/${files.length} successful in ${totalDuration}ms`
@@ -274,8 +279,14 @@ export class PerformanceEngine {
     filePath: string,
     options: Partial<ComponentGenerationOptions>
   ): string {
-    // Create a hash of file path and options for caching
-    const key = JSON.stringify({ filePath, options });
+    // Include file modification time to invalidate cache when file changes
+    let mtimeMs = 0;
+    try {
+      mtimeMs = fs.statSync(filePath).mtimeMs;
+    } catch {
+      // File may not exist yet; use 0 so caching still works
+    }
+    const key = JSON.stringify({ filePath, mtimeMs, options });
     return Buffer.from(key).toString('base64');
   }
 

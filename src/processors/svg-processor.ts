@@ -242,7 +242,7 @@ export class SVGProcessor {
 
     // Object lookup map for naming conventions - O(1) performance
     const namingHandlers = {
-      kebab: () => toPascalCase(baseName),
+      kebab: () => toKebabCase(baseName),
       camel: () => {
         const pascalName = toPascalCase(baseName);
         return pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
@@ -485,12 +485,28 @@ export class SVGProcessor {
       };
 
       logger.error(`Failed to process ${svgFilePath}:`, error);
+
+      // Immediately remove failed jobs to prevent memory leaks
+      this.processingQueue.delete(jobId);
+
       return result;
     } finally {
-      // Clean up completed jobs after some time
-      setTimeout(() => {
-        this.processingQueue.delete(jobId);
-      }, 30000); // 30 seconds
+      // Clean up completed jobs after a short delay (allows stats queries)
+      if (job.status === 'completed') {
+        setTimeout(() => {
+          this.processingQueue.delete(jobId);
+        }, 30000); // 30 seconds
+      }
+
+      // Cap queue size as a safety net to prevent unbounded growth
+      if (this.processingQueue.size > 10000) {
+        const oldestEntries = Array.from(this.processingQueue.entries())
+          .filter(([, j]) => j.status === 'completed' || j.status === 'failed')
+          .slice(0, this.processingQueue.size - 5000);
+        for (const [key] of oldestEntries) {
+          this.processingQueue.delete(key);
+        }
+      }
     }
   }
 
@@ -506,8 +522,14 @@ export class SVGProcessor {
   } {
     const jobs = Array.from(this.processingQueue.values());
 
-    // Single pass through jobs instead of 4 separate filters
-    const stats = {
+    // Direct property increment via object key — O(1) per job, avoids switch branching
+    const stats: Record<string, number> & {
+      total: number;
+      pending: number;
+      processing: number;
+      completed: number;
+      failed: number;
+    } = {
       total: jobs.length,
       pending: 0,
       processing: 0,
@@ -516,20 +538,7 @@ export class SVGProcessor {
     };
 
     for (const job of jobs) {
-      switch (job.status) {
-        case 'pending':
-          stats.pending++;
-          break;
-        case 'processing':
-          stats.processing++;
-          break;
-        case 'completed':
-          stats.completed++;
-          break;
-        case 'failed':
-          stats.failed++;
-          break;
-      }
+      stats[job.status]++;
     }
 
     return stats;

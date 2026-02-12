@@ -31,7 +31,7 @@ tests/
 │
 ├── config-options.test.ts         # Configuration options tests
 ├── e2e-complete.test.ts           # End-to-end tests
-├── config-migration.test.cjs      # v3.x to v4.0.0 migration tests
+├── config-migration.test.cjs      # v3.x to v4.0.3 migration tests
 ├── locked-files-index.test.ts     # Locked files and index generation tests
 │
 ├── test-config-output/            # Test output for config tests

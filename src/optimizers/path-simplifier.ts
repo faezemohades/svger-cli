@@ -255,44 +255,47 @@ function extractLinearPoints(
   for (let i = 0; i < commands.length; i++) {
     const cmd = commands[i];
     const isRelative = cmd.type === cmd.type.toLowerCase();
+    const upperType = cmd.type.toUpperCase();
 
-    switch (cmd.type.toUpperCase()) {
-      case 'L': {
+    // O(1) object lookup for command type → point extraction
+    const pointExtractors: Record<string, () => void> = {
+      L: () => {
         const x = isRelative ? currentX + cmd.values[0] : cmd.values[0];
         const y = isRelative ? currentY + cmd.values[1] : cmd.values[1];
         points.push({ x, y, cmdIndex: i + 1 });
         indices.push(i + 1);
         currentX = x;
         currentY = y;
-        break;
-      }
-      case 'H': {
+      },
+      H: () => {
         const x = isRelative ? currentX + cmd.values[0] : cmd.values[0];
         points.push({ x, y: currentY, cmdIndex: i + 1 });
         indices.push(i + 1);
         currentX = x;
-        break;
-      }
-      case 'V': {
+      },
+      V: () => {
         const y = isRelative ? currentY + cmd.values[0] : cmd.values[0];
         points.push({ x: currentX, y, cmdIndex: i + 1 });
         indices.push(i + 1);
         currentY = y;
-        break;
+      },
+    };
+
+    const extractor = pointExtractors[upperType];
+    if (extractor) {
+      extractor();
+    } else {
+      // Update position for other commands but don't add to points
+      if (upperType === 'M') {
+        currentX = isRelative ? currentX + cmd.values[0] : cmd.values[0];
+        currentY = isRelative ? currentY + cmd.values[1] : cmd.values[1];
+      } else if (upperType === 'C') {
+        currentX = isRelative ? currentX + cmd.values[4] : cmd.values[4];
+        currentY = isRelative ? currentY + cmd.values[5] : cmd.values[5];
+      } else if (upperType === 'Q') {
+        currentX = isRelative ? currentX + cmd.values[2] : cmd.values[2];
+        currentY = isRelative ? currentY + cmd.values[3] : cmd.values[3];
       }
-      default:
-        // Update position for other commands but don't add to points
-        if (cmd.type.toUpperCase() === 'M') {
-          currentX = isRelative ? currentX + cmd.values[0] : cmd.values[0];
-          currentY = isRelative ? currentY + cmd.values[1] : cmd.values[1];
-        } else if (cmd.type.toUpperCase() === 'C') {
-          currentX = isRelative ? currentX + cmd.values[4] : cmd.values[4];
-          currentY = isRelative ? currentY + cmd.values[5] : cmd.values[5];
-        } else if (cmd.type.toUpperCase() === 'Q') {
-          currentX = isRelative ? currentX + cmd.values[2] : cmd.values[2];
-          currentY = isRelative ? currentY + cmd.values[3] : cmd.values[3];
-        }
-        break;
     }
   }
 

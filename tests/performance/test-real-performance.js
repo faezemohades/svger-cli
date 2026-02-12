@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Real-World Performance Test for SVGER-CLI v4.0.0
+ * Real-World Performance Test for SVGER-CLI v4.0.3
  * Tests actual SVG icons from assets/svges folder
  */
 
@@ -153,7 +153,7 @@ async function runTest(testName, command, description) {
 }
 
 function generateReport(results) {
-  let report = `# SVGER-CLI v4.0.0 Performance Report\n\n`;
+  let report = `# SVGER-CLI v4.0.3 Performance Report\n\n`;
   report += `**Test Date:** ${new Date().toISOString()}\n`;
   report += `**Test Environment:** Node.js ${process.version}\n`;
   report += `**Platform:** ${process.platform} ${process.arch}\n`;
@@ -199,12 +199,12 @@ function generateReport(results) {
     report += `| Memory Used | ${avgMemory.toFixed(2)}MB | ${Math.min(...successfulTests.map(r => r.memoryIncrease)).toFixed(2)}MB | ${Math.max(...successfulTests.map(r => r.memoryIncrease)).toFixed(2)}MB |\n`;
     report += `| Total Files | ${totalFiles} | - | - |\n\n`;
 
-    // v4.0.0 vs competitors comparison
-    report += `## v4.0.0 Performance vs Competitors\n\n`;
+    // v4.0.3 vs competitors comparison
+    report += `## v4.0.3 Performance vs Competitors\n\n`;
     report += `Based on ${countFiles(ICONS_DIR)} real SVG icons:\n\n`;
     report += `| Tool | Time | Memory | Throughput |\n`;
     report += `|------|------|--------|------------|\n`;
-    report += `| **SVGER v4.0.0** | **${formatTime(avgDuration)}** | **${avgMemory.toFixed(2)}MB** | **${(totalFiles / successfulTests.length / (avgDuration / 1000)).toFixed(2)} files/sec** |\n`;
+    report += `| **SVGER v4.0.3** | **${formatTime(avgDuration)}** | **${avgMemory.toFixed(2)}MB** | **${(totalFiles / successfulTests.length / (avgDuration / 1000)).toFixed(2)} files/sec** |\n`;
     report += `| SVGR (estimated) | ${formatTime(avgDuration * 2.1)} | ${(avgMemory * 3.2).toFixed(2)}MB | ${(totalFiles / successfulTests.length / (avgDuration * 2.1 / 1000)).toFixed(2)} files/sec |\n`;
     report += `| SVGO (estimated) | ${formatTime(avgDuration * 1.5)} | ${(avgMemory * 2.1).toFixed(2)}MB | ${(totalFiles / successfulTests.length / (avgDuration * 1.5 / 1000)).toFixed(2)} files/sec |\n\n`;
 
@@ -221,7 +221,7 @@ function generateReport(results) {
 
 async function main() {
   log('\n' + '='.repeat(80), 'bright');
-  log('🚀 SVGER-CLI v4.0.0 Real-World Performance Test', 'bright');
+  log('🚀 SVGER-CLI v4.0.3 Real-World Performance Test', 'bright');
   log('='.repeat(80) + '\n', 'bright');
 
   // Verify icons directory exists

@@ -81,7 +81,6 @@ export class FileSystem {
   private static _readdir = promisify(fs.readdir);
   private static _stat = promisify(fs.stat);
   private static _mkdir = promisify(fs.mkdir);
-  private static _rmdir = promisify(fs.rmdir);
   private static _unlink = promisify(fs.unlink);
 
   static async exists(path: string): Promise<boolean> {
@@ -124,20 +123,7 @@ export class FileSystem {
 
   static async removeDir(dirPath: string): Promise<void> {
     try {
-      const files = await this._readdir(dirPath);
-
-      for (const file of files) {
-        const filePath = `${dirPath}/${file}`;
-        const stats = await this._stat(filePath);
-
-        if (stats.isDirectory()) {
-          await this.removeDir(filePath);
-        } else {
-          await this._unlink(filePath);
-        }
-      }
-
-      await this._rmdir(dirPath);
+      await fs.promises.rm(dirPath, { recursive: true, force: true });
     } catch (error: any) {
       if (error.code !== 'ENOENT') {
         throw error;
@@ -405,9 +391,14 @@ export class FileWatcher {
         }
       );
 
+      watcher.on('error', error => {
+        this.emit('error', error);
+      });
+
       this.watchers.push(watcher);
     } catch (error) {
-      console.error(`Failed to watch ${path}:`, error);
+      // Emit error event so consumers can handle it
+      this.emit('error', error);
     }
 
     return this;

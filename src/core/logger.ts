@@ -26,10 +26,14 @@ export class LoggerService implements Logger {
   }
 
   private shouldLog(level: LogLevel): boolean {
-    const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
-    const currentIndex = levels.indexOf(this.logLevel);
-    const messageIndex = levels.indexOf(level);
-    return messageIndex >= currentIndex;
+    // O(1) Map lookup instead of O(n) indexOf on array
+    const levelPriority: Record<string, number> = {
+      debug: 0,
+      info: 1,
+      warn: 2,
+      error: 3,
+    };
+    return (levelPriority[level] ?? 0) >= (levelPriority[this.logLevel] ?? 0);
   }
 
   private formatMessage(level: LogLevel, message: string): string {

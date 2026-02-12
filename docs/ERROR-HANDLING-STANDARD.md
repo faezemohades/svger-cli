@@ -1,7 +1,7 @@
 # Error Handling Standards
 
 ## Purpose
-This document establishes standardized error handling patterns for SVGER-CLI v4.0.1+ to ensure consistency, proper error propagation, and appropriate user feedback.
+This document establishes standardized error handling patterns for SVGER-CLI v4.0.3+ to ensure consistency, proper error propagation, and appropriate user feedback.
 
 ## Standard Patterns
 

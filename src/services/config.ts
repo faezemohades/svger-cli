@@ -332,11 +332,17 @@ export class ConfigService {
       }
     }
 
-    // Save migrated config
-    this.writeConfig(migratedConfig);
-    logger.success('Configuration migrated to v4.0.0');
+    // Save migrated config merged with defaults to ensure all new keys exist
+    const mergedMigratedConfig: SVGConfig = {
+      ...this.getDefaultConfig(),
+      ...migratedConfig,
+    };
+    this.writeConfig(mergedMigratedConfig);
+    logger.success(
+      `Configuration migrated from ${currentVersion} to ${CURRENT_VERSION}`
+    );
 
-    return migratedConfig;
+    return mergedMigratedConfig;
   }
 
   /**

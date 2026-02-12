@@ -1,6 +1,6 @@
 # SVG Optimizer Module
 
-Advanced SVG optimization system with pluggable pipeline architecture for svger-cli v4.0.0.
+Advanced SVG optimization system with pluggable pipeline architecture for svger-cli v4.0.3.
 
 ## Features
 
@@ -265,7 +265,7 @@ The optimizer is automatically integrated into:
 // v3.1.1 code works unchanged
 await svgService.buildAll({ src: './svgs', out: './components' });
 
-// v4.0.0 with optimization
+// v4.0.3 with optimization
 await svgService.buildAll({ 
   src: './svgs', 
   out: './components',

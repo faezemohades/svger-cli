@@ -4,10 +4,20 @@
  * A high-performance, framework-agnostic SVG processing toolkit with enterprise-grade
  * architecture and comprehensive styling capabilities.
  *
- * @version 2.0.0
  * @author SVGER-CLI Development Team
  * @license MIT
  */
+
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Get package version dynamically
+const __index_filename = fileURLToPath(import.meta.url);
+const __index_dirname = dirname(__index_filename);
+const __packageJson = JSON.parse(
+  readFileSync(join(__index_dirname, '../package.json'), 'utf-8')
+);
 
 // ============================================================================
 // CORE SERVICES
@@ -239,7 +249,7 @@ export const SVGER = {
 /**
  * Package Version Information
  */
-export const VERSION = '2.0.0';
+export const VERSION: string = __packageJson.version;
 export const PACKAGE_NAME = 'svger-cli';
 
 // ============================================================================

@@ -276,83 +276,69 @@ export function getDefaultOptConfig(level: OptLevel): OptConfig {
     optimizationLevel: level,
   };
 
-  switch (level) {
-    case OptLevel.NONE:
-      return {
-        ...baseConfig,
-        removeMetadata: false,
-        removeComments: false,
-        normalizeWhitespace: false,
-        removeUnnecessaryAttrs: false,
-        shortenColors: false,
-        removeEmptyContainers: false,
-        removeDoctype: false,
-        removeXMLProcInst: false,
-        enableNumericOptimization: false,
-        enableStyleOptimization: false,
-        enableTransformOptimization: false,
-        enableTransformCollapsing: false,
-        enablePathOptimization: false,
-        enablePathSimplification: false,
-      };
+  // O(1) object lookup for optimization level → config overrides
+  const levelOverrides: Record<OptLevel, Partial<OptConfig>> = {
+    [OptLevel.NONE]: {
+      removeMetadata: false,
+      removeComments: false,
+      normalizeWhitespace: false,
+      removeUnnecessaryAttrs: false,
+      shortenColors: false,
+      removeEmptyContainers: false,
+      removeDoctype: false,
+      removeXMLProcInst: false,
+      enableNumericOptimization: false,
+      enableStyleOptimization: false,
+      enableTransformOptimization: false,
+      enableTransformCollapsing: false,
+      enablePathOptimization: false,
+      enablePathSimplification: false,
+    },
+    [OptLevel.BASIC]: {},
+    [OptLevel.BALANCED]: {
+      removeHiddenElements: true,
+      floatPrecision: 3,
+      enableNumericOptimization: true,
+      enableStyleOptimization: true,
+      enableTransformOptimization: false,
+      enableTransformCollapsing: false,
+      enablePathOptimization: false,
+    },
+    [OptLevel.AGGRESSIVE]: {
+      removeHiddenElements: true,
+      mergePaths: true,
+      collapseGroups: true,
+      floatPrecision: 2,
+      pathTolerance: 0.7,
+      sortAttrs: true,
+      enableNumericOptimization: true,
+      enableStyleOptimization: true,
+      enableTransformOptimization: true,
+      enableTransformCollapsing: true,
+      enablePathOptimization: true,
+      shapeConversion: false,
+      shapeConversionThreshold: 5,
+    },
+    [OptLevel.MAXIMUM]: {
+      removeHiddenElements: true,
+      mergePaths: true,
+      collapseGroups: true,
+      inlineStyles: true,
+      floatPrecision: 1,
+      pathTolerance: 0.9,
+      sortAttrs: true,
+      removeViewBox: false,
+      enableNumericOptimization: true,
+      enableStyleOptimization: true,
+      enableTransformOptimization: true,
+      enableTransformCollapsing: true,
+      enablePathOptimization: true,
+      enablePathSimplification: true,
+      shapeConversion: true,
+      shapeConversionThreshold: 0,
+    },
+  };
 
-    case OptLevel.BASIC:
-      return baseConfig;
-
-    case OptLevel.BALANCED:
-      return {
-        ...baseConfig,
-        removeHiddenElements: true,
-        floatPrecision: 3,
-        enableNumericOptimization: true,
-        enableStyleOptimization: true,
-        enableTransformOptimization: false,
-        enableTransformCollapsing: false,
-        enablePathOptimization: false,
-      };
-
-    case OptLevel.AGGRESSIVE:
-      return {
-        ...baseConfig,
-        removeHiddenElements: true,
-        mergePaths: true,
-        collapseGroups: true,
-        floatPrecision: 2,
-        pathTolerance: 0.7,
-        sortAttrs: true,
-        enableNumericOptimization: true,
-        enableStyleOptimization: true,
-        enableTransformOptimization: true,
-        enableTransformCollapsing: true,
-        enablePathOptimization: true,
-        // DISABLED: Shape conversion conflicts with floatPrecision=2
-        // Causes visual regressions (coordinates get rounded before conversion)
-        shapeConversion: false,
-        shapeConversionThreshold: 5,
-      };
-
-    case OptLevel.MAXIMUM:
-      return {
-        ...baseConfig,
-        removeHiddenElements: true,
-        mergePaths: true,
-        collapseGroups: true,
-        inlineStyles: true,
-        floatPrecision: 1,
-        pathTolerance: 0.9,
-        sortAttrs: true,
-        removeViewBox: false, // Keep viewBox even at maximum for compatibility
-        enableNumericOptimization: true,
-        enableStyleOptimization: true,
-        enableTransformOptimization: true,
-        enableTransformCollapsing: true,
-        enablePathOptimization: true,
-        enablePathSimplification: true,
-        shapeConversion: true,
-        shapeConversionThreshold: 0, // Convert even 1-byte savings
-      };
-
-    default:
-      return baseConfig;
-  }
+  const overrides = levelOverrides[level] ?? {};
+  return { ...baseConfig, ...overrides };
 }

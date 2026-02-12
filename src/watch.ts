@@ -1,7 +1,7 @@
 import path from 'path';
 import { generateSVG } from './builder.js';
 import { isLocked } from './lock.js';
-import { FileSystem, FileWatcher } from './utils/native.js';
+import { FileSystem, FileWatcher, toPascalCase } from './utils/native.js';
 
 /**
  * Watches a source folder for changes to SVG files and automatically
@@ -70,8 +70,9 @@ export async function watchSVGs(config: { src: string; out: string }) {
       console.log(`➕ New SVG detected: ${path.basename(filePath)}`);
       await generateSVG({ svgFile: filePath, outDir });
     } else {
-      // File was deleted
-      const componentName = path.basename(filePath, '.svg');
+      // File was deleted — use PascalCase to match the generated component filename
+      const baseName = path.basename(filePath, '.svg');
+      const componentName = toPascalCase(baseName);
       const outFile = path.join(outDir, `${componentName}.tsx`);
 
       if (await FileSystem.exists(outFile)) {

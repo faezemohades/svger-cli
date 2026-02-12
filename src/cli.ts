@@ -163,8 +163,8 @@ program
         process.exit(1);
       }
 
-      // Validate framework type if provided
-      const validFrameworks = [
+      // Validate framework type if provided — O(1) Set.has() instead of O(n) Array.includes()
+      const validFrameworks = new Set([
         'react',
         'react-native',
         'vue',
@@ -174,25 +174,25 @@ program
         'preact',
         'lit',
         'vanilla',
-      ];
-      if (opts.framework && !validFrameworks.includes(opts.framework)) {
+      ]);
+      if (opts.framework && !validFrameworks.has(opts.framework)) {
         logger.error(
-          `Error: Invalid framework "${opts.framework}". Valid options: ${validFrameworks.join(', ')}`
+          `Error: Invalid framework "${opts.framework}". Valid options: ${[...validFrameworks].join(', ')}`
         );
         process.exit(1);
       }
 
-      // Validate optimization level if provided
-      const validOptLevels = [
+      // Validate optimization level if provided — O(1) Set.has()
+      const validOptLevels = new Set([
         'none',
         'basic',
         'balanced',
         'aggressive',
         'maximum',
-      ];
-      if (opts.optimize && !validOptLevels.includes(opts.optimize)) {
+      ]);
+      if (opts.optimize && !validOptLevels.has(opts.optimize)) {
         logger.error(
-          `Error: Invalid optimization level "${opts.optimize}". Valid options: ${validOptLevels.join(', ')}`
+          `Error: Invalid optimization level "${opts.optimize}". Valid options: ${[...validOptLevels].join(', ')}`
         );
         process.exit(1);
       }
@@ -377,20 +377,20 @@ program
           process.exit(1);
         }
 
-        // Parse value with proper type conversion
-        let parsedValue: any = value;
+        // Parse value with O(1) lookup for known literals, then type detection
+        const literalValues: Record<string, any> = {
+          true: true,
+          false: false,
+        };
+        let parsedValue: any;
 
-        // Parse booleans
-        if (value === 'true') {
-          parsedValue = true;
-        } else if (value === 'false') {
-          parsedValue = false;
-        }
-        // Parse numbers
-        else if (!isNaN(Number(value)) && value.trim() !== '') {
+        if (value in literalValues) {
+          parsedValue = literalValues[value];
+        } else if (!isNaN(Number(value)) && value.trim() !== '') {
           parsedValue = Number(value);
+        } else {
+          parsedValue = value;
         }
-        // Keep as string otherwise
 
         return configService.setConfig(key, parsedValue);
       }
@@ -451,13 +451,18 @@ program
         process.exit(1);
       }
 
-      // Validate optimization level if provided
-      const validOptLevels = ['basic', 'balanced', 'aggressive', 'maximum'];
+      // Validate optimization level if provided — O(1) Set.has()
+      const validOptLevels = new Set([
+        'basic',
+        'balanced',
+        'aggressive',
+        'maximum',
+      ]);
       const level = opts.level || 'balanced';
 
-      if (!validOptLevels.includes(level)) {
+      if (!validOptLevels.has(level)) {
         logger.error(
-          `Error: Invalid optimization level "${level}". Valid options: ${validOptLevels.join(', ')}`
+          `Error: Invalid optimization level "${level}". Valid options: ${[...validOptLevels].join(', ')}`
         );
         process.exit(1);
       }

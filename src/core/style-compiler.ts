@@ -330,13 +330,12 @@ function getAnimationStyles(animationType: string): React.CSSProperties {
 }
 
 function getThemeStyles(theme: _theme): React.CSSProperties {
-  if (theme === 'dark') {
-    return { filter: 'invert(1) hue-rotate(180deg)' };
-  }
-  if (theme === 'auto') {
-    return { filter: 'var(--svger-theme-filter, none)' };
-  }
-  return {};
+  // O(1) object lookup instead of if-else chain
+  const themeStyleMap: Record<string, React.CSSProperties> = {
+    dark: { filter: 'invert(1) hue-rotate(180deg)' },
+    auto: { filter: 'var(--svger-theme-filter, none)' },
+  };
+  return themeStyleMap[theme as string] || {};
 }
 
 ${componentName}.displayName = "${componentName}";

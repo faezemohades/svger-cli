@@ -529,23 +529,27 @@ const ${componentName} = React.forwardRef<SVGSVGElement, ${componentName}Props>(
         baseStyles.color = colorMap[variant];
       }
       
-      // Apply theme
-      if (theme === 'dark') {
-        baseStyles.filter = 'invert(1)';
-      } else if (theme === 'auto') {
-        baseStyles.filter = 'var(--svger-theme-filter, none)';
+      // Apply theme — O(1) object lookup instead of if-else chain
+      const themeFilters: Record<string, string> = {
+        dark: 'invert(1)',
+        auto: 'var(--svger-theme-filter, none)',
+      };
+      if (theme && themeFilters[theme]) {
+        baseStyles.filter = themeFilters[theme];
       }
       
-      // Apply animation
+      // Apply animation — O(1) object lookup instead of if-else chain
       if (animate) {
-        if (animate === true || animate === 'spin') {
-          baseStyles.animation = 'svger-spin 2s linear infinite';
-        } else if (animate === 'pulse') {
-          baseStyles.animation = 'svger-pulse 2s ease-in-out infinite';
-        } else if (animate === 'bounce') {
-          baseStyles.animation = 'svger-bounce 1s infinite';
-        } else if (animate === 'fade') {
-          baseStyles.animation = 'svger-fade 2s ease-in-out infinite alternate';
+        const animationMap: Record<string, string> = {
+          spin: 'svger-spin 2s linear infinite',
+          pulse: 'svger-pulse 2s ease-in-out infinite',
+          bounce: 'svger-bounce 1s infinite',
+          fade: 'svger-fade 2s ease-in-out infinite alternate',
+        };
+        const animKey = animate === true ? 'spin' : animate;
+        const anim = animationMap[animKey as string];
+        if (anim) {
+          baseStyles.animation = anim;
         }
       }
       

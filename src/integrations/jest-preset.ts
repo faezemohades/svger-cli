@@ -94,6 +94,37 @@ module.exports.default = ${componentName};
 };
 
 /**
+ * Synchronous SVG content cleaning for Jest compatibility.
+ * svgProcessor.cleanSVGContent() is async (uses optimizer pipeline) and cannot
+ * be called from Jest's synchronous process() method. This provides equivalent
+ * basic cleaning without the async optimizer pipeline.
+ */
+function cleanSVGContentSync(svgContent: string): string {
+  return (
+    svgContent
+      // Remove XML declaration
+      .replace(/<\?xml.*?\?>/g, '')
+      // Remove DOCTYPE declaration
+      .replace(/<!DOCTYPE.*?>/g, '')
+      // Remove comments
+      .replace(/<!--[\s\S]*?-->/g, '')
+      // Normalize whitespace
+      .replace(/\r?\n|\r/g, '')
+      .replace(/\s{2,}/g, ' ')
+      // Remove xmlns attributes
+      .replace(/\s+xmlns(:xlink)?="[^"]*"/g, '')
+      // Remove metadata
+      .replace(/<metadata[\s\S]*?<\/metadata>/gi, '')
+      .replace(/<title[\s\S]*?<\/title>/gi, '')
+      .replace(/<desc[\s\S]*?<\/desc>/gi, '')
+      .trim()
+      // Extract inner content from <svg> tag
+      .replace(/^<svg[^>]*>([\s\S]*)<\/svg>$/i, '$1')
+      .trim()
+  );
+}
+
+/**
  * Generate component synchronously (for Jest compatibility)
  */
 function generateComponentSync(
@@ -101,8 +132,8 @@ function generateComponentSync(
   svgContent: string,
   options: any
 ): string {
-  // Clean SVG content
-  const cleanedContent = svgProcessor.cleanSVGContent(svgContent);
+  // Clean SVG content synchronously (cleanSVGContent is async and cannot be used here)
+  const cleanedContent = cleanSVGContentSync(svgContent);
 
   // For Jest, we'll generate a simple React component
   const viewBox = svgProcessor.extractViewBox(svgContent);

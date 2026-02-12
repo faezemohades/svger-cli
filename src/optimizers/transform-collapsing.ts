@@ -280,21 +280,18 @@ function applyTransformToPath(node: SVGNode, matrix: Matrix): boolean {
  * Apply transform to shape coordinates
  */
 function applyTransformToShape(node: SVGNode, matrix: Matrix): boolean {
-  switch (node.tag) {
-    case 'rect':
-      return applyTransformToRect(node, matrix);
-    case 'circle':
-      return applyTransformToCircle(node, matrix);
-    case 'line':
-      return applyTransformToLine(node, matrix);
-    case 'polygon':
-    case 'polyline':
-      return applyTransformToPoints(node, matrix);
-    case 'path':
-      return applyTransformToPath(node, matrix);
-    default:
-      return false;
-  }
+  // O(1) object lookup for shape tag → transform handler
+  const shapeHandlers: Record<string, (n: SVGNode, m: Matrix) => boolean> = {
+    rect: applyTransformToRect,
+    circle: applyTransformToCircle,
+    line: applyTransformToLine,
+    polygon: applyTransformToPoints,
+    polyline: applyTransformToPoints,
+    path: applyTransformToPath,
+  };
+
+  const handler = shapeHandlers[node.tag];
+  return handler ? handler(node, matrix) : false;
 }
 
 /**
