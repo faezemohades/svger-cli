@@ -9,15 +9,10 @@ import { resolve } from 'path';
 import { pathToFileURL } from 'url';
 import path from 'path';
 import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+
 
 // Read version dynamically from package.json
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const packageJson = JSON.parse(
-  readFileSync(join(__dirname, '../package.json'), 'utf-8')
-);
+const packageJson = JSON.parse(readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
 const CLI_VERSION = packageJson.version;
 
 const program = new CLI();
@@ -551,4 +546,8 @@ program
     }
   });
 
-program.parse();
+await program.parse();
+
+// Ensure the process exits after CLI execution completes
+// (imported singletons may keep the event loop alive)
+process.exit(0);

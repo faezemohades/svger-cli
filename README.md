@@ -11,8 +11,8 @@
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Ready-blue.svg" alt="TypeScript" /></a>
     <a href="https://www.npmjs.com/package/svger-cli"><img src="https://img.shields.io/badge/Dependencies-Zero-green.svg" alt="Zero Dependencies" /></a>
-    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Tests-114%20passing-success.svg" alt="Tests" /></a>
-    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Coverage-82%25-yellow.svg" alt="Coverage" /></a>
+    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Tests-155%20passing-success.svg" alt="Tests" /></a>
+    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Coverage-10%25-red.svg" alt="Coverage" /></a>
   </p>
 
   <p><strong>The most advanced, zero-dependency SVG to component converter with extensible plugin system and official build tool integrations. First-class support for Webpack, Vite, Rollup, Babel, Next.js, and Jest. Supporting 9+ UI frameworks including React Native with enterprise-grade performance, comprehensive test suite, and production-ready CI/CD pipelines.</strong></p>

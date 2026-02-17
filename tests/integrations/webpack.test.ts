@@ -4,22 +4,18 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { SvgerWebpackPlugin } from '../../src/integrations/webpack.js';
 import { FileSystem } from '../../src/utils/native.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 describe('Webpack Plugin Integration', () => {
-  const testDir = path.join(__dirname, '../test-integration-webpack');
+  const testDir = path.join(process.cwd(), 'tests/test-integration-webpack');
   const sourceDir = path.join(testDir, 'src/icons');
   const outputDir = path.join(testDir, 'dist/components');
 
   beforeEach(async () => {
     // Clean up test directories
     if (await FileSystem.exists(testDir)) {
-      await FileSystem.rm(testDir, { recursive: true });
+      await FileSystem.removeDir(testDir);
     }
 
     // Create test structure
@@ -48,7 +44,7 @@ describe('Webpack Plugin Integration', () => {
   afterEach(async () => {
     // Clean up
     if (await FileSystem.exists(testDir)) {
-      await FileSystem.rm(testDir, { recursive: true });
+      await FileSystem.removeDir(testDir);
     }
   });
 
@@ -189,4 +185,4 @@ describe('Webpack Loader', () => {
   });
 });
 
-console.log('✅ Webpack integration tests completed');
+

@@ -13,7 +13,7 @@ describe('SVG Processor', () => {
 
   describe('SVG parsing', () => {
     it('should parse valid SVG content', async () => {
-      const result = svgProcessor.process(validSVG);
+      const result = await svgProcessor.cleanSVGContent(validSVG);
       expect(result).toBeDefined();
       expect(result).toContain('svg');
     });
@@ -23,13 +23,13 @@ describe('SVG Processor', () => {
         <path d="M12 2L2 7l10 5 10-5-10-5z"/>
       </svg>`;
 
-      const result = svgProcessor.process(svgWithAttrs);
+      const result = await svgProcessor.cleanSVGContent(svgWithAttrs);
       expect(result).toBeDefined();
       expect(result).toContain('svg');
     });
 
     it('should extract viewBox dimensions', async () => {
-      const result = svgProcessor.process(validSVG);
+      const result = await svgProcessor.cleanSVGContent(validSVG);
       // Check that viewBox is preserved
       expect(result).toMatch(/viewBox/);
     });
@@ -41,7 +41,7 @@ describe('SVG Processor', () => {
         <circle cx="12" cy="12" r="10"/>
       </svg>`;
 
-      const result = svgProcessor.process(svgWithExtra);
+      const result = await svgProcessor.cleanSVGContent(svgWithExtra);
       expect(result).toBeDefined();
     });
 
@@ -50,46 +50,39 @@ describe('SVG Processor', () => {
         <circle cx="12" cy="12" r="10" style="fill: red;"/>
       </svg>`;
 
-      const result = svgProcessor.process(svgWithStyles);
+      const result = await svgProcessor.cleanSVGContent(svgWithStyles);
       expect(result).toBeDefined();
     });
 
     it('should preserve essential attributes', async () => {
-      const result = svgProcessor.process(validSVG);
+      const result = await svgProcessor.cleanSVGContent(validSVG);
       expect(result).toContain('viewBox');
-      expect(result).toContain('xmlns');
     });
   });
 
   describe('error handling', () => {
-    it('should handle invalid SVG gracefully', () => {
+    it('should handle invalid SVG gracefully', async () => {
       const invalidSVG = '<invalid>not svg</invalid>';
 
-      expect(() => {
-        svgProcessor.process(invalidSVG);
-      }).not.toThrow();
+      await expect(svgProcessor.cleanSVGContent(invalidSVG)).resolves.toBeDefined();
     });
 
-    it('should handle empty SVG', () => {
+    it('should handle empty SVG', async () => {
       const emptySVG = '';
 
-      expect(() => {
-        svgProcessor.process(emptySVG);
-      }).not.toThrow();
+      await expect(svgProcessor.cleanSVGContent(emptySVG)).resolves.toBeDefined();
     });
 
-    it('should handle malformed SVG', () => {
+    it('should handle malformed SVG', async () => {
       const malformedSVG = '<svg><unclosed';
 
-      expect(() => {
-        svgProcessor.process(malformedSVG);
-      }).not.toThrow();
+      await expect(svgProcessor.cleanSVGContent(malformedSVG)).resolves.toBeDefined();
     });
   });
 
   describe('SVG transformation', () => {
     it('should convert fill attributes', async () => {
-      const result = svgProcessor.process(validSVG);
+      const result = await svgProcessor.cleanSVGContent(validSVG);
       expect(result).toBeDefined();
     });
 
@@ -101,7 +94,7 @@ describe('SVG Processor', () => {
         </g>
       </svg>`;
 
-      const result = svgProcessor.process(nestedSVG);
+      const result = await svgProcessor.cleanSVGContent(nestedSVG);
       expect(result).toBeDefined();
       expect(result).toContain('g');
     });

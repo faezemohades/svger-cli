@@ -49,8 +49,7 @@ describe('EnhancedPluginManager', () => {
         hooks: {},
       } as EnhancedPlugin;
 
-      manager.registerPlugin(plugin);
-      expect(manager.pluginCount).toBe(0);
+      expect(() => manager.registerPlugin(plugin)).toThrow();
     });
 
     it('should reject plugin with no hooks', () => {
@@ -60,8 +59,7 @@ describe('EnhancedPluginManager', () => {
         hooks: {},
       } as EnhancedPlugin;
 
-      manager.registerPlugin(plugin);
-      expect(manager.pluginCount).toBe(0);
+      expect(() => manager.registerPlugin(plugin)).toThrow();
     });
 
     it('should reject plugin with invalid hook type', () => {
@@ -75,8 +73,7 @@ describe('EnhancedPluginManager', () => {
         },
       } as unknown as EnhancedPlugin;
 
-      manager.registerPlugin(plugin);
-      expect(manager.pluginCount).toBe(0);
+      expect(() => manager.registerPlugin(plugin)).toThrow();
     });
 
     it('should call plugin init on registration', async () => {
@@ -106,8 +103,7 @@ describe('EnhancedPluginManager', () => {
       };
 
       manager.registerPlugin(plugin);
-      manager.registerPlugin(plugin); // Duplicate
-      expect(manager.pluginCount).toBe(1);
+      expect(() => manager.registerPlugin(plugin)).toThrow(); // Duplicate
     });
   });
 

@@ -28,6 +28,13 @@ module.exports = {
     '/test-config-output/',
     '/test-e2e-complete/',
     'src/__tests__/fixtures.ts',
+    'src/__tests__/__mocks__/',
+    'tests/unit/',
+    'tests/locked-files-index\\.test',
+    'tests/e2e-complete\\.test',
+    'tests/config-options\\.test',
+    'tests/dist/',
+    'tests/dist-tests/',
   ],
   transformIgnorePatterns: ['node_modules/(?!(pixelmatch|pngjs)/)'],
   collectCoverageFrom: [

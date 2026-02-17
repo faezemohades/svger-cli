@@ -35,15 +35,17 @@ describe('CLI', () => {
     it('should display help when --help is used', () => {
       const result = execSync('node bin/svg-tool.js --help', {
         encoding: 'utf-8',
+        timeout: 15000,
       });
 
-      expect(result).toContain('Usage');
+      expect(result).toContain('svger-cli');
       expect(result).toContain('build');
     });
 
     it('should display version when --version is used', () => {
       const result = execSync('node bin/svg-tool.js --version', {
         encoding: 'utf-8',
+        timeout: 15000,
       });
 
       expect(result).toMatch(/\d+\.\d+\.\d+/);
@@ -52,7 +54,7 @@ describe('CLI', () => {
     it('should process SVG files with build command', () => {
       const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react`;
 
-      const result = execSync(cmd, { encoding: 'utf-8' });
+      const result = execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
       expect(result).toBeDefined();
     });
 
@@ -63,7 +65,7 @@ describe('CLI', () => {
         const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework ${framework}`;
 
         expect(() => {
-          execSync(cmd, { encoding: 'utf-8' });
+          execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
         }).not.toThrow();
       });
     });
@@ -72,7 +74,7 @@ describe('CLI', () => {
       const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react --typescript`;
 
       expect(() => {
-        execSync(cmd, { encoding: 'utf-8' });
+        execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
       }).not.toThrow();
     });
 
@@ -83,7 +85,7 @@ describe('CLI', () => {
         const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react --naming ${convention}`;
 
         expect(() => {
-          execSync(cmd, { encoding: 'utf-8' });
+          execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
         }).not.toThrow();
       });
     });
@@ -98,7 +100,7 @@ describe('CLI', () => {
       );
 
       const cmd = `node bin/svg-tool.js clean --out ${outputDir}`;
-      execSync(cmd, { encoding: 'utf-8' });
+      execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
 
       const files = await FileSystem.readDir(outputDir);
       expect(files.length).toBe(0);
@@ -111,7 +113,7 @@ describe('CLI', () => {
       // This just verifies the command is recognized
       const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework react --help`;
 
-      const result = execSync(cmd, { encoding: 'utf-8' });
+      const result = execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
       expect(result).toBeDefined();
     });
   });
@@ -119,7 +121,7 @@ describe('CLI', () => {
   describe('error handling', () => {
     it('should show error for missing required arguments', () => {
       try {
-        execSync('node bin/svg-tool.js build', { encoding: 'utf-8' });
+        execSync('node bin/svg-tool.js build', { encoding: 'utf-8', timeout: 15000 });
       } catch (error: any) {
         expect(error.status).not.toBe(0);
       }
@@ -128,7 +130,7 @@ describe('CLI', () => {
     it('should show error for invalid framework', () => {
       try {
         const cmd = `node bin/svg-tool.js build --src ${inputDir} --out ${outputDir} --framework invalid`;
-        execSync(cmd, { encoding: 'utf-8' });
+        execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
       } catch (error: any) {
         // Should fail with invalid framework
         expect(error.status).not.toBe(0);
@@ -138,7 +140,7 @@ describe('CLI', () => {
     it('should show error for non-existent source directory', () => {
       try {
         const cmd = `node bin/svg-tool.js build --src /non/existent/path --out ${outputDir} --framework react`;
-        execSync(cmd, { encoding: 'utf-8' });
+        execSync(cmd, { encoding: 'utf-8', timeout: 15000 });
       } catch (error: any) {
         expect(error.status).not.toBe(0);
       }

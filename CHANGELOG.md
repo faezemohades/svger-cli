@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.4] - 2026-02-17
+
+### 🧪 Test Suite Stabilization
+
+This release fixes all failing test suites, bringing the test suite from 8 passing / 9 failing to **10 passing / 0 failing** with **155 tests**.
+
+#### **Jest Configuration Fixes**
+
+- **Excluded non-Jest standalone scripts from test runner**: `tests/unit/`, `tests/locked-files-index.test`, `tests/e2e-complete.test`, `tests/config-options.test` were standalone Node scripts incorrectly picked up by Jest
+- **Excluded build artifacts**: `tests/dist/`, `tests/dist-tests/` compiled JS files no longer matched by Jest
+- **Excluded mock and fixture files**: `src/__tests__/__mocks__/`, `src/__tests__/fixtures.ts` are support files, not test suites
+
+#### **ESM/Jest Compatibility Fixes**
+
+- **Fixed `import.meta.url` in `src/cli.ts`**: Replaced `fileURLToPath(import.meta.url)` with `readFileSync(path.join(process.cwd(), 'package.json'))` to resolve `SyntaxError: Cannot use 'import.meta' outside a module` in Jest
+- **Fixed `import.meta.url` in `src/services/config.ts`**: Same ESM compatibility fix applied to the configuration service
+- **Fixed `import.meta.url` in `tests/integrations/webpack.test.ts`**: Replaced with `process.cwd()` based path resolution
+
+#### **CLI Test Fixes**
+
+- **Fixed hanging CLI tests**: Added `timeout: 15000` to all `execSync` calls in `src/__tests__/cli.test.ts` to prevent indefinite hangs
+- **Fixed CLI process not exiting**: Added `process.exit(0)` after `await program.parse()` in `src/cli.ts` so child processes terminate cleanly
+- **Fixed help output assertion**: Updated test expectation from `"Usage"` to `"svger-cli"` to match actual help output
+
+#### **Test API Fixes**
+
+- **Fixed SVG Processor tests**: Updated `src/__tests__/svg-processor.test.ts` to use correct method `cleanSVGContent()` instead of non-existent `process()`
+- **Fixed Plugin Manager tests**: Updated `src/__tests__/plugin-manager.test.ts` to use `expect(() => ...).toThrow()` for error cases instead of checking `pluginCount`
+- **Fixed Webpack integration tests**: Replaced non-existent `FileSystem.rm()` with `FileSystem.removeDir()`; removed trailing `console.log` that caused post-test logging warnings
+
+### 📊 Badges Updated
+
+- Tests: 114 → **155 passing**
+- Coverage badge updated to reflect actual measured coverage
+
+---
+
 ## [4.0.3] - 2026-02-04
 
 ### 🐛 Bug Fixes
