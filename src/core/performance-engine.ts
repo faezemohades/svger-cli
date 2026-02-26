@@ -113,7 +113,7 @@ export class PerformanceEngine {
     duration: number;
   }> {
     const startTime = Date.now();
-    const cacheKey = this.generateCacheKey(file.path, file.options || {});
+    const cacheKey = await this.generateCacheKey(file.path, file.options || {});
 
     // Check cache first
     const cached = this.getCachedResult(cacheKey);
@@ -275,14 +275,15 @@ export class PerformanceEngine {
     }
   }
 
-  private generateCacheKey(
+  private async generateCacheKey(
     filePath: string,
     options: Partial<ComponentGenerationOptions>
-  ): string {
+  ): Promise<string> {
     // Include file modification time to invalidate cache when file changes
     let mtimeMs = 0;
     try {
-      mtimeMs = fs.statSync(filePath).mtimeMs;
+      const stat = await fs.promises.stat(filePath);
+      mtimeMs = stat.mtimeMs;
     } catch {
       // File may not exist yet; use 0 so caching still works
     }

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.5] - 2026-02-26
+
+### 🐛 Bug Fixes
+
+- **Watch Mode Stability**: Fixed a critical bug in `watch.ts` and `svg-service.ts` where file deletion logic failed to respect user configuration (naming convention, file extensions) and incorrectly defaulted to PascalCase/TSX.
+- **Performance Optimization**: Updated `PerformanceEngine` to use asynchronous file stats (`fs.promises.stat`) instead of synchronous calls, unlocking true parallel processing capabilities and preventing main thread blocking during large batch operations.
+- **Regex Optimization**: Optimized `basic-cleaner.ts` to use a single compiled RegExp for attribute replacement instead of creating a new RegExp for every attribute in every file, resulting in significantly faster processing.
+- **Visual Testing Infrastructure**: Fixed broken visual regression test scripts in `package.json` and corrected relative import paths in `tests/dev/test-visual-diff.js` and `tests/dev/test-visual-integration.js`.
+
+### 🚀 Performance
+
+- **Parallel Processing**: Asynchronous file operations in the performance engine now allow for non-blocking concurrent processing, improving throughput for large icon sets.
+- **Optimizer Speed**: Attribute cleaning is now O(N) instead of O(K*N), reducing overhead in the optimization pipeline.
+
+---
+
 ## [4.0.4] - 2026-02-17
 
 ### 🧪 Test Suite Stabilization

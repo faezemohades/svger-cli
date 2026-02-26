@@ -9,6 +9,7 @@ import {
 import { logger } from '../core/logger.js';
 import { configService } from './config.js';
 import { svgProcessor } from '../processors/svg-processor.js';
+import { frameworkTemplateEngine } from '../core/framework-templates.js';
 import { fileWatcher } from './file-watcher.js';
 import { OptLevel } from '../optimizers/types.js';
 
@@ -353,16 +354,27 @@ export class SVGService {
     config?: any
   ): Promise<void> {
     try {
-      const namingConvention = config?.output?.naming || 'pascal';
+      // Get configuration
+      const fullConfig = configService.readConfig();
+      const mergedConfig = { ...fullConfig, ...config };
+
+      const namingConvention = mergedConfig.outputConfig?.naming || 'pascal';
+      const framework = mergedConfig.framework || 'react';
+      const typescript = mergedConfig.typescript !== false;
+      const extension = frameworkTemplateEngine.getFileExtension(
+        framework,
+        typescript
+      );
+
       const componentName = svgProcessor.generateComponentName(
         path.basename(filePath),
         namingConvention
       );
-      const componentPath = path.join(outDir, `${componentName}.tsx`);
+      const componentPath = path.join(outDir, `${componentName}.${extension}`);
 
       if (await FileSystem.exists(componentPath)) {
         await FileSystem.unlink(componentPath);
-        logger.success(`Removed component: ${componentName}.tsx`);
+        logger.success(`Removed component: ${componentName}.${extension}`);
       }
     } catch (error) {
       logger.error(

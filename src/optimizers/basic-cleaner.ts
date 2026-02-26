@@ -86,13 +86,10 @@ export function convertToCamelCase(svg: string, config: OptConfig): string {
     'stroke-opacity': 'strokeOpacity',
   };
 
-  let result = svg;
-  for (const [kebab, camel] of Object.entries(attributeMap)) {
-    const regex = new RegExp(kebab, 'g');
-    result = result.replace(regex, camel);
-  }
-
-  return result;
+  // Create a single regex from all keys — O(n) instead of O(k*n)
+  const regex = new RegExp(Object.keys(attributeMap).join('|'), 'g');
+  
+  return svg.replace(regex, (match) => attributeMap[match]);
 }
 
 /**

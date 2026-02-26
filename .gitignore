@@ -101,7 +101,6 @@ test-output/
 test-config-output/
 test-e2e-complete/
 dist-tests/
-tests/dev/
 
 # CI/CD
 workspace/input/*

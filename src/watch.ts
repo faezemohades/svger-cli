@@ -1,7 +1,10 @@
 import path from 'path';
 import { generateSVG } from './builder.js';
 import { isLocked } from './lock.js';
-import { FileSystem, FileWatcher, toPascalCase } from './utils/native.js';
+import { FileSystem, FileWatcher } from './utils/native.js';
+import { configService } from './services/config.js';
+import { svgProcessor } from './processors/svg-processor.js';
+import { frameworkTemplateEngine } from './core/framework-templates.js';
 
 /**
  * Watches a source folder for changes to SVG files and automatically
@@ -70,14 +73,25 @@ export async function watchSVGs(config: { src: string; out: string }) {
       console.log(`➕ New SVG detected: ${path.basename(filePath)}`);
       await generateSVG({ svgFile: filePath, outDir });
     } else {
-      // File was deleted — use PascalCase to match the generated component filename
-      const baseName = path.basename(filePath, '.svg');
-      const componentName = toPascalCase(baseName);
-      const outFile = path.join(outDir, `${componentName}.tsx`);
+      // File was deleted — use configured naming convention and extension
+      const config = configService.readConfig();
+      const namingConvention = config.outputConfig?.naming || 'pascal';
+      const framework = config.framework || 'react';
+      const typescript = config.typescript !== false;
+      const extension = frameworkTemplateEngine.getFileExtension(
+        framework,
+        typescript
+      );
+
+      const componentName = svgProcessor.generateComponentName(
+        path.basename(filePath),
+        namingConvention
+      );
+      const outFile = path.join(outDir, `${componentName}.${extension}`);
 
       if (await FileSystem.exists(outFile)) {
         await FileSystem.unlink(outFile);
-        console.log(`🗑️ Removed component: ${componentName}.tsx`);
+        console.log(`🗑️ Removed component: ${componentName}.${extension}`);
       }
     }
   });
