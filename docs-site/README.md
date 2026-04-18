@@ -86,7 +86,7 @@ Edit `script.js` - vanilla JavaScript for all interactions.
 ### Update Version Number
 Update the version badge in `index.html`:
 ```html
-<span class="text-[10px] text-muted-foreground tracking-wider leading-none mt-0.5">v4.0.3</span>
+<span class="text-[10px] text-muted-foreground tracking-wider leading-none mt-0.5">v4.0.6</span>
 ```
 
 ### Update Performance Stats
