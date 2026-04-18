@@ -231,6 +231,22 @@ export class SVGProcessor {
     return viewBoxMatch ? viewBoxMatch[1] : null;
   }
 
+  private static readonly NAMING_HANDLERS: Record<string, (baseName: string) => string> = {
+    kebab: (baseName) => toKebabCase(baseName),
+    camel: (baseName) => {
+      const pascalName = toPascalCase(baseName);
+      return pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
+    },
+    pascal: (baseName) => {
+      const componentName = toPascalCase(baseName);
+      // Ensure component name starts with uppercase letter
+      if (!/^[A-Z]/.test(componentName)) {
+        return `Svg${componentName}`;
+      }
+      return componentName;
+    },
+  };
+
   /**
    * Generate component name from filename
    */
@@ -239,26 +255,8 @@ export class SVGProcessor {
     namingConvention?: 'kebab' | 'pascal' | 'camel'
   ): string {
     const baseName = path.basename(fileName, '.svg');
-
-    // Object lookup map for naming conventions - O(1) performance
-    const namingHandlers = {
-      kebab: () => toKebabCase(baseName),
-      camel: () => {
-        const pascalName = toPascalCase(baseName);
-        return pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
-      },
-      pascal: () => {
-        const componentName = toPascalCase(baseName);
-        // Ensure component name starts with uppercase letter
-        if (!/^[A-Z]/.test(componentName)) {
-          return `Svg${componentName}`;
-        }
-        return componentName;
-      },
-    };
-
-    const handler = namingHandlers[namingConvention || 'pascal'];
-    return handler ? handler() : namingHandlers.pascal();
+    const convention = namingConvention || 'pascal';
+    return SVGProcessor.NAMING_HANDLERS[convention](baseName);
   }
 
   /**
@@ -377,6 +375,12 @@ export class SVGProcessor {
     }
   }
 
+  private static readonly NAMING_CONVERTERS: Record<string, (name: string) => string> = {
+    kebab: toKebabCase,
+    camel: toCamelCase,
+    pascal: (name: string) => name,
+  };
+
   /**
    * Generate filename from component name using naming convention
    */
@@ -385,14 +389,8 @@ export class SVGProcessor {
     extension: string,
     namingConvention?: NamingConvention
   ): string {
-    // Object lookup map for file naming - O(1) performance
-    const namingConverters: Record<string, (name: string) => string> = {
-      kebab: toKebabCase,
-      camel: toCamelCase,
-      pascal: (name: string) => name,
-    };
-
-    const converter = namingConverters[namingConvention || 'pascal'];
+    const convention = namingConvention || 'pascal';
+    const converter = SVGProcessor.NAMING_CONVERTERS[convention];
     const fileName = converter ? converter(componentName) : componentName;
 
     return `${fileName}.${extension}`;

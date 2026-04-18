@@ -154,6 +154,12 @@ export class PerformanceEngine {
     }
   }
 
+  private readonly OPTIMIZATION_STRATEGIES: Record<string, (content: string) => string> = {
+    fast: (c) => this.applyFastOptimizations(c),
+    balanced: (c) => this.applyBalancedOptimizations(c),
+    maximum: (c) => this.applyMaximumOptimizations(c),
+  };
+
   /**
    * Optimize SVG content with performance considerations
    */
@@ -163,18 +169,8 @@ export class PerformanceEngine {
   ): string {
     const startTime = performance.now();
 
-    // Object lookup map for optimization strategies - O(1) performance
-    const optimizationStrategies: Record<string, (content: string) => string> =
-      {
-        fast: c => this.applyFastOptimizations(c),
-        balanced: c => this.applyBalancedOptimizations(c),
-        maximum: c => this.applyMaximumOptimizations(c),
-      };
-
-    const strategy = optimizationStrategies[level];
-    const optimized = strategy
-      ? strategy(content)
-      : this.applyBalancedOptimizations(content);
+    const strategy = this.OPTIMIZATION_STRATEGIES[level];
+    const optimized = strategy ? strategy(content) : this.applyBalancedOptimizations(content);
 
     const duration = performance.now() - startTime;
     const compressionRatio = (1 - optimized.length / content.length) * 100;

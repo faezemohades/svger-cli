@@ -1,6 +1,6 @@
 {
   "name": "svger-cli",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "Enterprise-grade SVG to component converter with advanced plugin system, visual diff testing, and official framework integrations. Supporting React, React Native, Vue, Angular, Svelte, Solid, Lit, Preact & Vanilla. Features TypeScript, HMR, optimization pipeline, and extensible architecture.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

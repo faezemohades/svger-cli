@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.6] - 2026-04-18
+
+### ⚡ Performance Optimization (Chrome V8)
+
+- **Inline Caching Optimization**: Replaced dynamic inner-function dictionaries (`NAMING_HANDLERS`, `NAMING_CONVERTERS`, `OPTIMIZATION_STRATEGIES` in `svg-processor.ts` and `performance-engine.ts`) with static readonly properties. This locks object shapes globally, forcing V8 monomorphic shape optimizations for O(1) branchless performance.
+- **Garbage Collection Fix**: Prevented massive memory thrashing during batch processing by ensuring property lookup maps no longer trigger allocations per `optimizeSVGContent` execution.
+
+---
+
 ## [4.0.5] - 2026-02-26
 
 ### 🐛 Bug Fixes
