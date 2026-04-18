@@ -57,6 +57,59 @@ const TEST_SVGS = [
       <rect x="220" y="20" width="60" height="60" fill="#e67e22"/>
     </svg>`,
   },
+  {
+    name: 'Gradients and Paths',
+    threshold: 2.0,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:1" />
+          <stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect x="10" y="10" width="180" height="180" fill="url(#grad1)" />
+      <path d="M 50 50 L 150 50 L 100 150 Z" fill="#fff" />
+    </svg>`
+  },
+  {
+    name: 'Multiple Curves',
+    threshold: 15.0,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <path d="M10 80 Q 95 10 180 80" stroke="black" fill="transparent"/>
+      <path d="M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80" stroke="red" fill="transparent"/>
+    </svg>`
+  },
+  {
+    name: 'Transform Elements',
+    threshold: 1.0,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <g transform="translate(100, 100) rotate(45)">
+        <rect x="-50" y="-50" width="100" height="100" fill="purple" />
+        <circle cx="0" cy="0" r="20" fill="white" />
+      </g>
+    </svg>`
+  },
+  {
+    name: 'Compound Shapes and Opacity',
+    threshold: 1.0,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <rect width="100" height="100" fill="blue" />
+      <rect x="50" y="50" width="100" height="100" fill="red" opacity="0.5" />
+      <circle cx="100" cy="100" r="40" fill="green" opacity="0.8" />
+    </svg>`
+  },
+  {
+    name: 'Patterns and Simple Strokes',
+    threshold: 1.0,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+      <defs>
+        <pattern id="pattern1" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="10" cy="10" r="5" fill="#333" />
+        </pattern>
+      </defs>
+      <rect width="200" height="200" fill="url(#pattern1)" />
+    </svg>`
+  },
 ];
 
 // ============================================================================

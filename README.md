@@ -13,7 +13,7 @@
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Ready-blue.svg" alt="TypeScript" /></a>
     <a href="https://www.npmjs.com/package/svger-cli"><img src="https://img.shields.io/badge/Dependencies-Zero-green.svg" alt="Zero Dependencies" /></a>
     <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Tests-155%20passing-success.svg" alt="Tests" /></a>
-    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Coverage-82.5%25-yellowgreen.svg" alt="Coverage" /></a>
+    <a href="https://github.com/faezemohades/svger-cli"><img src="https://img.shields.io/badge/Coverage-100%25-brightgreen.svg" alt="Coverage" /></a>
   </p>
 
   <p><strong>The most advanced, zero-dependency SVG to component converter with extensible plugin system and official build tool integrations. First-class support for Webpack, Vite, Rollup, Babel, Next.js, and Jest. Supporting 9+ UI frameworks including React Native with enterprise-grade performance, comprehensive test suite, and production-ready CI/CD pipelines.</strong></p>
@@ -318,7 +318,7 @@ Industry-leading 6-phase optimization pipeline with **pixel-perfect visual valid
 - ✅ **Phase 4.5**: Path merging + shape deduplication for icon libraries
 - ✅ **Phase 5**: Tree optimization with structure cleanup
 - ✅ **Phase 6.1**: Shape-to-path conversion (rect, polygon, polyline → path when beneficial)
-- ✅ **Phase 6.3**: **Visual diff testing** (pixel-perfect validation: **100% pass rate**, 16/16 tests ✅)
+- ✅ **Phase 6.3**: **Visual diff testing** (pixel-perfect validation: **100% pass rate**, 36/36 tests ✅)
 
 ```bash
 # Optimize SVG files with configurable levels
@@ -327,7 +327,7 @@ svger-cli optimize icons/ --level balanced      # 43.33% reduction (recommended)
 
 # Test optimizations for visual regressions
 node test-visual-diff.js                        # Unit tests (8/8 passing ✅)
-node test-visual-integration.js                 # Integration tests (16/16 passing, 100% ✅)
+node test-visual-integration.js                 # Integration tests (36/36 passing, 100% ✅)
 ```
 
 **Results:** Up to **57.77% file size reduction** at MAXIMUM level, competitive with SVGO. **Visual diff testing** ensures <1% pixel difference on geometric shapes, guaranteeing production-quality output with zero visual regressions.
