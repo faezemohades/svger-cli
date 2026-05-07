@@ -2,14 +2,21 @@ import path from 'path';
 import { FileSystem } from '../utils/native.js';
 import { SVGConfig } from '../types/index.js';
 import { logger } from '../core/logger.js';
-import { readFileSync } from 'fs';
+import { getPackageInfo } from '../utils/package-info.js';
 
+type ConfigValue = string | number | boolean | null | undefined;
+type ConfigTree = Record<string, unknown>;
+type ConfigMigrationInput = Partial<SVGConfig> & {
+  plugin?: unknown;
+  performance?: SVGConfig['performance'] & { optimization?: string };
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 
 // Get package version dynamically
-const packageJson = JSON.parse(readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
-
-
-const CURRENT_VERSION = packageJson.version;
+const CURRENT_VERSION = getPackageInfo().version;
 
 /**
  * Professional configuration management service
@@ -155,7 +162,9 @@ export class ConfigService {
     }
 
     try {
-      const configData = FileSystem.readJSONSync(this.getConfigPath());
+      const configData = FileSystem.readJSONSync<ConfigMigrationInput>(
+        this.getConfigPath()
+      );
 
       if (Object.keys(configData).length === 0) {
         logger.debug('No configuration found, using defaults');
@@ -219,19 +228,20 @@ export class ConfigService {
   /**
    * Set a specific configuration value
    */
-  public setConfig(key: string, value: any): void {
+  public setConfig(key: string, value: ConfigValue): void {
     const config = this.readConfig();
 
     // Support nested key paths like 'styleRules.fill'
     const keys = key.split('.');
-    let current: any = config;
+    let current: ConfigTree = config as unknown as ConfigTree;
 
     for (let i = 0; i < keys.length - 1; i++) {
       const k = keys[i];
-      if (!(k in current)) {
+      const nextValue = current[k];
+      if (!isRecord(nextValue)) {
         current[k] = {};
       }
-      current = current[k];
+      current = current[k] as ConfigTree;
     }
 
     const finalKey = keys[keys.length - 1];
@@ -244,7 +254,7 @@ export class ConfigService {
   /**
    * Get a specific configuration value
    */
-  public getConfig(key?: string): any {
+  public getConfig(key?: string): unknown {
     const config = this.readConfig();
 
     if (!key) {
@@ -253,10 +263,10 @@ export class ConfigService {
 
     // Support nested key paths
     const keys = key.split('.');
-    let current: any = config;
+    let current: unknown = config;
 
     for (const k of keys) {
-      if (!(k in current)) {
+      if (!isRecord(current) || !(k in current)) {
         return undefined;
       }
       current = current[k];
@@ -268,18 +278,19 @@ export class ConfigService {
   /**
    * Migrate configuration from older versions to v4.0.0
    */
-  public migrateConfig(config: any): SVGConfig {
+  public migrateConfig(config: unknown): SVGConfig {
     // Validate config is not null/undefined
-    if (!config || typeof config !== 'object') {
+    if (!isRecord(config)) {
       logger.warn('Invalid config provided for migration, using defaults');
       return this.getDefaultConfig();
     }
 
-    const currentVersion = config.version || '3.0.0';
+    const migrationConfig = config as ConfigMigrationInput;
+    const currentVersion = migrationConfig.version || '3.0.0';
 
     // No migration needed if already current version
     if (currentVersion === CURRENT_VERSION) {
-      return { ...this.getDefaultConfig(), ...config };
+      return { ...this.getDefaultConfig(), ...migrationConfig };
     }
 
     logger.info(
@@ -287,7 +298,7 @@ export class ConfigService {
     );
 
     // Migration from v3.x to v4.0.0
-    const migratedConfig: any = { ...config };
+    const migratedConfig: ConfigMigrationInput = { ...migrationConfig };
 
     // Add version field
     migratedConfig.version = CURRENT_VERSION;
@@ -302,9 +313,11 @@ export class ConfigService {
     if (migratedConfig.plugin) {
       logger.warn('Migrating legacy "plugin" field to "plugins" array');
       if (Array.isArray(migratedConfig.plugin)) {
-        migratedConfig.plugins = migratedConfig.plugin;
+        migratedConfig.plugins = migratedConfig.plugin as SVGConfig['plugins'];
       } else {
-        migratedConfig.plugins = [migratedConfig.plugin];
+        migratedConfig.plugins = [
+          migratedConfig.plugin as SVGConfig['plugins'][number],
+        ];
       }
       delete migratedConfig.plugin;
     }
@@ -312,7 +325,10 @@ export class ConfigService {
     // Ensure performance.optimization uses new values
     if (migratedConfig.performance?.optimization) {
       const oldOptimization = migratedConfig.performance.optimization;
-      const optimizationMap: Record<string, string> = {
+      const optimizationMap: Record<
+        string,
+        SVGConfig['performance']['optimization']
+      > = {
         none: 'fast',
         basic: 'fast',
         standard: 'balanced',

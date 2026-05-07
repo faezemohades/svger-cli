@@ -5,6 +5,8 @@ import {
   GenerateOptions,
   WatchOptions,
   FileWatchEvent,
+  FrameworkOptions,
+  SVGConfig,
 } from '../types/index.js';
 import { logger } from '../core/logger.js';
 import { configService } from './config.js';
@@ -12,6 +14,17 @@ import { svgProcessor } from '../processors/svg-processor.js';
 import { frameworkTemplateEngine } from '../core/framework-templates.js';
 import { fileWatcher } from './file-watcher.js';
 import { OptLevel } from '../optimizers/types.js';
+
+type RuntimeProcessingOverrides = {
+  framework?: SVGConfig['framework'];
+  frameworkOptions?: FrameworkOptions;
+  optimize?: string;
+  typescript?: boolean;
+};
+
+type BuildRequestOptions = BuildOptions & RuntimeProcessingOverrides;
+type GenerateRequestOptions = GenerateOptions & RuntimeProcessingOverrides;
+type ResolvedRuntimeConfig = SVGConfig & RuntimeProcessingOverrides;
 
 /**
  * Main SVG service that orchestrates all SVG processing operations
@@ -63,10 +76,34 @@ export class SVGService {
     );
   }
 
+  private mergeRuntimeConfig(
+    configOverrides: Partial<SVGConfig> | undefined,
+    runtimeOverrides: RuntimeProcessingOverrides
+  ): ResolvedRuntimeConfig {
+    const config = configService.readConfig();
+
+    return {
+      ...config,
+      ...(configOverrides || {}),
+      ...(runtimeOverrides.framework && {
+        framework: runtimeOverrides.framework,
+      }),
+      ...(runtimeOverrides.typescript !== undefined && {
+        typescript: runtimeOverrides.typescript,
+      }),
+      ...(runtimeOverrides.frameworkOptions && {
+        frameworkOptions: runtimeOverrides.frameworkOptions,
+      }),
+      ...(runtimeOverrides.optimize && {
+        optimize: runtimeOverrides.optimize,
+      }),
+    };
+  }
+
   /**
    * Build all SVG files from source to output directory
    */
-  public async buildAll(options: BuildOptions): Promise<void> {
+  public async buildAll(options: BuildRequestOptions): Promise<void> {
     logger.info('Starting SVG build process');
     logger.info(`Source: ${options.src}`);
     logger.info(`Output: ${options.out}`);
@@ -83,28 +120,11 @@ export class SVGService {
     await FileSystem.ensureDir(outDir);
 
     // Get configuration - merge config file with options
-    const config = configService.readConfig();
-    const mergedConfig = {
-      ...config,
-      ...(options.config || {}),
-      // Support direct properties on options for CLI convenience
-      ...((options as any).framework && {
-        framework: (options as any).framework,
-      }),
-      ...((options as any).typescript !== undefined && {
-        typescript: (options as any).typescript,
-      }),
-      ...((options as any).frameworkOptions && {
-        frameworkOptions: (options as any).frameworkOptions,
-      }),
-      ...((options as any).optimize && {
-        optimize: (options as any).optimize,
-      }),
-    };
+    const mergedConfig = this.mergeRuntimeConfig(options.config, options);
 
     // Set optimizer level if specified
-    if ((options as any).optimize) {
-      const optimizeLevel = (options as any).optimize as string;
+    if (options.optimize) {
+      const optimizeLevel = options.optimize;
       logger.info(`Using optimization level: ${optimizeLevel}`);
       this.setOptimizerLevel(optimizeLevel);
     }
@@ -199,7 +219,7 @@ export class SVGService {
   /**
    * Generate a React component from a single SVG file
    */
-  public async generateSingle(options: GenerateOptions): Promise<void> {
+  public async generateSingle(options: GenerateRequestOptions): Promise<void> {
     logger.info(`Generating component from: ${options.svgFile}`);
 
     const filePath = path.resolve(options.svgFile);
@@ -217,21 +237,24 @@ export class SVGService {
     }
 
     // Set optimizer level if specified
-    if ((options as any).optimize) {
-      const optimizeLevel = (options as any).optimize as string;
+    if (options.optimize) {
+      const optimizeLevel = options.optimize;
       logger.info(`Using optimization level: ${optimizeLevel}`);
       this.setOptimizerLevel(optimizeLevel);
     }
 
     // Get configuration
-    const config = configService.readConfig();
-    const mergedConfig = { ...config, ...options.config };
+    const mergedConfig = this.mergeRuntimeConfig(options.config, options);
 
     // Process the file
     const result = await svgProcessor.processSVGFile(filePath, outDir, {
+      framework: mergedConfig.framework,
+      typescript: mergedConfig.typescript,
+      frameworkOptions: mergedConfig.frameworkOptions,
       defaultWidth: mergedConfig.defaultWidth,
       defaultHeight: mergedConfig.defaultHeight,
       defaultFill: mergedConfig.defaultFill,
+      namingConvention: mergedConfig.outputConfig?.naming || 'pascal',
       styleRules: Object.fromEntries(
         Object.entries(mergedConfig.styleRules || {}).filter(
           ([, v]) => v !== undefined
@@ -281,7 +304,7 @@ export class SVGService {
   private async handleWatchEvent(
     event: FileWatchEvent,
     outDir: string,
-    config?: Partial<any>
+    config?: Partial<SVGConfig>
   ): Promise<void> {
     const fileName = path.basename(event.filePath);
 
@@ -313,7 +336,7 @@ export class SVGService {
   private async processWatchedFile(
     filePath: string,
     outDir: string,
-    config?: Partial<any>
+    config?: Partial<SVGConfig>
   ): Promise<void> {
     try {
       // Check if file is locked
@@ -351,7 +374,7 @@ export class SVGService {
   private async handleFileRemoval(
     filePath: string,
     outDir: string,
-    config?: any
+    config?: Partial<SVGConfig>
   ): Promise<void> {
     try {
       // Get configuration
@@ -420,7 +443,10 @@ export class SVGService {
    * Scans the output directory for all existing component files,
    * including those from locked SVGs that weren't regenerated
    */
-  private async generateIndexFile(outDir: string, config?: any): Promise<void> {
+  private async generateIndexFile(
+    outDir: string,
+    config?: Partial<SVGConfig>
+  ): Promise<void> {
     try {
       // Scan output directory for all component files
       const files = await FileSystem.readDir(outDir);
@@ -492,8 +518,8 @@ ${imports}
    */
   public getStats(): {
     activeWatchers: number;
-    processingQueue: any;
-    watcherStats: any;
+    processingQueue: ReturnType<typeof svgProcessor.getProcessingStats>;
+    watcherStats: ReturnType<typeof fileWatcher.getWatchStats>;
   } {
     return {
       activeWatchers: this.activeWatchers.size,

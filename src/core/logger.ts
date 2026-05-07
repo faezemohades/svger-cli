@@ -1,4 +1,7 @@
+import { format } from 'util';
 import { Logger, LogLevel } from '../types/index.js';
+
+type WritableLogStream = Pick<typeof process.stdout, 'write'>;
 
 /**
  * Professional logging service with configurable levels and formatted output
@@ -42,6 +45,15 @@ export class LoggerService implements Logger {
     return `${timestamp} ${prefix} ${message}`;
   }
 
+  private write(
+    stream: WritableLogStream,
+    level: LogLevel,
+    message: string,
+    args: unknown[]
+  ): void {
+    stream.write(`${format(this.formatMessage(level, message), ...args)}\n`);
+  }
+
   private getPrefix(level: LogLevel): string {
     if (!this.enableColors) {
       return `[${level.toUpperCase()}]`;
@@ -70,35 +82,37 @@ export class LoggerService implements Logger {
     return `${color}${icon} [${level.toUpperCase()}]${reset}`;
   }
 
-  public debug(message: string, ...args: any[]): void {
+  public debug(message: string, ...args: unknown[]): void {
     if (this.shouldLog('debug')) {
-      console.debug(this.formatMessage('debug', message), ...args);
+      this.write(process.stdout, 'debug', message, args);
     }
   }
 
-  public info(message: string, ...args: any[]): void {
+  public info(message: string, ...args: unknown[]): void {
     if (this.shouldLog('info')) {
-      console.info(this.formatMessage('info', message), ...args);
+      this.write(process.stdout, 'info', message, args);
     }
   }
 
-  public warn(message: string, ...args: any[]): void {
+  public warn(message: string, ...args: unknown[]): void {
     if (this.shouldLog('warn')) {
-      console.warn(this.formatMessage('warn', message), ...args);
+      this.write(process.stderr, 'warn', message, args);
     }
   }
 
-  public error(message: string, ...args: any[]): void {
+  public error(message: string, ...args: unknown[]): void {
     if (this.shouldLog('error')) {
-      console.error(this.formatMessage('error', message), ...args);
+      this.write(process.stderr, 'error', message, args);
     }
   }
 
-  public success(message: string, ...args: any[]): void {
+  public success(message: string, ...args: unknown[]): void {
     if (this.shouldLog('info')) {
       const timestamp = new Date().toISOString();
       const successPrefix = this.enableColors ? '✅ [SUCCESS]' : '[SUCCESS]';
-      console.log(`${timestamp} ${successPrefix} ${message}`, ...args);
+      process.stdout.write(
+        `${format(`${timestamp} ${successPrefix} ${message}`, ...args)}\n`
+      );
     }
   }
 }

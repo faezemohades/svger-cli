@@ -154,10 +154,13 @@ export class PerformanceEngine {
     }
   }
 
-  private readonly OPTIMIZATION_STRATEGIES: Record<string, (content: string) => string> = {
-    fast: (c) => this.applyFastOptimizations(c),
-    balanced: (c) => this.applyBalancedOptimizations(c),
-    maximum: (c) => this.applyMaximumOptimizations(c),
+  private readonly OPTIMIZATION_STRATEGIES: Record<
+    string,
+    (content: string) => string
+  > = {
+    fast: c => this.applyFastOptimizations(c),
+    balanced: c => this.applyBalancedOptimizations(c),
+    maximum: c => this.applyMaximumOptimizations(c),
   };
 
   /**
@@ -170,7 +173,9 @@ export class PerformanceEngine {
     const startTime = performance.now();
 
     const strategy = this.OPTIMIZATION_STRATEGIES[level];
-    const optimized = strategy ? strategy(content) : this.applyBalancedOptimizations(content);
+    const optimized = strategy
+      ? strategy(content)
+      : this.applyBalancedOptimizations(content);
 
     const duration = performance.now() - startTime;
     const compressionRatio = (1 - optimized.length / content.length) * 100;

@@ -30,6 +30,7 @@ interface PluginMetrics {
  */
 export class EnhancedPluginManager {
   private plugins: Map<string, EnhancedPlugin> = new Map();
+  private activePlugins: Set<string> = new Set();
   private executionMetrics: PluginMetrics[] = [];
   private readonly MAX_METRICS_SIZE = 1000; // Cap at 1000 entries to prevent memory leak
   private enableVisualValidation = true;
@@ -41,7 +42,10 @@ export class EnhancedPluginManager {
   /**
    * Register a plugin
    */
-  registerPlugin(plugin: EnhancedPlugin): void {
+  registerPlugin(
+    plugin: EnhancedPlugin,
+    options: { activate?: boolean } = {}
+  ): void {
     if (this.plugins.has(plugin.name)) {
       const errorMsg = `Plugin "${plugin.name}" is already registered. Cannot register duplicate plugins with the same name.`;
       logger.error(errorMsg);
@@ -70,9 +74,30 @@ export class EnhancedPluginManager {
     }
 
     this.plugins.set(plugin.name, plugin);
+    if (options.activate !== false) {
+      this.activePlugins.add(plugin.name);
+    }
     logger.info(
       `✅ Plugin registered: ${plugin.name} v${plugin.version} (${Object.keys(plugin.hooks).length} hooks)`
     );
+  }
+
+  /**
+   * Activate a registered plugin
+   */
+  activatePlugin(pluginName: string): void {
+    if (!this.plugins.has(pluginName)) {
+      throw new Error(`Plugin "${pluginName}" is not registered`);
+    }
+
+    this.activePlugins.add(pluginName);
+  }
+
+  /**
+   * Deactivate a registered plugin
+   */
+  deactivatePlugin(pluginName: string): void {
+    this.activePlugins.delete(pluginName);
   }
 
   /**
@@ -120,7 +145,10 @@ export class EnhancedPluginManager {
       `Executing ${pluginsForHook.length} plugin(s) for hook: ${hookType}`
     );
 
-    const currentContext = { ...context };
+    const currentContext: PluginHookContext = {
+      ...context,
+      metadata: new Map(context.metadata),
+    };
     const startTime = performance.now();
 
     for (const plugin of pluginsForHook) {
@@ -144,10 +172,9 @@ export class EnhancedPluginManager {
           currentContext.content = result.content;
         }
         if (result.metadata) {
-          currentContext.metadata = {
-            ...currentContext.metadata,
-            ...result.metadata,
-          };
+          for (const [key, value] of Object.entries(result.metadata)) {
+            currentContext.metadata.set(key, value);
+          }
         }
         if (result.skipRemaining) {
           currentContext.skipRemaining = true;
@@ -267,7 +294,9 @@ export class EnhancedPluginManager {
    */
   private getPluginsForHook(hookType: PluginHookType): EnhancedPlugin[] {
     return Array.from(this.plugins.values()).filter(
-      plugin => plugin.hooks[hookType] !== undefined
+      plugin =>
+        this.activePlugins.has(plugin.name) &&
+        plugin.hooks[hookType] !== undefined
     );
   }
 
@@ -427,6 +456,13 @@ export class EnhancedPluginManager {
   }
 
   /**
+   * Get total number of active plugins
+   */
+  get activePluginCount(): number {
+    return this.activePlugins.size;
+  }
+
+  /**
    * Clear all plugins (useful for testing)
    */
   clearPlugins(): void {
@@ -445,6 +481,7 @@ export class EnhancedPluginManager {
     }
 
     this.plugins.clear();
+    this.activePlugins.clear();
     this.clearMetrics();
     logger.info('All plugins cleared');
   }

@@ -1,6 +1,8 @@
 import { Plugin, PluginConfig } from '../types/index.js';
 import { logger } from '../core/logger.js';
 
+type PluginOptions = Record<string, unknown>;
+
 /**
  * Plugin management system for extending SVG processing capabilities
  */
@@ -28,21 +30,21 @@ export class PluginManager {
     this.registerPlugin({
       name: 'optimize',
       version: '1.0.0',
-      process: async (content: string, _options?: any) => {
+      process: async (content: string, _options?: PluginOptions) => {
         return this.optimizeSVG(content, _options);
       },
-      validate: (_options?: any) => true,
+      validate: (_options?: PluginOptions) => true,
     });
 
     // Color Theme Plugin
     this.registerPlugin({
       name: 'color-theme',
       version: '1.0.0',
-      process: async (content: string, options?: any) => {
+      process: async (content: string, options?: PluginOptions) => {
         return this.applyColorTheme(content, options);
       },
-      validate: (options?: any) => {
-        return options && typeof options.theme === 'object';
+      validate: (options?: PluginOptions) => {
+        return !!options && typeof options.theme === 'object';
       },
     });
 
@@ -50,7 +52,7 @@ export class PluginManager {
     this.registerPlugin({
       name: 'size-normalizer',
       version: '1.0.0',
-      process: async (content: string, options?: any) => {
+      process: async (content: string, options?: PluginOptions) => {
         return this.normalizeSizes(content, options);
       },
     });
@@ -154,7 +156,7 @@ export class PluginManager {
   /**
    * Built-in SVG optimizer
    */
-  private optimizeSVG(content: string, options: any = {}): string {
+  private optimizeSVG(content: string, options: PluginOptions = {}): string {
     let optimized = content;
 
     // Remove unnecessary whitespace
@@ -184,13 +186,16 @@ export class PluginManager {
   /**
    * Built-in color theme applier
    */
-  private applyColorTheme(content: string, options: any = {}): string {
+  private applyColorTheme(
+    content: string,
+    options: PluginOptions = {}
+  ): string {
     if (!options.theme) {
       return content;
     }
 
     let themed = content;
-    const theme = options.theme;
+    const theme = options.theme as Record<string, string>;
 
     // Replace colors according to theme
     for (const [originalColor, newColor] of Object.entries(theme)) {
@@ -207,8 +212,14 @@ export class PluginManager {
   /**
    * Built-in size normalizer
    */
-  private normalizeSizes(content: string, options: any = {}): string {
-    const targetSize = options.size || 24;
+  private normalizeSizes(content: string, options: PluginOptions = {}): string {
+    const sizeOption = options.size;
+    const targetSize =
+      typeof sizeOption === 'number'
+        ? sizeOption
+        : typeof sizeOption === 'string'
+          ? parseFloat(sizeOption) || 24
+          : 24;
 
     // This is a basic implementation - would need more sophisticated sizing logic
     let normalized = content;

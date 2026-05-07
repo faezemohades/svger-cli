@@ -325,7 +325,7 @@ describe('EnhancedPluginManager', () => {
       };
 
       const result = await manager.executeHook('after-parse', context);
-      expect(result.metadata).toEqual({ processedBy: 'test-plugin' });
+      expect(result.metadata.get('processedBy')).toBe('test-plugin');
     });
   });
 

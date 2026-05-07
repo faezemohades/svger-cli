@@ -14,6 +14,38 @@ type BufferEncoding =
   | 'binary'
   | 'hex';
 
+type JsonObject = Record<string, unknown>;
+type CLIOptionValue = string | boolean;
+export type CLIOptions = Record<string, CLIOptionValue>;
+type CLIAction = (args: string[], options: CLIOptions) => void | Promise<void>;
+type CommandOptionConfig = { description: string; hasValue: boolean };
+type WatcherCallback = (...args: unknown[]) => void;
+
+function hasErrorCode(error: unknown, code: string): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === code
+  );
+}
+
+function formatUnknownError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+}
+
+function writeStdout(message: string): void {
+  process.stdout.write(`${message}\n`);
+}
+
+function writeStderr(message: string): void {
+  process.stderr.write(`${message}\n`);
+}
+
 /**
  * Native Node.js utilities to replace external dependencies
  */
@@ -114,8 +146,8 @@ export class FileSystem {
   static async ensureDir(dirPath: string): Promise<void> {
     try {
       await this._mkdir(dirPath, { recursive: true });
-    } catch (error: any) {
-      if (error.code !== 'EEXIST') {
+    } catch (error: unknown) {
+      if (!hasErrorCode(error, 'EEXIST')) {
         throw error;
       }
     }
@@ -124,8 +156,8 @@ export class FileSystem {
   static async removeDir(dirPath: string): Promise<void> {
     try {
       await fs.promises.rm(dirPath, { recursive: true, force: true });
-    } catch (error: any) {
-      if (error.code !== 'ENOENT') {
+    } catch (error: unknown) {
+      if (!hasErrorCode(error, 'ENOENT')) {
         throw error;
       }
     }
@@ -154,10 +186,10 @@ export class FileSystem {
     return this._unlink(filePath);
   }
 
-  static readJSONSync(path: string): any {
+  static readJSONSync<T = JsonObject>(path: string): T | JsonObject {
     try {
       const content = fs.readFileSync(path, 'utf8');
-      return JSON.parse(content);
+      return JSON.parse(content) as T;
     } catch {
       return {};
     }
@@ -165,7 +197,7 @@ export class FileSystem {
 
   static writeJSONSync(
     path: string,
-    data: any,
+    data: unknown,
     options?: { spaces?: number }
   ): void {
     const content = JSON.stringify(data, null, options?.spaces || 0);
@@ -184,8 +216,8 @@ export class FileSystem {
   static ensureDirSync(dirPath: string): void {
     try {
       fs.mkdirSync(dirPath, { recursive: true });
-    } catch (error: any) {
-      if (error.code !== 'EEXIST') {
+    } catch (error: unknown) {
+      if (!hasErrorCode(error, 'EEXIST')) {
         throw error;
       }
     }
@@ -200,11 +232,8 @@ export class CLI {
     string,
     {
       description: string;
-      action: (
-        args: string[],
-        options: Record<string, any>
-      ) => void | Promise<void>;
-      options: Map<string, { description: string; hasValue: boolean }>;
+      action: CLIAction;
+      options: Map<string, CommandOptionConfig>;
     }
   > = new Map();
 
@@ -234,13 +263,13 @@ export class CLI {
   addCommand(
     signature: string,
     description: string,
-    action: Function,
-    options: Map<string, any>
+    action: CLIAction,
+    options: Map<string, CommandOptionConfig>
   ): void {
     const [command] = signature.split(' ');
     this.commands.set(command, {
       description,
-      action: action as any,
+      action,
       options,
     });
   }
@@ -254,7 +283,7 @@ export class CLI {
     }
 
     if (args[0] === '--version' || args[0] === '-v') {
-      console.log(this.programVersion);
+      writeStdout(this.programVersion);
       return;
     }
 
@@ -262,7 +291,7 @@ export class CLI {
     const command = this.commands.get(commandName);
 
     if (!command) {
-      console.error(`Unknown command: ${commandName}`);
+      writeStderr(`Unknown command: ${commandName}`);
       this.showHelp();
       process.exit(1);
     }
@@ -275,20 +304,20 @@ export class CLI {
     try {
       await command.action(parsedArgs, options);
     } catch (error) {
-      console.error('Command failed:', error);
+      writeStderr(`Command failed: ${formatUnknownError(error)}`);
       process.exit(1);
     }
   }
 
   private parseArgs(
     args: string[],
-    commandOptions: Map<string, any>
+    commandOptions: Map<string, CommandOptionConfig>
   ): {
     parsedArgs: string[];
-    options: Record<string, any>;
+    options: CLIOptions;
   } {
     const parsedArgs: string[] = [];
-    const options: Record<string, any> = {};
+    const options: CLIOptions = {};
 
     let i = 0;
     while (i < args.length) {
@@ -326,17 +355,17 @@ export class CLI {
   }
 
   private showHelp(): void {
-    console.log(`${this.programName} - ${this.programDescription}`);
-    console.log(`Version: ${this.programVersion}\n`);
-    console.log('Commands:');
+    writeStdout(`${this.programName} - ${this.programDescription}`);
+    writeStdout(`Version: ${this.programVersion}\n`);
+    writeStdout('Commands:');
 
     for (const [name, cmd] of this.commands) {
-      console.log(`  ${name.padEnd(15)} ${cmd.description}`);
+      writeStdout(`  ${name.padEnd(15)} ${cmd.description}`);
     }
 
-    console.log('\nOptions:');
-    console.log('  --help, -h      Show help');
-    console.log('  --version, -v   Show version');
+    writeStdout('\nOptions:');
+    writeStdout('  --help, -h      Show help');
+    writeStdout('  --version, -v   Show version');
   }
 }
 
@@ -344,8 +373,7 @@ class CommandBuilder {
   private signature: string;
   private desc = '';
   private cli: CLI;
-  private options: Map<string, { description: string; hasValue: boolean }> =
-    new Map();
+  private options: Map<string, CommandOptionConfig> = new Map();
 
   constructor(signature: string, cli: CLI) {
     this.signature = signature;
@@ -364,7 +392,7 @@ class CommandBuilder {
     return this;
   }
 
-  action(fn: Function): void {
+  action(fn: CLIAction): void {
     this.cli.addCommand(this.signature, this.desc, fn, this.options);
   }
 }
@@ -374,7 +402,7 @@ class CommandBuilder {
  */
 export class FileWatcher {
   private watchers: fs.FSWatcher[] = [];
-  private callbacks: Map<string, Function[]> = new Map();
+  private callbacks: Map<string, WatcherCallback[]> = new Map();
 
   watch(path: string, options?: { recursive?: boolean }): this {
     try {
@@ -404,7 +432,7 @@ export class FileWatcher {
     return this;
   }
 
-  on(event: string, callback: Function): this {
+  on(event: string, callback: WatcherCallback): this {
     if (!this.callbacks.has(event)) {
       this.callbacks.set(event, []);
     }
@@ -412,13 +440,13 @@ export class FileWatcher {
     return this;
   }
 
-  private emit(event: string, ...args: any[]): void {
+  private emit(event: string, ...args: unknown[]): void {
     const callbacks = this.callbacks.get(event) || [];
     callbacks.forEach(callback => {
       try {
         callback(...args);
       } catch (error) {
-        console.error('Watcher callback error:', error);
+        writeStderr(`Watcher callback error: ${formatUnknownError(error)}`);
       }
     });
   }

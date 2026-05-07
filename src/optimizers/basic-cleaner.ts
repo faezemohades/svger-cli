@@ -17,8 +17,7 @@ export function removeXMLDeclaration(svg: string, config: OptConfig): string {
  * Remove px units from width and height attributes for React compatibility
  */
 export function removePxUnits(svg: string): string {
-  // Convert width="24px" to width={24} for React
-  return svg.replace(/\s(width|height)=["'](\d+)px["']/g, ' $1={$2}');
+  return svg.replace(/\s(width|height)=["'](\d+)px["']/g, ' $1="$2"');
 }
 
 /**
@@ -67,29 +66,9 @@ export function removeMetadata(svg: string, config: OptConfig): string {
 export function convertToCamelCase(svg: string, config: OptConfig): string {
   if (!config.reactCompatibility) return svg;
 
-  const attributeMap: Record<string, string> = {
-    'fill-rule': 'fillRule',
-    'clip-rule': 'clipRule',
-    'stroke-width': 'strokeWidth',
-    'stroke-linecap': 'strokeLinecap',
-    'stroke-linejoin': 'strokeLinejoin',
-    'stroke-miterlimit': 'strokeMiterlimit',
-    'stroke-dasharray': 'strokeDasharray',
-    'stroke-dashoffset': 'strokeDashoffset',
-    'font-family': 'fontFamily',
-    'font-size': 'fontSize',
-    'font-weight': 'fontWeight',
-    'text-anchor': 'textAnchor',
-    'stop-color': 'stopColor',
-    'stop-opacity': 'stopOpacity',
-    'fill-opacity': 'fillOpacity',
-    'stroke-opacity': 'strokeOpacity',
-  };
-
-  // Create a single regex from all keys — O(n) instead of O(k*n)
-  const regex = new RegExp(Object.keys(attributeMap).join('|'), 'g');
-  
-  return svg.replace(regex, (match) => attributeMap[match]);
+  // Optimizer output must remain valid SVG/XML.
+  // JSX-specific attribute conversion is applied later during component generation.
+  return svg;
 }
 
 /**
@@ -98,8 +77,7 @@ export function convertToCamelCase(svg: string, config: OptConfig): string {
 export function removeXMLNamespaces(svg: string, config: OptConfig): string {
   if (!config.removeUnnecessaryAttrs) return svg;
 
-  // Remove xmlns and xmlns:xlink (React handles these automatically)
-  return svg.replace(/\s+xmlns(:xlink)?="[^"]*"/g, '');
+  return svg;
 }
 
 /**
@@ -114,47 +92,7 @@ export function removeInlineStyles(svg: string, config: OptConfig): string {
     return svg.replace(/\s+style="[^"]*"/g, '');
   }
 
-  // Convert inline CSS styles to React style objects for React compatibility
-  return svg.replace(/\s+style="([^"]*)"/g, (_match, styleString) => {
-    // Handle empty style attributes
-    if (!styleString.trim()) {
-      return '';
-    }
-
-    const styles: Record<string, string> = {};
-
-    // Parse CSS declarations
-    const declarations = styleString
-      .split(';')
-      .map((s: string) => s.trim())
-      .filter((s: string) => s.length > 0);
-
-    declarations.forEach((declaration: string) => {
-      const [property, value] = declaration
-        .split(':')
-        .map((s: string) => s.trim());
-
-      if (property && value) {
-        // Convert CSS property names to camelCase (stroke-width → strokeWidth)
-        const camelProperty = property.replace(/-([a-z])/g, (g: string) =>
-          g[1].toUpperCase()
-        );
-        styles[camelProperty] = value;
-      }
-    });
-
-    // If no valid styles, remove the attribute
-    if (Object.keys(styles).length === 0) {
-      return '';
-    }
-
-    // Generate React inline style object syntax
-    const styleEntries = Object.entries(styles)
-      .map(([key, value]) => `${key}: '${value}'`)
-      .join(', ');
-
-    return ` style={{${styleEntries}}}`;
-  });
+  return svg;
 }
 
 /**

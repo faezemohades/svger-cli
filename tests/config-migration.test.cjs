@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { ConfigService } = require('../dist/services/config.js');
+const packageJson = require('../package.json');
 
 // Test directory
 const TEST_DIR = path.join(__dirname, 'config-migration-test');
@@ -45,8 +46,8 @@ function testNewConfig() {
     const defaultConfig = configService.getDefaultConfig();
     
     // Verify version
-    if (defaultConfig.version !== '4.0.0') {
-      throw new Error(`Expected version 4.0.0, got ${defaultConfig.version}`);
+    if (defaultConfig.version !== packageJson.version) {
+      throw new Error(`Expected version ${packageJson.version}, got ${defaultConfig.version}`);
     }
     
     // Verify plugins array exists
@@ -54,7 +55,7 @@ function testNewConfig() {
       throw new Error('Plugins array missing in v4.0.0 config');
     }
     
-    console.log('✅ Version: 4.0.0');
+    console.log(`✅ Version: ${packageJson.version}`);
     console.log('✅ Plugins array: present');
     console.log('✅ All v4.0.0 features: available');
     console.log('✅ Test PASSED');
@@ -102,8 +103,8 @@ function testMigrateFromV3() {
     const migratedConfig = configService.readConfig();
     
     // Verify migration
-    if (migratedConfig.version !== '4.0.0') {
-      throw new Error(`Expected version 4.0.0 after migration, got ${migratedConfig.version}`);
+    if (migratedConfig.version !== packageJson.version) {
+      throw new Error(`Expected version ${packageJson.version} after migration, got ${migratedConfig.version}`);
     }
     
     if (!Array.isArray(migratedConfig.plugins)) {
@@ -115,7 +116,7 @@ function testMigrateFromV3() {
       throw new Error(`Expected optimization 'fast', got '${migratedConfig.performance.optimization}'`);
     }
     
-    console.log('✅ Version migrated: v3.x → 4.0.0');
+    console.log(`✅ Version migrated: v3.x → ${packageJson.version}`);
     console.log('✅ Plugins array: added');
     console.log('✅ Optimization level: basic → fast');
     console.log('✅ Config file: updated');

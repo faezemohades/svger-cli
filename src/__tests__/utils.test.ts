@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, afterEach } from '@jest/globals';
 import {
   toPascalCase,
   toCamelCase,
@@ -94,7 +94,9 @@ describe('FileSystem Utilities', () => {
   afterEach(async () => {
     try {
       await FileSystem.removeDir(testDir);
-    } catch {}
+    } catch {
+      // Ignore cleanup errors.
+    }
   });
 
   describe('ensureDir', () => {

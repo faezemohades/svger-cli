@@ -6,24 +6,27 @@
  */
 import { configService } from './services/config.js';
 
+type LegacyConfigValue = string | number | boolean | null | undefined;
+type LegacyConfigRecord = Record<string, unknown>;
+
 /**
  * Read the current svger-cli configuration.
  *
  * @deprecated Use `configService.readConfig()` instead.
- * @returns {Record<string, any>} Configuration object.
+ * @returns {LegacyConfigRecord} Configuration object.
  */
-export function readConfig(): Record<string, any> {
-  return configService.readConfig();
+export function readConfig(): LegacyConfigRecord {
+  return configService.readConfig() as unknown as LegacyConfigRecord;
 }
 
 /**
  * Write a configuration object to the config file.
  *
  * @deprecated Use `configService.writeConfig(config)` instead.
- * @param {Record<string, any>} config - Configuration object to write.
+ * @param {LegacyConfigRecord} config - Configuration object to write.
  */
-export function writeConfig(config: Record<string, any>) {
-  configService.writeConfig(config as any);
+export function writeConfig(config: LegacyConfigRecord): void {
+  configService.writeConfig(config as never);
 }
 
 /**
@@ -40,9 +43,9 @@ export async function initConfig() {
  *
  * @deprecated Use `configService.setConfig(key, value)` instead.
  * @param {string} key - The config key to set.
- * @param {any} value - The value to assign to the key.
+ * @param {LegacyConfigValue} value - The value to assign to the key.
  */
-export function setConfig(key: string, value: any) {
+export function setConfig(key: string, value: LegacyConfigValue): void {
   configService.setConfig(key, value);
 }
 
@@ -51,6 +54,6 @@ export function setConfig(key: string, value: any) {
  *
  * @deprecated Use `configService.showConfig()` instead.
  */
-export function showConfig() {
+export function showConfig(): void {
   configService.showConfig();
 }

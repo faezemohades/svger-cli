@@ -41,7 +41,8 @@ export async function watchSVGs(config: { src: string; out: string }) {
   watcher.watch(srcDir, { recursive: false });
 
   // Handle file changes
-  watcher.on('change', async (filePath: string) => {
+  watcher.on('change', async (filePath: unknown) => {
+    if (typeof filePath !== 'string') return;
     if (!filePath.endsWith('.svg')) return;
 
     console.log('Detected change in file:', filePath);
@@ -56,7 +57,8 @@ export async function watchSVGs(config: { src: string; out: string }) {
   });
 
   // Handle new files (rename event in fs.watch can indicate new files)
-  watcher.on('rename', async (filePath: string) => {
+  watcher.on('rename', async (filePath: unknown) => {
+    if (typeof filePath !== 'string') return;
     if (!filePath.endsWith('.svg')) return;
 
     // Check if file exists (new file) or doesn't exist (deleted file)

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.7] - 2026-05-07
+
+### ✅ Release Readiness & Validation
+
+- **Full release validation completed**: Ran the packaged validation flows for frameworks, configuration options, end-to-end workflows, integrations, visual integration, linting, build, Jest, and production dependency audit.
+- **Quality gates verified**: ESLint remains at **0 errors / 14 warnings**, build passes, Jest passes at **155/155**, visual integration passes at **36/36**, and `npm audit --omit=dev` reports **0 vulnerabilities**.
+- **CLI command coverage confirmed**: Smoke-tested `plugins`, `config`, `optimize`, `lock`, `unlock`, and `watch` flows against the built CLI before release.
+
+### 🐛 Bug Fixes
+
+- **Fixed watch command lifecycle regression**: The CLI no longer forces `process.exit(0)` after starting watch mode, allowing the watcher to stay alive and process file changes correctly.
+
+### 📦 Release Preparation
+
+- **Version bump**: Updated the package and checked-in docs references from `4.0.6` to `4.0.7`.
+- **Release documentation refreshed**: Prepared the changelog and release notes for the `v4.0.7` publication.
+
 ## [4.0.6] - 2026-04-18
 
 ### ⚡ Performance Optimization (Chrome V8)

@@ -1,11 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  jest,
-} from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { FileSystem } from '../utils/native.js';
 import path from 'path';
 
@@ -30,7 +23,7 @@ describe('Builder Module', () => {
     try {
       await FileSystem.removeDir(testDir);
     } catch (error) {
-      // Ignore cleanup errors
+      // Ignore cleanup errors.
     }
   });
 
@@ -95,11 +88,11 @@ describe('Builder Module', () => {
     });
 
     it('should handle missing input directory', async () => {
-      const nonExistentDir = path.join(testDir, 'non-existent');
+      const _nonExistentDir = path.join(testDir, 'non-existent');
 
       // TODO: Test missing directory handling
       expect(() => {
-        // Should throw or handle gracefully
+        // Should throw or handle gracefully.
       }).not.toThrow();
     });
   });

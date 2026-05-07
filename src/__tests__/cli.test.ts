@@ -28,7 +28,9 @@ describe('CLI', () => {
   afterEach(async () => {
     try {
       await FileSystem.removeDir(testDir);
-    } catch {}
+    } catch {
+      // Ignore cleanup errors.
+    }
   });
 
   describe('build command', () => {
@@ -121,7 +123,10 @@ describe('CLI', () => {
   describe('error handling', () => {
     it('should show error for missing required arguments', () => {
       try {
-        execSync('node bin/svg-tool.js build', { encoding: 'utf-8', timeout: 15000 });
+        execSync('node bin/svg-tool.js build', {
+          encoding: 'utf-8',
+          timeout: 15000,
+        });
       } catch (error: any) {
         expect(error.status).not.toBe(0);
       }

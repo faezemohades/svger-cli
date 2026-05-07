@@ -1,29 +1,100 @@
 #!/usr/bin/env node
-import { CLI, FileSystem } from './utils/native.js';
+import { CLI, FileSystem, type CLIOptions } from './utils/native.js';
 import { svgService } from './services/svg-service.js';
 import { configService } from './services/config.js';
 import { logger } from './core/logger.js';
 import { getPluginManager } from './core/enhanced-plugin-manager.js';
 import { svgProcessor } from './processors/svg-processor.js';
+import { registerBuiltInPlugins } from './plugins/builtins.js';
+import type {
+  BuildOptions,
+  FrameworkOptions,
+  FrameworkType,
+  GenerateOptions,
+} from './types/index.js';
 import { resolve } from 'path';
 import { pathToFileURL } from 'url';
 import path from 'path';
-import { readFileSync } from 'fs';
+import { getPackageInfo } from './utils/package-info.js';
 
+type BuildRuntimeOptions = BuildOptions & {
+  framework?: FrameworkType;
+  frameworkOptions?: FrameworkOptions;
+  optimize?: string;
+  typescript?: boolean;
+};
+
+type GenerateRuntimeOptions = GenerateOptions & {
+  framework?: FrameworkType;
+  frameworkOptions?: FrameworkOptions;
+  optimize?: string;
+  typescript?: boolean;
+};
+
+interface BuildCommandOptions {
+  composition?: boolean;
+  framework?: FrameworkType;
+  listPlugins?: boolean;
+  optimize?: string;
+  plugin?: string;
+  signals?: boolean;
+  standalone?: boolean;
+  typescript?: boolean;
+}
+
+interface GenerateCommandOptions {
+  composition?: boolean;
+  framework?: FrameworkType;
+  optimize?: string;
+  standalone?: boolean;
+  typescript?: boolean;
+}
+
+interface ConfigCommandOptions {
+  init?: boolean;
+  set?: string;
+  show?: boolean;
+}
+
+interface PluginsCommandOptions {
+  load?: string;
+}
+
+interface OptimizeCommandOptions {
+  inPlace?: boolean;
+  level?: string;
+  validate?: boolean;
+}
+
+function asCommandOptions<T>(options: CLIOptions): T {
+  return options as unknown as T;
+}
 
 // Read version dynamically from package.json
-const packageJson = JSON.parse(readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
-const CLI_VERSION = packageJson.version;
+const CLI_VERSION = getPackageInfo().version;
 
 const program = new CLI();
+let shouldExitAfterParse = true;
+
+function ensureBuiltInPluginsRegistered(): void {
+  registerBuiltInPlugins(getPluginManager());
+}
 
 /**
  * Load a plugin from npm package or local path
  */
 async function loadPlugin(pluginNameOrPath: string): Promise<void> {
   const pluginManager = getPluginManager();
+  ensureBuiltInPluginsRegistered();
 
   try {
+    if (pluginManager.hasPlugin(pluginNameOrPath)) {
+      pluginManager.activatePlugin(pluginNameOrPath);
+      const plugin = pluginManager.getPlugin(pluginNameOrPath);
+      logger.info(`Loaded plugin: ${plugin?.name} v${plugin?.version}`);
+      return;
+    }
+
     let pluginModule;
 
     // Check if it's a local path (starts with ./ or ../ or /)
@@ -71,6 +142,7 @@ async function loadPlugin(pluginNameOrPath: string): Promise<void> {
  * List all registered plugins
  */
 function listRegisteredPlugins(): void {
+  ensureBuiltInPluginsRegistered();
   const pluginManager = getPluginManager();
   const plugins = pluginManager.listPlugins();
 
@@ -134,17 +206,19 @@ program
     'Load plugin(s) by name or path (comma-separated for multiple)'
   )
   .option('--list-plugins', 'List all registered plugins and exit')
-  .action(async (args: string[], opts: Record<string, any>) => {
+  .action(async (args: string[], opts: CLIOptions) => {
     try {
+      const buildOptions = asCommandOptions<BuildCommandOptions>(opts);
+
       // Handle --list-plugins flag
-      if (opts.listPlugins) {
+      if (buildOptions.listPlugins) {
         listRegisteredPlugins();
         return;
       }
 
       // Load plugins if specified
-      if (opts.plugin) {
-        const plugins = opts.plugin.split(',').map((p: string) => p.trim());
+      if (buildOptions.plugin) {
+        const plugins = buildOptions.plugin.split(',').map(p => p.trim());
         for (const pluginNameOrPath of plugins) {
           await loadPlugin(pluginNameOrPath);
         }
@@ -159,7 +233,7 @@ program
       }
 
       // Validate framework type if provided — O(1) Set.has() instead of O(n) Array.includes()
-      const validFrameworks = new Set([
+      const validFrameworks = new Set<FrameworkType>([
         'react',
         'react-native',
         'vue',
@@ -170,9 +244,12 @@ program
         'lit',
         'vanilla',
       ]);
-      if (opts.framework && !validFrameworks.has(opts.framework)) {
+      if (
+        buildOptions.framework &&
+        !validFrameworks.has(buildOptions.framework)
+      ) {
         logger.error(
-          `Error: Invalid framework "${opts.framework}". Valid options: ${[...validFrameworks].join(', ')}`
+          `Error: Invalid framework "${buildOptions.framework}". Valid options: ${[...validFrameworks].join(', ')}`
         );
         process.exit(1);
       }
@@ -185,41 +262,41 @@ program
         'aggressive',
         'maximum',
       ]);
-      if (opts.optimize && !validOptLevels.has(opts.optimize)) {
+      if (buildOptions.optimize && !validOptLevels.has(buildOptions.optimize)) {
         logger.error(
-          `Error: Invalid optimization level "${opts.optimize}". Valid options: ${[...validOptLevels].join(', ')}`
+          `Error: Invalid optimization level "${buildOptions.optimize}". Valid options: ${[...validOptLevels].join(', ')}`
         );
         process.exit(1);
       }
 
       // Build config from CLI options
-      const buildConfig: any = { src, out };
+      const buildConfig: BuildRuntimeOptions = { src, out };
 
-      if (opts.framework) {
-        buildConfig.framework = opts.framework;
+      if (buildOptions.framework) {
+        buildConfig.framework = buildOptions.framework;
       }
 
-      if (opts.typescript !== undefined) {
-        buildConfig.typescript = opts.typescript;
+      if (buildOptions.typescript !== undefined) {
+        buildConfig.typescript = buildOptions.typescript;
       }
 
-      if (opts.optimize) {
-        buildConfig.optimize = opts.optimize;
+      if (buildOptions.optimize) {
+        buildConfig.optimize = buildOptions.optimize;
       }
 
       // Framework-specific options
-      const frameworkOptions: any = {};
+      const frameworkOptions: FrameworkOptions = {};
 
-      if (opts.composition !== undefined) {
-        frameworkOptions.scriptSetup = opts.composition;
+      if (buildOptions.composition !== undefined) {
+        frameworkOptions.scriptSetup = buildOptions.composition;
       }
 
-      if (opts.standalone !== undefined) {
-        frameworkOptions.standalone = opts.standalone;
+      if (buildOptions.standalone !== undefined) {
+        frameworkOptions.standalone = buildOptions.standalone;
       }
 
-      if (opts.signals !== undefined) {
-        frameworkOptions.signals = opts.signals;
+      if (buildOptions.signals !== undefined) {
+        frameworkOptions.signals = buildOptions.signals;
       }
 
       if (Object.keys(frameworkOptions).length > 0) {
@@ -242,6 +319,7 @@ program
   .description('Watch source folder and rebuild SVGs automatically')
   .action(async (args: string[]) => {
     try {
+      shouldExitAfterParse = false;
       const [src, out] = args;
 
       // Validate required arguments
@@ -282,32 +360,33 @@ program
     '--optimize <level>',
     'Optimization level: none, basic, balanced, aggressive, maximum (default: basic)'
   )
-  .action(async (args: string[], opts: Record<string, any>) => {
+  .action(async (args: string[], opts: CLIOptions) => {
     try {
+      const generateOptions = asCommandOptions<GenerateCommandOptions>(opts);
       const [svgFile, out] = args;
 
-      const generateConfig: any = { svgFile, outDir: out };
+      const generateConfig: GenerateRuntimeOptions = { svgFile, outDir: out };
 
-      if (opts.framework) {
-        generateConfig.framework = opts.framework;
+      if (generateOptions.framework) {
+        generateConfig.framework = generateOptions.framework;
       }
 
-      if (opts.typescript !== undefined) {
-        generateConfig.typescript = opts.typescript;
+      if (generateOptions.typescript !== undefined) {
+        generateConfig.typescript = generateOptions.typescript;
       }
 
-      if (opts.optimize) {
-        generateConfig.optimize = opts.optimize;
+      if (generateOptions.optimize) {
+        generateConfig.optimize = generateOptions.optimize;
       }
 
-      const frameworkOptions: any = {};
+      const frameworkOptions: FrameworkOptions = {};
 
-      if (opts.composition !== undefined) {
-        frameworkOptions.scriptSetup = opts.composition;
+      if (generateOptions.composition !== undefined) {
+        frameworkOptions.scriptSetup = generateOptions.composition;
       }
 
-      if (opts.standalone !== undefined) {
-        frameworkOptions.standalone = opts.standalone;
+      if (generateOptions.standalone !== undefined) {
+        frameworkOptions.standalone = generateOptions.standalone;
       }
 
       if (Object.keys(frameworkOptions).length > 0) {
@@ -362,22 +441,24 @@ program
   .option('--init', 'Create default .svgconfig.json')
   .option('--set <keyValue>', 'Set config key=value')
   .option('--show', 'Show current config')
-  .action(async (_args: string[], opts: Record<string, any>) => {
+  .action(async (_args: string[], opts: CLIOptions) => {
     try {
-      if (opts.init) return await configService.initConfig();
-      if (opts.set) {
-        const [key, value] = opts.set.split('=');
+      const configOptions = asCommandOptions<ConfigCommandOptions>(opts);
+
+      if (configOptions.init) return await configService.initConfig();
+      if (configOptions.set) {
+        const [key, value] = configOptions.set.split('=');
         if (!key || value === undefined) {
           logger.error('Invalid format. Use key=value');
           process.exit(1);
         }
 
         // Parse value with O(1) lookup for known literals, then type detection
-        const literalValues: Record<string, any> = {
+        const literalValues: Record<string, boolean> = {
           true: true,
           false: false,
         };
-        let parsedValue: any;
+        let parsedValue: string | number | boolean;
 
         if (value in literalValues) {
           parsedValue = literalValues[value];
@@ -389,7 +470,7 @@ program
 
         return configService.setConfig(key, parsedValue);
       }
-      if (opts.show) return configService.showConfig();
+      if (configOptions.show) return configService.showConfig();
       logger.error('No option provided. Use --init, --set, or --show');
       process.exit(1);
     } catch (error) {
@@ -406,11 +487,13 @@ program
   .command('plugins')
   .description('List all registered plugins and their metrics')
   .option('--load <names>', 'Load plugin(s) by name or path (comma-separated)')
-  .action(async (_args: string[], opts: Record<string, any>) => {
+  .action(async (_args: string[], opts: CLIOptions) => {
     try {
+      const pluginOptions = asCommandOptions<PluginsCommandOptions>(opts);
+
       // Load plugins if specified
-      if (opts.load) {
-        const plugins = opts.load.split(',').map((p: string) => p.trim());
+      if (pluginOptions.load) {
+        const plugins = pluginOptions.load.split(',').map(p => p.trim());
         for (const pluginNameOrPath of plugins) {
           await loadPlugin(pluginNameOrPath);
         }
@@ -437,9 +520,13 @@ program
   )
   .option('--validate', 'Run visual diff validation')
   .option('--in-place', 'Optimize files in-place (overwrite originals)')
-  .action(async (args: string[], opts: Record<string, any>) => {
+  .action(async (args: string[], opts: CLIOptions) => {
     try {
-      const [input, output = opts.inPlace ? input : args[1] || input] = args;
+      const optimizeOptions = asCommandOptions<OptimizeCommandOptions>(opts);
+      const [
+        input,
+        output = optimizeOptions.inPlace ? input : args[1] || input,
+      ] = args;
 
       if (!input) {
         logger.error('Error: Input path is required');
@@ -453,7 +540,7 @@ program
         'aggressive',
         'maximum',
       ]);
-      const level = opts.level || 'balanced';
+      const level = optimizeOptions.level || 'balanced';
 
       if (!validOptLevels.has(level)) {
         logger.error(
@@ -463,7 +550,9 @@ program
       }
 
       const inputDir = path.resolve(input);
-      const outputDir = opts.inPlace ? inputDir : path.resolve(output);
+      const outputDir = optimizeOptions.inPlace
+        ? inputDir
+        : path.resolve(output);
 
       // Validate input directory
       if (!(await FileSystem.exists(inputDir))) {
@@ -518,7 +607,7 @@ program
         `Optimization complete! ${optimized} optimized, ${failed} failed`
       );
 
-      if (opts.validate) {
+      if (optimizeOptions.validate) {
         logger.warn(
           'Visual validation not yet implemented for optimize command'
         );
@@ -550,4 +639,6 @@ await program.parse();
 
 // Ensure the process exits after CLI execution completes
 // (imported singletons may keep the event loop alive)
-process.exit(0);
+if (shouldExitAfterParse) {
+  process.exit(0);
+}

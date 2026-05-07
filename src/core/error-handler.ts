@@ -1,5 +1,39 @@
 import { logger } from '../core/logger.js';
 
+type ErrorContext = Record<string, unknown>;
+type RecoveryResult = unknown;
+
+function isSVGError(error: Error | SVGError): error is SVGError {
+  return 'code' in error && 'severity' in error;
+}
+
+function hasSeverity(
+  value: unknown
+): value is { severity: SVGError['severity'] } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'severity' in value &&
+    typeof (value as { severity?: unknown }).severity === 'string'
+  );
+}
+
+function getContextString(
+  context: ErrorContext | undefined,
+  key: string
+): string | undefined {
+  const value = context?.[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getContextBoolean(
+  context: ErrorContext | undefined,
+  key: string
+): boolean | undefined {
+  const value = context?.[key];
+  return typeof value === 'boolean' ? value : undefined;
+}
+
 /**
  * Enhanced error handling system with detailed error tracking and recovery
  */
@@ -8,14 +42,14 @@ export interface SVGError {
   code: string;
   message: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  context?: Record<string, any>;
+  context?: ErrorContext;
   timestamp: number;
   stack?: string;
 }
 
 export interface ErrorRecoveryStrategy {
   canRecover(error: SVGError): boolean;
-  recover(error: SVGError, context?: any): Promise<any>;
+  recover(error: SVGError, context?: unknown): Promise<RecoveryResult>;
 }
 
 export class SVGErrorHandler {
@@ -40,8 +74,8 @@ export class SVGErrorHandler {
    */
   public async handleError(
     error: Error | SVGError,
-    context?: Record<string, any>
-  ): Promise<{ recovered: boolean; result?: any }> {
+    context?: ErrorContext
+  ): Promise<{ recovered: boolean; result?: RecoveryResult }> {
     const svgError = this.normalizeError(error, context);
 
     // Log error based on severity
@@ -104,21 +138,19 @@ export class SVGErrorHandler {
 
   private normalizeError(
     error: Error | SVGError,
-    context?: Record<string, any>
+    context?: ErrorContext
   ): SVGError {
-    if ('code' in error && 'severity' in error) {
-      return error as SVGError;
+    if (isSVGError(error)) {
+      return error;
     }
 
-    // Convert regular Error to SVGError
-    const regularError = error as Error;
     return {
-      code: this.categorizeError(regularError),
-      message: regularError.message,
-      severity: this.determineSeverity(regularError),
+      code: this.categorizeError(error),
+      message: error.message,
+      severity: this.determineSeverity(error),
       context: context || {},
       timestamp: Date.now(),
-      stack: regularError.stack,
+      stack: error.stack,
     };
   }
 
@@ -191,8 +223,8 @@ export class SVGErrorHandler {
 
   private async attemptRecovery(
     error: SVGError,
-    context?: any
-  ): Promise<{ recovered: boolean; result?: any }> {
+    context?: unknown
+  ): Promise<{ recovered: boolean; result?: RecoveryResult }> {
     const strategy = this.recoveryStrategies.get(error.code);
 
     if (!strategy) {
@@ -223,21 +255,23 @@ export class SVGErrorHandler {
     // File not found recovery
     this.registerRecoveryStrategy('FILE_NOT_FOUND', {
       canRecover: error =>
-        error.context?.filePath && error.context?.canSkip === true,
+        !!getContextString(error.context, 'filePath') &&
+        getContextBoolean(error.context, 'canSkip') === true,
       recover: async (error, _context) => {
-        logger.warn(`Skipping missing file: ${error.context?.filePath}`);
-        return { skipped: true, filePath: error.context?.filePath };
+        const filePath = getContextString(error.context, 'filePath');
+        logger.warn(`Skipping missing file: ${filePath}`);
+        return { skipped: true, filePath };
       },
     });
 
     // Invalid SVG recovery
     this.registerRecoveryStrategy('INVALID_SVG', {
-      canRecover: error => error.context?.svgContent,
+      canRecover: error => !!getContextString(error.context, 'svgContent'),
       recover: async (error, _context) => {
         logger.info('Attempting to clean invalid SVG content');
 
         // Basic SVG cleanup
-        let cleaned = error.context?.svgContent || '';
+        let cleaned = getContextString(error.context, 'svgContent') || '';
 
         // Remove potentially problematic content
         cleaned = cleaned
@@ -252,12 +286,13 @@ export class SVGErrorHandler {
 
     // Permission denied recovery
     this.registerRecoveryStrategy('PERMISSION_DENIED', {
-      canRecover: error => error.context?.alternative,
+      canRecover: error => !!getContextString(error.context, 'alternative'),
       recover: async (error, _context) => {
+        const alternativePath = getContextString(error.context, 'alternative');
         logger.warn(
-          `Using alternative path due to permission issue: ${error.context?.alternative}`
+          `Using alternative path due to permission issue: ${alternativePath}`
         );
-        return { alternativePath: error.context?.alternative };
+        return { alternativePath };
       },
     });
 
@@ -273,7 +308,7 @@ export const errorHandler = SVGErrorHandler.getInstance();
  */
 export async function withErrorHandling<T>(
   operation: () => Promise<T>,
-  context?: Record<string, any>
+  context?: ErrorContext
 ): Promise<T | null> {
   try {
     return await operation();
@@ -285,8 +320,10 @@ export async function withErrorHandling<T>(
     }
 
     // Re-throw if not recovered and severity is high
-    const svgError = error as any;
-    if (svgError.severity === 'high' || svgError.severity === 'critical') {
+    if (
+      hasSeverity(error) &&
+      (error.severity === 'high' || error.severity === 'critical')
+    ) {
       throw error;
     }
 
@@ -297,19 +334,21 @@ export async function withErrorHandling<T>(
 /**
  * Decorator for automatic error handling
  */
-export function handleErrors(context?: Record<string, any>) {
+export function handleErrors(context?: ErrorContext) {
   return function (
-    _target: any,
+    _target: unknown,
     propertyName: string,
     descriptor: PropertyDescriptor
-  ) {
-    const method = descriptor.value;
+  ): PropertyDescriptor {
+    const method = descriptor.value as (...args: unknown[]) => Promise<unknown>;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       return withErrorHandling(() => method.apply(this, args), {
         method: propertyName,
         ...context,
       });
     };
+
+    return descriptor;
   };
 }

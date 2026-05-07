@@ -64,19 +64,25 @@ describe('SVG Processor', () => {
     it('should handle invalid SVG gracefully', async () => {
       const invalidSVG = '<invalid>not svg</invalid>';
 
-      await expect(svgProcessor.cleanSVGContent(invalidSVG)).resolves.toBeDefined();
+      await expect(
+        svgProcessor.cleanSVGContent(invalidSVG)
+      ).resolves.toBeDefined();
     });
 
     it('should handle empty SVG', async () => {
       const emptySVG = '';
 
-      await expect(svgProcessor.cleanSVGContent(emptySVG)).resolves.toBeDefined();
+      await expect(
+        svgProcessor.cleanSVGContent(emptySVG)
+      ).resolves.toBeDefined();
     });
 
     it('should handle malformed SVG', async () => {
       const malformedSVG = '<svg><unclosed';
 
-      await expect(svgProcessor.cleanSVGContent(malformedSVG)).resolves.toBeDefined();
+      await expect(
+        svgProcessor.cleanSVGContent(malformedSVG)
+      ).resolves.toBeDefined();
     });
   });
 

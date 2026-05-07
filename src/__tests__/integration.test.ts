@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { FileSystem } from '../utils/native.js';
 import path from 'path';
 
@@ -46,7 +46,9 @@ describe('Integration Tests', () => {
   afterAll(async () => {
     try {
       await FileSystem.removeDir(testDir);
-    } catch {}
+    } catch {
+      // Ignore cleanup errors.
+    }
   });
 
   describe('Complete workflow', () => {

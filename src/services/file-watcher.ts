@@ -160,7 +160,7 @@ export class FileWatcherService {
         const result = handler(event);
         // Handle async handlers
         if (result && typeof result.then === 'function') {
-          result.catch((error: any) => {
+          result.catch((error: unknown) => {
             logger.error(`Error in file event handler:`, error);
           });
         }

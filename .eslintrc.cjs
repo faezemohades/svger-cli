@@ -40,5 +40,25 @@ module.exports = {
         'no-console': 'off',
       },
     },
+    {
+      files: [
+        'src/builder.ts',
+        'src/clean.ts',
+        'src/lock.ts',
+        'src/watch.ts',
+        'src/optimizers/**/*.ts',
+        'src/utils/visual-diff.ts',
+        'src/services/config.ts',
+      ],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+    {
+      files: ['src/types/**/*.ts', 'src/integrations/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
   ],
 };

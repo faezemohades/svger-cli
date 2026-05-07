@@ -270,6 +270,8 @@ function optimizeAttributeValue(
   attrValue: string,
   config: OptConfig
 ): string {
+  const trimmedValue = attrValue.trim();
+
   // Color attributes
   const colorAttrs = new Set([
     'fill',
@@ -307,6 +309,11 @@ function optimizeAttributeValue(
   ]);
 
   if (numericAttrs.has(attrName)) {
+    if (trimmedValue.endsWith('%')) {
+      const numericPortion = trimmedValue.slice(0, -1);
+      return `${optimizeNumericString(numericPortion, config.floatPrecision)}%`;
+    }
+
     return optimizeNumericString(attrValue, config.floatPrecision);
   }
 

@@ -28,6 +28,8 @@ import {
 } from '../optimizers/advanced-stages.js';
 import { pathDeduplicationStage } from '../optimizers/path-deduplicator.js';
 import { shapeConversionStage } from '../optimizers/shape-conversion.js';
+import { getPluginManager } from '../core/enhanced-plugin-manager.js';
+import type { FrameworkType } from '../types/index.js';
 
 /**
  * SVG content processor and component generator
@@ -37,6 +39,7 @@ export class SVGProcessor {
   private processingQueue: Map<string, ProcessingJob> = new Map();
   private jobCounter = 0;
   private optimizer: OptimizerPipeline | null = null;
+  private currentOptimizationLevel: OptLevel = OptLevel.BASIC;
 
   private constructor() {
     // Initialize optimizer pipeline with basic cleaning stage
@@ -55,6 +58,7 @@ export class SVGProcessor {
    * Set optimization level for SVG processing
    */
   public setOptimizationLevel(level: OptLevel): void {
+    this.currentOptimizationLevel = level;
     if (!this.optimizer) {
       this.optimizer = new OptimizerPipeline({ level });
       this.registerOptimizationStages(level);
@@ -146,11 +150,8 @@ export class SVGProcessor {
    * @deprecated Use cleanSVGContent with optimizer pipeline instead
    */
   private legacyCleanSVGContent(svgContent: string): string {
-    // First, convert inline styles to React style objects for React-based frameworks
-    const cleaned = this.convertInlineStylesToReact(svgContent);
-
     return (
-      cleaned
+      svgContent
         // Remove XML declaration
         .replace(/<\?xml.*?\?>/g, '')
         // Remove DOCTYPE declaration
@@ -160,28 +161,72 @@ export class SVGProcessor {
         // Normalize whitespace
         .replace(/\r?\n|\r/g, '')
         .replace(/\s{2,}/g, ' ')
-        // Remove xmlns attributes (React will handle these)
-        .replace(/\s+xmlns(:xlink)?="[^"]*"/g, '')
-        // Convert attributes to camelCase for React
-        .replace(/fill-rule/g, 'fillRule')
-        .replace(/clip-rule/g, 'clipRule')
-        .replace(/stroke-width/g, 'strokeWidth')
-        .replace(/stroke-linecap/g, 'strokeLinecap')
-        .replace(/stroke-linejoin/g, 'strokeLinejoin')
-        .replace(/stroke-miterlimit/g, 'strokeMiterlimit')
-        .replace(/stroke-dasharray/g, 'strokeDasharray')
-        .replace(/stroke-dashoffset/g, 'strokeDashoffset')
-        .replace(/font-family/g, 'fontFamily')
-        .replace(/font-size/g, 'fontSize')
-        .replace(/font-weight/g, 'fontWeight')
-        .replace(/text-anchor/g, 'textAnchor')
-        // Remove width/height with px units (React doesn't accept these in numeric attributes)
-        .replace(/\s(width|height)=["'](\d+)px["']/g, ' $1={$2}')
-        // Remove outer SVG tag and keep inner content
-        .trim()
-        .replace(/^<svg[^>]*>([\s\S]*)<\/svg>$/i, '$1')
+        // Keep SVG content valid for downstream optimization and non-JSX frameworks
+        .replace(/\s(width|height)=["'](\d+)px["']/g, ' $1="$2"')
         .trim()
     );
+  }
+
+  private static readonly JSX_FRAMEWORKS = new Set<FrameworkType>([
+    'react',
+    'react-native',
+    'preact',
+    'solid',
+  ]);
+
+  private convertAttributesToJSX(svgContent: string): string {
+    const attributeMap: Record<string, string> = {
+      'fill-rule': 'fillRule',
+      'clip-rule': 'clipRule',
+      'stroke-width': 'strokeWidth',
+      'stroke-linecap': 'strokeLinecap',
+      'stroke-linejoin': 'strokeLinejoin',
+      'stroke-miterlimit': 'strokeMiterlimit',
+      'stroke-dasharray': 'strokeDasharray',
+      'stroke-dashoffset': 'strokeDashoffset',
+      'font-family': 'fontFamily',
+      'font-size': 'fontSize',
+      'font-weight': 'fontWeight',
+      'text-anchor': 'textAnchor',
+      'stop-color': 'stopColor',
+      'stop-opacity': 'stopOpacity',
+      'fill-opacity': 'fillOpacity',
+      'stroke-opacity': 'strokeOpacity',
+      'clip-path': 'clipPath',
+      'xlink:href': 'xlinkHref',
+    };
+
+    const regex = new RegExp(Object.keys(attributeMap).join('|'), 'g');
+    return svgContent.replace(regex, match => attributeMap[match]);
+  }
+
+  private prepareSVGForFramework(
+    svgContent: string,
+    framework: FrameworkType
+  ): string {
+    if (!SVGProcessor.JSX_FRAMEWORKS.has(framework)) {
+      return svgContent;
+    }
+
+    return this.convertAttributesToJSX(
+      this.convertInlineStylesToReact(svgContent)
+    );
+  }
+
+  private async applyActivePlugins(svgContent: string): Promise<string> {
+    const pluginManager = getPluginManager();
+    if (pluginManager.activePluginCount === 0) {
+      return svgContent;
+    }
+
+    const context = await pluginManager.executeHook('after-parse', {
+      content: svgContent,
+      config: getDefaultOptConfig(this.currentOptimizationLevel),
+      originalContent: svgContent,
+      metadata: new Map<string, unknown>(),
+    });
+
+    return context.content;
   }
 
   /**
@@ -231,13 +276,16 @@ export class SVGProcessor {
     return viewBoxMatch ? viewBoxMatch[1] : null;
   }
 
-  private static readonly NAMING_HANDLERS: Record<string, (baseName: string) => string> = {
-    kebab: (baseName) => toKebabCase(baseName),
-    camel: (baseName) => {
+  private static readonly NAMING_HANDLERS: Record<
+    string,
+    (baseName: string) => string
+  > = {
+    kebab: baseName => toKebabCase(baseName),
+    camel: baseName => {
       const pascalName = toPascalCase(baseName);
       return pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
     },
-    pascal: (baseName) => {
+    pascal: baseName => {
       const componentName = toPascalCase(baseName);
       // Ensure component name starts with uppercase letter
       if (!/^[A-Z]/.test(componentName)) {
@@ -270,14 +318,16 @@ export class SVGProcessor {
     try {
       // Clean and optimize SVG content (now async)
       const cleanedContent = await this.cleanSVGContent(svgContent);
-
-      // Apply plugins (no plugin configs for now, just process directly)
-      const processedContent = cleanedContent;
+      const pluginProcessedContent =
+        await this.applyActivePlugins(cleanedContent);
 
       // Create full options object with required fields
       const fullOptions: ComponentGenerationOptions = {
         componentName,
-        svgContent: processedContent,
+        svgContent: this.prepareSVGForFramework(
+          pluginProcessedContent,
+          options.framework || 'react'
+        ),
         framework: options.framework || 'react',
         typescript:
           options.typescript !== undefined ? options.typescript : true,
@@ -375,7 +425,10 @@ export class SVGProcessor {
     }
   }
 
-  private static readonly NAMING_CONVERTERS: Record<string, (name: string) => string> = {
+  private static readonly NAMING_CONVERTERS: Record<
+    string,
+    (name: string) => string
+  > = {
     kebab: toKebabCase,
     camel: toCamelCase,
     pascal: (name: string) => name,
