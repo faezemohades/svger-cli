@@ -296,6 +296,12 @@ export class CLI {
       process.exit(1);
     }
 
+    // Check for subcommand help before parsing args
+    if (remainingArgs.includes('--help') || remainingArgs.includes('-h')) {
+      this.showCommandHelp(commandName, command);
+      return;
+    }
+
     const { parsedArgs, options } = this.parseArgs(
       remainingArgs,
       command.options
@@ -366,6 +372,29 @@ export class CLI {
     writeStdout('\nOptions:');
     writeStdout('  --help, -h      Show help');
     writeStdout('  --version, -v   Show version');
+  }
+
+  private showCommandHelp(
+    commandName: string,
+    command: {
+      description: string;
+      action: CLIAction;
+      options: Map<string, CommandOptionConfig>;
+    }
+  ): void {
+    writeStdout(`${this.programName} ${commandName}`);
+    writeStdout(`\n${command.description}\n`);
+
+    if (command.options.size > 0) {
+      writeStdout('Options:');
+      for (const [name, opt] of command.options) {
+        const flag = opt.hasValue ? `--${name} <value>` : `--${name}`;
+        writeStdout(`  ${flag.padEnd(25)} ${opt.description}`);
+      }
+    }
+
+    writeStdout('\nGlobal Options:');
+    writeStdout('  --help, -h                Show help');
   }
 }
 

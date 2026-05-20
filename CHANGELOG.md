@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.8] - 2026-05-20
+
+### 🐛 Bug Fixes
+
+- **Fixed subcommand help handling**: `svger-cli build --help` and other subcommand help flags now display command-specific help text instead of failing with "Both <src> and <out> paths are required" error. The CLI parser now correctly intercepts `--help` and `-h` flags after subcommand resolution.
+- **Fixed false Vue/Svelte index generation warning**: Builds for Vue and Svelte frameworks no longer emit the misleading "No component files found in output directory for index generation" warning. Index generation is now framework-aware and silently skipped for frameworks that use non-standard extensions (`.vue`, `.svelte`).
+
+### 🔧 Improvements
+
+- **Enhanced CLI help system**: Added per-command help display showing command-specific options and global options separately.
+- **Framework-aware index generation**: Index file generation now intelligently detects framework type and skips for frameworks where barrel exports are not applicable.
+
+### 📝 Documentation
+
+- Bug fixes address issues reported in upstream issue report dated 2026-05-19 for version 4.0.7.
+
 ## [4.0.7] - 2026-05-07
 
 ### ✅ Release Readiness & Validation

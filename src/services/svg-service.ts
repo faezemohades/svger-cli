@@ -448,6 +448,17 @@ export class SVGService {
     config?: Partial<SVGConfig>
   ): Promise<void> {
     try {
+      // Skip index generation for frameworks that use non-standard extensions
+      const framework = config?.framework;
+      const frameworksWithoutIndexSupport = new Set(['vue', 'svelte']);
+      
+      if (framework && frameworksWithoutIndexSupport.has(framework)) {
+        logger.debug(
+          `Skipping index generation for ${framework} framework (components use .${framework} extension)`
+        );
+        return;
+      }
+
       // Scan output directory for all component files
       const files = await FileSystem.readDir(outDir);
 
