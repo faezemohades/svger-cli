@@ -36,9 +36,9 @@ import type { EnhancedPluginManager } from '../core/enhanced-plugin-manager.js';
 import type { FrameworkType } from '../types/index.js';
 import {
   applySVGInputSafety,
-  resolveOutputArtifactPath,
   type SVGInputSafetyOptions,
 } from '../security/input-safety.js';
+import { writeOutputFileAtomic } from '../io/atomic-write.js';
 
 function throwIfAborted(signal?: AbortSignal): void {
   if (!signal?.aborted) return;
@@ -576,9 +576,6 @@ export class SVGProcessor {
       );
       throwIfAborted(options.signal);
 
-      // Ensure output directory exists
-      await FileSystem.ensureDir(outputDir);
-
       // Get correct file extension based on framework
       const framework = options.framework || 'react';
       const typescript =
@@ -596,9 +593,12 @@ export class SVGProcessor {
       );
 
       // Write component file
-      const outputFilePath = resolveOutputArtifactPath(outputDir, fileName);
-      throwIfAborted(options.signal);
-      await FileSystem.writeFile(outputFilePath, componentCode, 'utf-8');
+      const outputFilePath = await writeOutputFileAtomic(
+        outputDir,
+        fileName,
+        componentCode,
+        options.signal
+      );
 
       // Update job status
       job.status = 'completed';

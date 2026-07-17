@@ -4,9 +4,32 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { recoverOutputTransactions } from '../../dist/index.js';
+import {
+  recoverOutputTransactions,
+  writeOutputFileAtomic,
+} from '../../dist/index.js';
 
 const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'svger-p1-recover-'));
+const atomicRoot = path.join(fixture, 'atomic');
+await writeOutputFileAtomic(atomicRoot, 'Atomic.tsx', 'first');
+await writeOutputFileAtomic(atomicRoot, 'Atomic.tsx', 'second');
+assert.equal(
+  await fs.readFile(path.join(atomicRoot, 'Atomic.tsx'), 'utf8'),
+  'second'
+);
+assert.deepEqual(await fs.readdir(atomicRoot), ['Atomic.tsx']);
+const cancelledController = new AbortController();
+cancelledController.abort('contract cancellation');
+await assert.rejects(
+  writeOutputFileAtomic(
+    path.join(fixture, 'cancelled-atomic'),
+    'Cancelled.tsx',
+    'content',
+    cancelledController.signal
+  ),
+  error => error.code === 'ABORT_ERR'
+);
+await assert.rejects(fs.access(path.join(fixture, 'cancelled-atomic')));
 const output = path.join(fixture, 'output');
 const stage = path.join(fixture, '.svger-stage-recovery');
 const backup = path.join(stage, 'backup');

@@ -46,6 +46,7 @@ export interface GenerateCommandOptions {
   typescript?: boolean;
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  signal?: AbortSignal;
 }
 
 export class GenerateCommand implements Command<GenerateCommandOptions, void> {
@@ -79,6 +80,7 @@ export interface WatchCommandOptions {
   config?: Partial<SVGConfig>;
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  signal?: AbortSignal;
 }
 
 export class WatchCommand implements Command<WatchCommandOptions, string> {
@@ -230,6 +232,7 @@ export interface OptimizeCommandOptions {
   validate?: boolean;
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  signal?: AbortSignal;
 }
 
 export interface OptimizeCommandResult {
@@ -290,6 +293,12 @@ export class OptimizeCommand
     let exitCode = ExitCode.Success;
     for (const file of files) {
       try {
+        if (options.signal?.aborted) {
+          throw Object.assign(new Error('Optimization was cancelled.'), {
+            code: 'ABORT_ERR',
+            cause: options.signal.reason,
+          });
+        }
         const inputPath = path.join(inputDir, file);
         const outputPath = resolveOutputArtifactPath(outputDir, file);
         const content = await FileSystem.readFile(inputPath, 'utf8');

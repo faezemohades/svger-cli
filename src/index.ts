@@ -216,6 +216,7 @@ export type {
   CacheReadResult,
   PipelineFingerprint,
 } from './cache/content-addressable-cache.js';
+export { writeOutputFileAtomic } from './io/atomic-write.js';
 export {
   resolveConfiguration,
   explainConfiguration,
