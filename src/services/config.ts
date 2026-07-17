@@ -3,6 +3,7 @@ import { FileSystem } from '../utils/native.js';
 import { SVGConfig } from '../types/index.js';
 import { logger } from '../core/logger.js';
 import { getPackageInfo } from '../utils/package-info.js';
+import { DEFAULT_MAX_SVG_INPUT_SIZE_BYTES } from '../security/input-safety.js';
 
 type ConfigValue = string | number | boolean | null | undefined;
 type ConfigTree = Record<string, unknown>;
@@ -58,6 +59,8 @@ export class ConfigService {
       batchSize: 10,
       maxConcurrency: 4,
       cache: true,
+      maxInputSizeBytes: DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+      unsafeInputPolicy: 'reject',
 
       // Default Properties
       defaultWidth: 24,

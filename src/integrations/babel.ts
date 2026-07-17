@@ -40,6 +40,10 @@ import type {
   BabelPluginOptions,
   ProcessingResult,
 } from '../types/integrations.js';
+import {
+  DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+  resolveOutputArtifactPath,
+} from '../security/input-safety.js';
 
 const PLUGIN_NAME = 'svger-babel-plugin';
 
@@ -82,11 +86,16 @@ async function processAllSVGs(
           defaultHeight: config.defaultHeight,
           defaultFill: config.defaultFill,
           styleRules: config.styleRules || {},
+          maxInputSizeBytes: options.maxInputSizeBytes,
+          unsafeInputPolicy: options.unsafeInputPolicy,
         }
       );
 
       const ext = options.typescript ? 'tsx' : 'jsx';
-      const outputFile = path.join(outputPath, `${componentName}.${ext}`);
+      const outputFile = resolveOutputArtifactPath(
+        outputPath,
+        `${componentName}.${ext}`
+      );
 
       await FileSystem.ensureDir(path.dirname(outputFile));
       await FileSystem.writeFile(outputFile, component);
@@ -155,7 +164,10 @@ async function generateIndexFile(
       .map(name => `export { default as ${name} } from './${name}';`)
       .join('\n');
 
-    const indexPath = path.join(outputDir, `index.${indexExtension}`);
+    const indexPath = resolveOutputArtifactPath(
+      outputDir,
+      `index.${indexExtension}`
+    );
     await FileSystem.writeFile(indexPath, exports, 'utf-8');
     logger.debug(`Generated index file: ${indexPath}`);
   } catch (error) {
@@ -212,6 +224,11 @@ export function svgerBabelPlugin(
       options.processOnInit !== undefined ? options.processOnInit : true,
     generateIndex:
       options.generateIndex !== undefined ? options.generateIndex : true,
+    maxInputSizeBytes:
+      options.maxInputSizeBytes ??
+      config.maxInputSizeBytes ??
+      DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+    unsafeInputPolicy: options.unsafeInputPolicy ?? 'reject',
   };
 
   const processedFiles = new Set<string>();

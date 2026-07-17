@@ -4,6 +4,8 @@ import { isLocked } from './lock.js';
 import { svgProcessor } from './processors/svg-processor.js';
 import { configService } from './services/config.js';
 import { frameworkTemplateEngine } from './core/framework-templates.js';
+import { resolveOutputArtifactPath } from './security/input-safety.js';
+import type { BuildOptions, UnsafeInputPolicy } from './types/index.js';
 
 /**
  * Converts all SVG files from a source directory into framework components
@@ -15,7 +17,7 @@ import { frameworkTemplateEngine } from './core/framework-templates.js';
  * @param {string} config.out - Path to the output folder where components will be generated.
  * @returns {Promise<void>} Resolves when all SVGs have been processed.
  */
-export async function buildAll(config: { src: string; out: string }) {
+export async function buildAll(config: BuildOptions) {
   const svgConfig = configService.readConfig();
   const srcDir = path.resolve(config.src);
   const outDir = path.resolve(config.out);
@@ -65,10 +67,16 @@ export async function buildAll(config: { src: string; out: string }) {
         defaultHeight: svgConfig.defaultHeight,
         defaultFill: svgConfig.defaultFill,
         styleRules: svgConfig.styleRules,
+        maxInputSizeBytes:
+          config.maxInputSizeBytes ?? svgConfig.maxInputSizeBytes,
+        unsafeInputPolicy: config.unsafeInputPolicy,
       }
     );
 
-    const outFile = path.join(outDir, `${componentName}.${fileExtension}`);
+    const outFile = resolveOutputArtifactPath(
+      outDir,
+      `${componentName}.${fileExtension}`
+    );
     await FileSystem.writeFile(outFile, componentCode, 'utf-8');
     console.log(`✅ Generated: ${componentName}.${fileExtension}`);
   }
@@ -88,9 +96,13 @@ export async function buildAll(config: { src: string; out: string }) {
 export async function generateSVG({
   svgFile,
   outDir,
+  maxInputSizeBytes,
+  unsafeInputPolicy,
 }: {
   svgFile: string;
   outDir: string;
+  maxInputSizeBytes?: number;
+  unsafeInputPolicy?: UnsafeInputPolicy;
 }) {
   const svgConfig = configService.readConfig();
   const filePath = path.resolve(svgFile);
@@ -127,13 +139,18 @@ export async function generateSVG({
       defaultHeight: svgConfig.defaultHeight,
       defaultFill: svgConfig.defaultFill,
       styleRules: svgConfig.styleRules,
+      maxInputSizeBytes: maxInputSizeBytes ?? svgConfig.maxInputSizeBytes,
+      unsafeInputPolicy,
     }
   );
 
   const outputFolder = path.resolve(outDir);
   await FileSystem.ensureDir(outputFolder);
 
-  const outFile = path.join(outputFolder, `${componentName}.${fileExtension}`);
+  const outFile = resolveOutputArtifactPath(
+    outputFolder,
+    `${componentName}.${fileExtension}`
+  );
   await FileSystem.writeFile(outFile, componentCode, 'utf-8');
 
   console.log(`✅ Generated: ${componentName}.${fileExtension}`);

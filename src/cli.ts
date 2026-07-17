@@ -11,11 +11,13 @@ import type {
   FrameworkOptions,
   FrameworkType,
   GenerateOptions,
+  UnsafeInputPolicy,
 } from './types/index.js';
 import { resolve } from 'path';
 import { pathToFileURL } from 'url';
 import path from 'path';
 import { getPackageInfo } from './utils/package-info.js';
+import { resolveOutputArtifactPath } from './security/input-safety.js';
 
 type BuildRuntimeOptions = BuildOptions & {
   framework?: FrameworkType;
@@ -31,7 +33,12 @@ type GenerateRuntimeOptions = GenerateOptions & {
   typescript?: boolean;
 };
 
-interface BuildCommandOptions {
+interface SafetyCommandOptions {
+  'max-input-size'?: string;
+  'unsafe-input-policy'?: string;
+}
+
+interface BuildCommandOptions extends SafetyCommandOptions {
   composition?: boolean;
   framework?: FrameworkType;
   listPlugins?: boolean;
@@ -42,7 +49,7 @@ interface BuildCommandOptions {
   typescript?: boolean;
 }
 
-interface GenerateCommandOptions {
+interface GenerateCommandOptions extends SafetyCommandOptions {
   composition?: boolean;
   framework?: FrameworkType;
   optimize?: string;
@@ -60,10 +67,38 @@ interface PluginsCommandOptions {
   load?: string;
 }
 
-interface OptimizeCommandOptions {
+interface OptimizeCommandOptions extends SafetyCommandOptions {
   inPlace?: boolean;
   level?: string;
   validate?: boolean;
+}
+
+function applySafetyCommandOptions(
+  source: SafetyCommandOptions,
+  target: {
+    maxInputSizeBytes?: number;
+    unsafeInputPolicy?: UnsafeInputPolicy;
+  }
+): void {
+  if (source['unsafe-input-policy']) {
+    const policy = source['unsafe-input-policy'];
+    if (policy !== 'reject' && policy !== 'strip') {
+      throw new Error(
+        `E_INVALID_UNSAFE_INPUT_POLICY: Expected "reject" or "strip", received "${policy}".`
+      );
+    }
+    target.unsafeInputPolicy = policy;
+  }
+
+  if (source['max-input-size']) {
+    const size = Number(source['max-input-size']);
+    if (!Number.isSafeInteger(size) || size <= 0) {
+      throw new Error(
+        'E_INVALID_INPUT_SIZE_LIMIT: --max-input-size must be a positive integer.'
+      );
+    }
+    target.maxInputSizeBytes = size;
+  }
 }
 
 function asCommandOptions<T>(options: CLIOptions): T {
@@ -206,6 +241,11 @@ program
     'Load plugin(s) by name or path (comma-separated for multiple)'
   )
   .option('--list-plugins', 'List all registered plugins and exit')
+  .option(
+    '--unsafe-input-policy <policy>',
+    'Unsafe raw SVG policy: reject (default) or strip'
+  )
+  .option('--max-input-size <bytes>', 'Maximum raw SVG size in bytes')
   .action(async (args: string[], opts: CLIOptions) => {
     try {
       const buildOptions = asCommandOptions<BuildCommandOptions>(opts);
@@ -271,6 +311,7 @@ program
 
       // Build config from CLI options
       const buildConfig: BuildRuntimeOptions = { src, out };
+      applySafetyCommandOptions(buildOptions, buildConfig);
 
       if (buildOptions.framework) {
         buildConfig.framework = buildOptions.framework;
@@ -317,7 +358,12 @@ program
 program
   .command('watch <src> <out>')
   .description('Watch source folder and rebuild SVGs automatically')
-  .action(async (args: string[]) => {
+  .option(
+    '--unsafe-input-policy <policy>',
+    'Unsafe raw SVG policy: reject (default) or strip'
+  )
+  .option('--max-input-size <bytes>', 'Maximum raw SVG size in bytes')
+  .action(async (args: string[], opts: CLIOptions) => {
     try {
       shouldExitAfterParse = false;
       const [src, out] = args;
@@ -327,7 +373,12 @@ program
         logger.error('Error: Both <src> and <out> paths are required');
         process.exit(1);
       }
-      await svgService.startWatching({ src, out });
+      const watchOptions: BuildRuntimeOptions = { src, out };
+      applySafetyCommandOptions(
+        asCommandOptions<SafetyCommandOptions>(opts),
+        watchOptions
+      );
+      await svgService.startWatching(watchOptions);
 
       // Keep the process running
       process.on('SIGINT', () => {
@@ -360,12 +411,18 @@ program
     '--optimize <level>',
     'Optimization level: none, basic, balanced, aggressive, maximum (default: basic)'
   )
+  .option(
+    '--unsafe-input-policy <policy>',
+    'Unsafe raw SVG policy: reject (default) or strip'
+  )
+  .option('--max-input-size <bytes>', 'Maximum raw SVG size in bytes')
   .action(async (args: string[], opts: CLIOptions) => {
     try {
       const generateOptions = asCommandOptions<GenerateCommandOptions>(opts);
       const [svgFile, out] = args;
 
       const generateConfig: GenerateRuntimeOptions = { svgFile, outDir: out };
+      applySafetyCommandOptions(generateOptions, generateConfig);
 
       if (generateOptions.framework) {
         generateConfig.framework = generateOptions.framework;
@@ -520,9 +577,19 @@ program
   )
   .option('--validate', 'Run visual diff validation')
   .option('--in-place', 'Optimize files in-place (overwrite originals)')
+  .option(
+    '--unsafe-input-policy <policy>',
+    'Unsafe raw SVG policy: reject (default) or strip'
+  )
+  .option('--max-input-size <bytes>', 'Maximum raw SVG size in bytes')
   .action(async (args: string[], opts: CLIOptions) => {
     try {
       const optimizeOptions = asCommandOptions<OptimizeCommandOptions>(opts);
+      const safetyOptions: {
+        maxInputSizeBytes?: number;
+        unsafeInputPolicy?: UnsafeInputPolicy;
+      } = {};
+      applySafetyCommandOptions(optimizeOptions, safetyOptions);
       const [
         input,
         output = optimizeOptions.inPlace ? input : args[1] || input,
@@ -586,10 +653,13 @@ program
       for (const file of svgFiles) {
         try {
           const inputPath = path.join(inputDir, file);
-          const outputPath = path.join(outputDir, file);
+          const outputPath = resolveOutputArtifactPath(outputDir, file);
 
           const content = await FileSystem.readFile(inputPath, 'utf-8');
-          const optimizedContent = await svgProcessor.cleanSVGContent(content);
+          const optimizedContent = await svgProcessor.cleanSVGContent(content, {
+            ...safetyOptions,
+            source: inputPath,
+          });
 
           await FileSystem.writeFile(outputPath, optimizedContent, 'utf-8');
           optimized++;

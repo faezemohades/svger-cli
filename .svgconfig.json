@@ -1,5 +1,5 @@
 {
-  "version": "4.0.8",
+  "version": "4.0.9",
   "source": "./svg-icons",
   "output": "./components/icons",
   "framework": "react",
@@ -10,6 +10,8 @@
   "batchSize": 10,
   "maxConcurrency": 4,
   "cache": true,
+  "maxInputSizeBytes": 10485760,
+  "unsafeInputPolicy": "reject",
   "defaultWidth": 48,
   "defaultHeight": 48,
   "defaultFill": "#000000",

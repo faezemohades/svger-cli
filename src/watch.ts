@@ -5,6 +5,8 @@ import { FileSystem, FileWatcher } from './utils/native.js';
 import { configService } from './services/config.js';
 import { svgProcessor } from './processors/svg-processor.js';
 import { frameworkTemplateEngine } from './core/framework-templates.js';
+import { resolveOutputArtifactPath } from './security/input-safety.js';
+import type { WatchOptions } from './types/index.js';
 
 /**
  * Watches a source folder for changes to SVG files and automatically
@@ -23,7 +25,7 @@ import { frameworkTemplateEngine } from './core/framework-templates.js';
  * // - Updates components when files change.
  * // - Removes components when SVGs are deleted.
  */
-export async function watchSVGs(config: { src: string; out: string }) {
+export async function watchSVGs(config: WatchOptions) {
   const srcDir = path.resolve(config.src);
   const outDir = path.resolve(config.out);
 
@@ -53,7 +55,12 @@ export async function watchSVGs(config: { src: string; out: string }) {
     }
 
     console.log(`✏️ SVG updated: ${path.basename(filePath)}`);
-    await generateSVG({ svgFile: filePath, outDir });
+    await generateSVG({
+      svgFile: filePath,
+      outDir,
+      maxInputSizeBytes: config.maxInputSizeBytes,
+      unsafeInputPolicy: config.unsafeInputPolicy,
+    });
   });
 
   // Handle new files (rename event in fs.watch can indicate new files)
@@ -73,7 +80,12 @@ export async function watchSVGs(config: { src: string; out: string }) {
       }
 
       console.log(`➕ New SVG detected: ${path.basename(filePath)}`);
-      await generateSVG({ svgFile: filePath, outDir });
+      await generateSVG({
+        svgFile: filePath,
+        outDir,
+        maxInputSizeBytes: config.maxInputSizeBytes,
+        unsafeInputPolicy: config.unsafeInputPolicy,
+      });
     } else {
       // File was deleted — use configured naming convention and extension
       const config = configService.readConfig();
@@ -89,7 +101,10 @@ export async function watchSVGs(config: { src: string; out: string }) {
         path.basename(filePath),
         namingConvention
       );
-      const outFile = path.join(outDir, `${componentName}.${extension}`);
+      const outFile = resolveOutputArtifactPath(
+        outDir,
+        `${componentName}.${extension}`
+      );
 
       if (await FileSystem.exists(outFile)) {
         await FileSystem.unlink(outFile);

@@ -54,6 +54,8 @@ export function withSvger(nextConfig: any = {}) {
           exclude: svgerOptions.exclude,
           hmr: svgerOptions.hmr,
           generateIndex: svgerOptions.generateIndex,
+          maxInputSizeBytes: svgerOptions.maxInputSizeBytes,
+          unsafeInputPolicy: svgerOptions.unsafeInputPolicy,
         });
 
         config.plugins.push(pluginInstance);
@@ -75,6 +77,8 @@ export function withSvger(nextConfig: any = {}) {
             options: {
               framework: svgerOptions.framework || 'react',
               typescript: svgerOptions.typescript,
+              maxInputSizeBytes: svgerOptions.maxInputSizeBytes,
+              unsafeInputPolicy: svgerOptions.unsafeInputPolicy,
             },
           },
         ],
@@ -111,6 +115,8 @@ export class SvgerNextJsPlugin extends SvgerWebpackPlugin {
       exclude: options.exclude,
       hmr: options.hmr,
       generateIndex: options.generateIndex,
+      maxInputSizeBytes: options.maxInputSizeBytes,
+      unsafeInputPolicy: options.unsafeInputPolicy,
     });
   }
 }
@@ -148,6 +154,8 @@ export function configureSvgImports(
           framework: options.framework || 'react',
           typescript:
             options.typescript !== undefined ? options.typescript : true,
+          maxInputSizeBytes: options.maxInputSizeBytes,
+          unsafeInputPolicy: options.unsafeInputPolicy,
         },
       },
     ],

@@ -32,6 +32,10 @@ import type {
   WebpackLoaderOptions,
   ProcessingResult,
 } from '../types/integrations.js';
+import {
+  DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+  resolveOutputArtifactPath,
+} from '../security/input-safety.js';
 
 const PLUGIN_NAME = 'SvgerWebpackPlugin';
 
@@ -61,6 +65,11 @@ export class SvgerWebpackPlugin {
       emitFile: options.emitFile !== undefined ? options.emitFile : true,
       generateIndex:
         options.generateIndex !== undefined ? options.generateIndex : true,
+      maxInputSizeBytes:
+        options.maxInputSizeBytes ??
+        config.maxInputSizeBytes ??
+        DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+      unsafeInputPolicy: options.unsafeInputPolicy ?? 'reject',
       watch: {
         debounce: options.watch?.debounce || 300,
         ignored: options.watch?.ignored || ['node_modules/**'],
@@ -193,6 +202,8 @@ export class SvgerWebpackPlugin {
         defaultHeight: mergedConfig.defaultHeight,
         defaultFill: mergedConfig.defaultFill,
         styleRules: mergedConfig.styleRules || {},
+        maxInputSizeBytes: this.options.maxInputSizeBytes,
+        unsafeInputPolicy: this.options.unsafeInputPolicy,
       });
 
       return {
@@ -244,7 +255,10 @@ export class SvgerWebpackPlugin {
         .map(name => `export { default as ${name} } from './${name}';`)
         .join('\n');
 
-      const indexPath = path.join(outputDir, `index.${indexExtension}`);
+      const indexPath = resolveOutputArtifactPath(
+        outputDir,
+        `index.${indexExtension}`
+      );
       await FileSystem.writeFile(indexPath, exports, 'utf-8');
       logger.debug(`Generated index file: ${indexPath}`);
     } catch (error) {
@@ -327,6 +341,9 @@ export async function svgerLoader(this: any, content: string): Promise<string> {
         defaultHeight: config.defaultHeight,
         defaultFill: config.defaultFill,
         styleRules: config.styleRules || {},
+        maxInputSizeBytes:
+          options.maxInputSizeBytes ?? config.maxInputSizeBytes,
+        unsafeInputPolicy: options.unsafeInputPolicy,
       }
     );
 

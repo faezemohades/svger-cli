@@ -14,12 +14,16 @@ import { svgProcessor } from '../processors/svg-processor.js';
 import { frameworkTemplateEngine } from '../core/framework-templates.js';
 import { fileWatcher } from './file-watcher.js';
 import { OptLevel } from '../optimizers/types.js';
+import { resolveOutputArtifactPath } from '../security/input-safety.js';
+import type { UnsafeInputPolicy } from '../types/index.js';
 
 type RuntimeProcessingOverrides = {
   framework?: SVGConfig['framework'];
   frameworkOptions?: FrameworkOptions;
   optimize?: string;
   typescript?: boolean;
+  maxInputSizeBytes?: number;
+  unsafeInputPolicy?: UnsafeInputPolicy;
 };
 
 type BuildRequestOptions = BuildOptions & RuntimeProcessingOverrides;
@@ -97,6 +101,12 @@ export class SVGService {
       ...(runtimeOverrides.optimize && {
         optimize: runtimeOverrides.optimize,
       }),
+      ...(runtimeOverrides.maxInputSizeBytes !== undefined && {
+        maxInputSizeBytes: runtimeOverrides.maxInputSizeBytes,
+      }),
+      ...(runtimeOverrides.unsafeInputPolicy && {
+        unsafeInputPolicy: runtimeOverrides.unsafeInputPolicy,
+      }),
     };
   }
 
@@ -170,6 +180,8 @@ export class SVGService {
                 ([, v]) => v !== undefined
               )
             ) as Record<string, string>,
+            maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
+            unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
           }
         );
 
@@ -209,6 +221,14 @@ export class SVGService {
       failedResults.forEach(r => {
         logger.warn(`  - ${r.file}: ${r.error?.message}`);
       });
+    }
+
+    const containmentFailure = failedResults.find(result => {
+      const code = (result.error as { code?: unknown } | undefined)?.code;
+      return typeof code === 'string' && code.startsWith('E_');
+    });
+    if (containmentFailure?.error) {
+      throw containmentFailure.error;
     }
 
     // Generate index.ts file with all component exports
@@ -260,6 +280,8 @@ export class SVGService {
           ([, v]) => v !== undefined
         )
       ) as Record<string, string>,
+      maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
+      unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
     });
 
     if (!result.success) {
@@ -291,7 +313,11 @@ export class SVGService {
 
     // Register event handler
     fileWatcher.onFileEvent(watchId, async (event: FileWatchEvent) => {
-      await this.handleWatchEvent(event, outDir, options.config);
+      await this.handleWatchEvent(event, outDir, {
+        ...options.config,
+        maxInputSizeBytes: options.maxInputSizeBytes,
+        unsafeInputPolicy: options.unsafeInputPolicy,
+      });
     });
 
     logger.success(`Watch mode active - waiting for file changes...`);
@@ -359,6 +385,8 @@ export class SVGService {
             ([, v]) => v !== undefined
           )
         ) as Record<string, string>,
+        maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
+        unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
       });
     } catch (error) {
       logger.error(
@@ -393,7 +421,10 @@ export class SVGService {
         path.basename(filePath),
         namingConvention
       );
-      const componentPath = path.join(outDir, `${componentName}.${extension}`);
+      const componentPath = resolveOutputArtifactPath(
+        outDir,
+        `${componentName}.${extension}`
+      );
 
       if (await FileSystem.exists(componentPath)) {
         await FileSystem.unlink(componentPath);
@@ -451,7 +482,7 @@ export class SVGService {
       // Skip index generation for frameworks that use non-standard extensions
       const framework = config?.framework;
       const frameworksWithoutIndexSupport = new Set(['vue', 'svelte']);
-      
+
       if (framework && frameworksWithoutIndexSupport.has(framework)) {
         logger.debug(
           `Skipping index generation for ${framework} framework (components use .${framework} extension)`
@@ -490,7 +521,7 @@ export class SVGService {
       });
 
       const indexContent = this.generateIndexContent(componentNames);
-      const indexPath = path.join(outDir, 'index.ts');
+      const indexPath = resolveOutputArtifactPath(outDir, 'index.ts');
 
       await FileSystem.writeFile(indexPath, indexContent, 'utf-8');
       logger.success(

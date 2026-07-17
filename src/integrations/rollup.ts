@@ -31,6 +31,10 @@ import type {
   RollupPluginOptions,
   ProcessingResult,
 } from '../types/integrations.js';
+import {
+  DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+  resolveOutputArtifactPath,
+} from '../security/input-safety.js';
 
 const PLUGIN_NAME = 'svger-rollup-plugin';
 
@@ -54,6 +58,11 @@ export function svgerRollupPlugin(options: RollupPluginOptions = {}): any {
     generateIndex:
       options.generateIndex !== undefined ? options.generateIndex : true,
     sourcemap: options.sourcemap !== undefined ? options.sourcemap : false,
+    maxInputSizeBytes:
+      options.maxInputSizeBytes ??
+      config.maxInputSizeBytes ??
+      DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+    unsafeInputPolicy: options.unsafeInputPolicy ?? 'reject',
   };
 
   const processedFiles = new Set<string>();
@@ -94,6 +103,8 @@ export function svgerRollupPlugin(options: RollupPluginOptions = {}): any {
               defaultHeight: config.defaultHeight,
               defaultFill: config.defaultFill,
               styleRules: config.styleRules || {},
+              maxInputSizeBytes: pluginOptions.maxInputSizeBytes,
+              unsafeInputPolicy: pluginOptions.unsafeInputPolicy,
             }
           );
 
@@ -127,6 +138,8 @@ export function svgerRollupPlugin(options: RollupPluginOptions = {}): any {
             defaultHeight: config.defaultHeight,
             defaultFill: config.defaultFill,
             styleRules: config.styleRules || {},
+            maxInputSizeBytes: pluginOptions.maxInputSizeBytes,
+            unsafeInputPolicy: pluginOptions.unsafeInputPolicy,
           }
         );
 
@@ -216,6 +229,8 @@ async function processSVGFile(
       defaultHeight: mergedConfig.defaultHeight,
       defaultFill: mergedConfig.defaultFill,
       styleRules: mergedConfig.styleRules || {},
+      maxInputSizeBytes: options.maxInputSizeBytes,
+      unsafeInputPolicy: options.unsafeInputPolicy,
     });
 
     return {
@@ -270,7 +285,10 @@ async function generateIndexFile(
       .map(name => `export { default as ${name} } from './${name}';`)
       .join('\n');
 
-    const indexPath = path.join(outputDir, `index.${indexExtension}`);
+    const indexPath = resolveOutputArtifactPath(
+      outputDir,
+      `index.${indexExtension}`
+    );
     await FileSystem.writeFile(indexPath, exports, 'utf-8');
     logger.debug(`Generated index file: ${indexPath}`);
   } catch (error) {

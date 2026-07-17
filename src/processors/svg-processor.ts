@@ -30,6 +30,11 @@ import { pathDeduplicationStage } from '../optimizers/path-deduplicator.js';
 import { shapeConversionStage } from '../optimizers/shape-conversion.js';
 import { getPluginManager } from '../core/enhanced-plugin-manager.js';
 import type { FrameworkType } from '../types/index.js';
+import {
+  applySVGInputSafety,
+  resolveOutputArtifactPath,
+  type SVGInputSafetyOptions,
+} from '../security/input-safety.js';
 
 /**
  * SVG content processor and component generator
@@ -125,12 +130,20 @@ export class SVGProcessor {
   /**
    * Clean and optimize SVG content using the optimizer pipeline
    */
-  public async cleanSVGContent(svgContent: string): Promise<string> {
+  public async cleanSVGContent(
+    svgContent: string,
+    safetyOptions: SVGInputSafetyOptions = {}
+  ): Promise<string> {
     logger.debug('Cleaning SVG content');
 
     try {
+      const safeContent = applySVGInputSafety(svgContent, {
+        ...safetyOptions,
+        warn: message => logger.warn(message),
+      });
+
       if (this.optimizer) {
-        const result = await this.optimizer.optimize(svgContent);
+        const result = await this.optimizer.optimize(safeContent);
         logger.debug(
           `Optimized SVG: ${result.reductionPercent.toFixed(2)}% size reduction`
         );
@@ -138,10 +151,19 @@ export class SVGProcessor {
       }
 
       // Fallback to legacy cleaning if optimizer is not initialized
-      return this.legacyCleanSVGContent(svgContent);
+      return this.legacyCleanSVGContent(safeContent);
     } catch (error) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        typeof error.code === 'string' &&
+        error.code.startsWith('E_')
+      ) {
+        throw error;
+      }
       logger.warn('Optimizer failed, falling back to legacy cleaning:', error);
-      return this.legacyCleanSVGContent(svgContent);
+      const safeContent = applySVGInputSafety(svgContent, safetyOptions);
+      return this.legacyCleanSVGContent(safeContent);
     }
   }
 
@@ -317,7 +339,11 @@ export class SVGProcessor {
   ): Promise<string> {
     try {
       // Clean and optimize SVG content (now async)
-      const cleanedContent = await this.cleanSVGContent(svgContent);
+      const cleanedContent = await this.cleanSVGContent(svgContent, {
+        maxInputSizeBytes: options.maxInputSizeBytes,
+        source: componentName,
+        unsafeInputPolicy: options.unsafeInputPolicy,
+      });
       const pluginProcessedContent =
         await this.applyActivePlugins(cleanedContent);
 
@@ -357,8 +383,14 @@ export class SVGProcessor {
       // Optimize SVG content based on framework requirements
       const optimizationLevel =
         options.framework === 'vanilla' ? 'maximum' : 'balanced';
+      const safeContent = applySVGInputSafety(svgContent, {
+        maxInputSizeBytes: options.maxInputSizeBytes,
+        source: componentName,
+        unsafeInputPolicy: options.unsafeInputPolicy,
+        warn: message => logger.warn(message),
+      });
       const optimizedContent = performanceEngine.optimizeSVGContent(
-        svgContent,
+        safeContent,
         optimizationLevel
       );
 
@@ -508,7 +540,7 @@ export class SVGProcessor {
       );
 
       // Write component file
-      const outputFilePath = path.join(outputDir, fileName);
+      const outputFilePath = resolveOutputArtifactPath(outputDir, fileName);
       await FileSystem.writeFile(outputFilePath, componentCode, 'utf-8');
 
       // Update job status

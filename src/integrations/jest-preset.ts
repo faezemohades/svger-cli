@@ -20,6 +20,7 @@
 import { svgProcessor } from '../processors/svg-processor.js';
 import { configService } from '../services/config.js';
 import type { JestPresetOptions } from '../types/integrations.js';
+import { applySVGInputSafety } from '../security/input-safety.js';
 
 /**
  * Jest transformer for SVG files
@@ -33,6 +34,12 @@ export const svgerJestTransformer = {
     const config = configService.readConfig();
     const transformOptions: JestPresetOptions =
       options?.transformerConfig?.svger || {};
+    const safeSourceText = applySVGInputSafety(sourceText, {
+      maxInputSizeBytes:
+        transformOptions.maxInputSizeBytes ?? config.maxInputSizeBytes,
+      source: sourcePath,
+      unsafeInputPolicy: transformOptions.unsafeInputPolicy,
+    });
 
     // Check if we should mock instead of transform
     if (transformOptions.mock) {
@@ -64,7 +71,7 @@ module.exports.default = ${componentName};
 
     try {
       // Generate component synchronously for Jest
-      const component = generateComponentSync(componentName, sourceText, {
+      const component = generateComponentSync(componentName, safeSourceText, {
         framework,
         typescript,
         defaultWidth: config.defaultWidth,

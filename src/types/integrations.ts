@@ -2,7 +2,7 @@
  * Type definitions for build tool integrations
  */
 
-import type { FrameworkType, SVGConfig } from './index.js';
+import type { FrameworkType, SVGConfig, UnsafeInputPolicy } from './index.js';
 
 // ============================================================================
 // Common Types
@@ -46,6 +46,12 @@ export interface BaseIntegrationOptions {
    * Exclude pattern (glob)
    */
   exclude?: string | string[];
+
+  /** Maximum accepted raw SVG size in bytes. @default 10485760 */
+  maxInputSizeBytes?: number;
+
+  /** Explicit handling policy for unsafe raw SVG input. @default 'reject' */
+  unsafeInputPolicy?: UnsafeInputPolicy;
 }
 
 // ============================================================================
@@ -249,6 +255,12 @@ export interface JestPresetOptions {
    * @default false
    */
   mock?: boolean;
+
+  /** Maximum accepted raw SVG size in bytes. @default 10485760 */
+  maxInputSizeBytes?: number;
+
+  /** Explicit handling policy for unsafe raw SVG input. @default 'reject' */
+  unsafeInputPolicy?: UnsafeInputPolicy;
 }
 
 // ============================================================================

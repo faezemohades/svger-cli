@@ -14,6 +14,7 @@ export type FrameworkType =
   | 'vanilla';
 
 export type NamingConvention = 'kebab' | 'pascal' | 'camel';
+export type UnsafeInputPolicy = 'reject' | 'strip';
 export type ComponentType = 'functional' | 'class' | 'arrow';
 export type ErrorHandlingStrategy = 'continue' | 'stop' | 'retry';
 export type PerformanceOptimization = 'fast' | 'balanced' | 'maximum';
@@ -96,6 +97,8 @@ export interface SVGConfig {
   batchSize: number;
   maxConcurrency: number;
   cache: boolean;
+  maxInputSizeBytes?: number;
+  unsafeInputPolicy?: UnsafeInputPolicy;
 
   // Default Properties
   defaultWidth: number;
@@ -163,18 +166,24 @@ export interface BuildOptions {
   src: string;
   out: string;
   config?: Partial<SVGConfig>;
+  maxInputSizeBytes?: number;
+  unsafeInputPolicy?: UnsafeInputPolicy;
 }
 
 export interface GenerateOptions {
   svgFile: string;
   outDir: string;
   config?: Partial<SVGConfig>;
+  maxInputSizeBytes?: number;
+  unsafeInputPolicy?: UnsafeInputPolicy;
 }
 
 export interface WatchOptions {
   src: string;
   out: string;
   config?: Partial<SVGConfig>;
+  maxInputSizeBytes?: number;
+  unsafeInputPolicy?: UnsafeInputPolicy;
 }
 
 export interface ComponentGenerationOptions {
@@ -189,6 +198,8 @@ export interface ComponentGenerationOptions {
   template?: TemplateConfig;
   frameworkOptions?: FrameworkOptions;
   namingConvention?: 'kebab' | 'pascal' | 'camel';
+  maxInputSizeBytes?: number;
+  unsafeInputPolicy?: UnsafeInputPolicy;
 }
 
 export interface TemplateConfig {
