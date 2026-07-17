@@ -15,7 +15,7 @@ const packageJson = JSON.parse(
 );
 const approvedPackageBaseline = {
   entryCount: 757,
-  packedBytes: 616_991,
+  packedBytes: 616_992,
   intentionalAssetCount: 606,
   growthTolerance: 0.05,
 };
