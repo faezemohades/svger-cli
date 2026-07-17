@@ -111,6 +111,7 @@
     "test:safety-matrix": "node tests/phase0/entrypoint-safety-matrix.test.mjs",
     "test:package": "npm run build && node tests/phase0/package-smoke.test.mjs",
     "test:phase0": "npm run build && npm run test:characterization && npm run test:security && npm run test:safety-matrix",
+    "test:phase1:contracts": "npm run build && node tests/phase1/report-contract.test.mjs",
     "test:visual": "node tests/dev/test-visual-diff.js",
     "test:visual:integration": "node tests/dev/test-visual-integration.js",
     "test:visual:ci": "node tests/dev/test-visual-integration.js --strict",

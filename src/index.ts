@@ -137,6 +137,36 @@ export { watchSVGs } from './watch.js';
 export { buildAll, generateSVG } from './builder.js';
 
 /**
+ * Phase 1 application contracts - stable diagnostics, reports, and commands.
+ */
+export {
+  ExitCode,
+  DiagnosticError,
+  diagnosticFromUnknown,
+  exitCodeFromUnknown,
+} from './contracts/diagnostics.js';
+export type {
+  Diagnostic,
+  DiagnosticSeverity,
+} from './contracts/diagnostics.js';
+export {
+  BUILD_REPORT_SCHEMA_VERSION,
+  createBuildReport,
+  formatBuildReport,
+} from './contracts/reporting.js';
+export type {
+  ArtifactStatus,
+  BuildMode,
+  BuildReport,
+  BuildStatus,
+  BuildSummary,
+  GeneratedArtifact,
+  ReportFormat,
+} from './contracts/reporting.js';
+export { executeCommand } from './application/command.js';
+export type { Command } from './application/command.js';
+
+/**
  * Content Cleaner - SVG content optimization and sanitization utilities
  * Provides: SVG cleaning, attribute normalization, and content optimization
  */
