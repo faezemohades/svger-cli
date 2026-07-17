@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "baselineVersion": "4.0.8",
+  "fixtureNames": ["basic.svg", "styled.svg"],
+  "paths": {
+    "legacyBuilder": {
+      "execution": {
+        "status": "resolved",
+        "diagnostics": [
+          {
+            "stream": "stdout",
+            "message": "✅ Generated: Basic.tsx\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "✅ Generated: Styled.tsx\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "🎉 All SVGs have been converted successfully!\n"
+          }
+        ]
+      },
+      "generatedFileNames": ["Basic.tsx", "Styled.tsx"],
+      "artifacts": {
+        "Basic.tsx": {
+          "bytes": 839,
+          "sha256": "df63264aaeee1703ceeb57af81e962d0bb3e63fb16e298f36a0b4fd912d15edc",
+          "content": "import React from \"react\";\nimport type { SVGProps } from \"react\";\n\nexport interface BasicProps extends SVGProps<SVGSVGElement> {\n  size?: number | string;\n}\n\nconst Basic = React.forwardRef<SVGSVGElement, BasicProps>(\n  ({ size, className, style, ...props }, ref) => {\n    const dimensions = size ? { width: size, height: size } : {\n      width: props.width || 24,\n      height: props.height || 24\n    };\n\n    return (\n      <svg\n        ref={ref}\n        viewBox=\"0 0 24 24\"\n        xmlns=\"http://www.w3.org/2000/svg\"\n        width={dimensions.width}\n        height={dimensions.height}\n        fill={props.fill || \"currentColor\"}\n        className={className}\n        style={style}\n        {...props}\n      >\n        <path fill=\"#123456\" d=\"M3 12l6 6L21 6\"/>\n      </svg>\n    );\n  }\n);\n\nBasic.displayName = \"Basic\";\n\nexport default Basic;\n"
+        },
+        "Styled.tsx": {
+          "bytes": 937,
+          "sha256": "5f5c582a46f07953acafe6023eb1279a36bade06ecfe2f056dbc4797618c9db5",
+          "content": "import React from \"react\";\nimport type { SVGProps } from \"react\";\n\nexport interface StyledProps extends SVGProps<SVGSVGElement> {\n  size?: number | string;\n}\n\nconst Styled = React.forwardRef<SVGSVGElement, StyledProps>(\n  ({ size, className, style, ...props }, ref) => {\n    const dimensions = size ? { width: size, height: size } : {\n      width: props.width || 32,\n      height: props.height || 32\n    };\n\n    return (\n      <svg\n        ref={ref}\n        viewBox=\"0 0 32 32\"\n        xmlns=\"http://www.w3.org/2000/svg\"\n        width={dimensions.width}\n        height={dimensions.height}\n        fill={props.fill || \"currentColor\"}\n        className={className}\n        style={style}\n        {...props}\n      >\n        <g id=\"layer\" style={{fill: 'none', stroke: '#abcdef', strokeWidth: '2px'}}> <circle cx=\"16\" cy=\"16\" r=\"12\" fillRule=\"evenodd\"/> </g>\n      </svg>\n    );\n  }\n);\n\nStyled.displayName = \"Styled\";\n\nexport default Styled;\n"
+        }
+      }
+    },
+    "svgService": {
+      "execution": {
+        "status": "resolved",
+        "diagnostics": [
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ℹ️ [INFO] Starting SVG build process\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ℹ️ [INFO] Source: /home/navidrezadoost/Documents/Github/svger-cli/baselines/v4.0.x/fixtures\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ℹ️ [INFO] Output: [WORK_ROOT]/service\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ℹ️ [INFO] Found 2 SVG files to process\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ✅ [SUCCESS] Generated component: Basic.tsx\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ✅ [SUCCESS] Generated component: Styled.tsx\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ℹ️ [INFO] Build complete: 2 successful, 0 failed\n"
+          },
+          {
+            "stream": "stdout",
+            "message": "[TIMESTAMP] ✅ [SUCCESS] Generated index.ts with 2 component exports\n"
+          }
+        ]
+      },
+      "generatedFileNames": ["Basic.tsx", "Styled.tsx", "index.ts"],
+      "artifacts": {
+        "Basic.tsx": {
+          "bytes": 839,
+          "sha256": "df63264aaeee1703ceeb57af81e962d0bb3e63fb16e298f36a0b4fd912d15edc",
+          "content": "import React from \"react\";\nimport type { SVGProps } from \"react\";\n\nexport interface BasicProps extends SVGProps<SVGSVGElement> {\n  size?: number | string;\n}\n\nconst Basic = React.forwardRef<SVGSVGElement, BasicProps>(\n  ({ size, className, style, ...props }, ref) => {\n    const dimensions = size ? { width: size, height: size } : {\n      width: props.width || 24,\n      height: props.height || 24\n    };\n\n    return (\n      <svg\n        ref={ref}\n        viewBox=\"0 0 24 24\"\n        xmlns=\"http://www.w3.org/2000/svg\"\n        width={dimensions.width}\n        height={dimensions.height}\n        fill={props.fill || \"currentColor\"}\n        className={className}\n        style={style}\n        {...props}\n      >\n        <path fill=\"#123456\" d=\"M3 12l6 6L21 6\"/>\n      </svg>\n    );\n  }\n);\n\nBasic.displayName = \"Basic\";\n\nexport default Basic;\n"
+        },
+        "Styled.tsx": {
+          "bytes": 937,
+          "sha256": "5f5c582a46f07953acafe6023eb1279a36bade06ecfe2f056dbc4797618c9db5",
+          "content": "import React from \"react\";\nimport type { SVGProps } from \"react\";\n\nexport interface StyledProps extends SVGProps<SVGSVGElement> {\n  size?: number | string;\n}\n\nconst Styled = React.forwardRef<SVGSVGElement, StyledProps>(\n  ({ size, className, style, ...props }, ref) => {\n    const dimensions = size ? { width: size, height: size } : {\n      width: props.width || 32,\n      height: props.height || 32\n    };\n\n    return (\n      <svg\n        ref={ref}\n        viewBox=\"0 0 32 32\"\n        xmlns=\"http://www.w3.org/2000/svg\"\n        width={dimensions.width}\n        height={dimensions.height}\n        fill={props.fill || \"currentColor\"}\n        className={className}\n        style={style}\n        {...props}\n      >\n        <g id=\"layer\" style={{fill: 'none', stroke: '#abcdef', strokeWidth: '2px'}}> <circle cx=\"16\" cy=\"16\" r=\"12\" fillRule=\"evenodd\"/> </g>\n      </svg>\n    );\n  }\n);\n\nStyled.displayName = \"Styled\";\n\nexport default Styled;\n"
+        },
+        "index.ts": {
+          "bytes": 299,
+          "sha256": "f762e3a21a100b8cff593d15f2a546de3d65200a81812be3f9e82496eaef3c8b",
+          "content": "/**\n * SVG Components Index\n * Generated by svger-cli\n * \n * Import individual components:\n * import { Basic } from './components';\n * \n * Import all components:\n * import * as Icons from './components';\n */\n\nexport { default as Basic } from './Basic';\nexport { default as Styled } from './Styled';\n"
+        }
+      }
+    }
+  },
+  "diff": {
+    "outputContent": [
+      {
+        "name": "Basic.tsx",
+        "equal": true,
+        "legacySha256": "df63264aaeee1703ceeb57af81e962d0bb3e63fb16e298f36a0b4fd912d15edc",
+        "serviceSha256": "df63264aaeee1703ceeb57af81e962d0bb3e63fb16e298f36a0b4fd912d15edc"
+      },
+      {
+        "name": "Styled.tsx",
+        "equal": true,
+        "legacySha256": "5f5c582a46f07953acafe6023eb1279a36bade06ecfe2f056dbc4797618c9db5",
+        "serviceSha256": "5f5c582a46f07953acafe6023eb1279a36bade06ecfe2f056dbc4797618c9db5"
+      }
+    ],
+    "diagnosticsEqual": false,
+    "exitSemanticsEqual": true,
+    "generatedFileNaming": {
+      "shared": ["Basic.tsx", "Styled.tsx"],
+      "legacyOnly": [],
+      "serviceOnly": ["index.ts"]
+    }
+  }
+}
