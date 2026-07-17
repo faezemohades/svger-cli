@@ -165,6 +165,16 @@ export type {
 } from './contracts/reporting.js';
 export { executeCommand } from './application/command.js';
 export type { Command } from './application/command.js';
+export {
+  resolveConfiguration,
+  explainConfiguration,
+} from './configuration/resolver.js';
+export type {
+  ConfigurationLayer,
+  ConfigurationOrigin,
+  ConfigurationOrigins,
+  ResolvedConfiguration,
+} from './configuration/resolver.js';
 
 /**
  * Content Cleaner - SVG content optimization and sanitization utilities
