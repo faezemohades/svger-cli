@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "matrix": {
+    "CLI build": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "CLI generate": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "CLI optimize": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "SVGProcessor": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "Legacy builder API": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "SVGService": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "Vite": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "Rollup": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "Webpack": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "Babel": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "PASS"
+    },
+    "Jest transformer": {
+      "reject": "PASS",
+      "strip": "PASS",
+      "sandbox": "N/A — transformer performs no filesystem writes"
+    },
+    "Next.js": {
+      "reject": "PASS — delegated to Webpack contract",
+      "strip": "PASS — option propagated to Webpack contract",
+      "sandbox": "PASS — delegated to Webpack artifact writer"
+    }
+  }
+}

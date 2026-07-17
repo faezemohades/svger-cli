@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./assets/svger-cli.png" alt="SVGER-CLI Banner" width="100%" />
   
-  <h1>SVGER-CLI v4.0.7</h1>
+  <h1>SVGER-CLI v4.0.9</h1>
   <h3>Enterprise SVG Processing Framework with Plugin System</h3>
   
   <p>

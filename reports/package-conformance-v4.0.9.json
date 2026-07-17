@@ -1,0 +1,4609 @@
+{
+  "schemaVersion": 1,
+  "package": "svger-cli@4.0.9",
+  "summary": {
+    "filename": "svger-cli-4.0.9.tgz",
+    "packedBytes": 616991,
+    "unpackedBytes": 1971238,
+    "entryCount": 757,
+    "groups": {
+      ".svgerconfig.example.json": 1,
+      "CHANGELOG.md": 1,
+      "LICENSE": 1,
+      "README.md": 1,
+      "SECURITY.md": 1,
+      "assets": 606,
+      "bin": 2,
+      "dist": 120,
+      "docs": 17,
+      "examples": 6,
+      "package.json": 1
+    }
+  },
+  "intentionalLargeGroups": {
+    "assets": "606 documented sample SVGs support the public test-svger executable and published benchmarking workflow.",
+    "docs": "A curated set of user-facing Markdown supports offline package documentation; generated API media and internal archives are excluded."
+  },
+  "budgets": {
+    "approvedBaseline": {
+      "entryCount": 757,
+      "packedBytes": 616930,
+      "intentionalAssetCount": 606,
+      "growthTolerance": 0.05
+    },
+    "maximumEntryCount": 794,
+    "maximumPackedBytes": 647776
+  },
+  "forbiddenContentReview": {
+    "baselines": false,
+    "compatibilityReports": false,
+    "coverage": false,
+    "developmentGitHubFiles": false,
+    "generatedApiDocs": false,
+    "internalDocArchive": false,
+    "internalReports": false,
+    "sourceMaps": false,
+    "sourceTree": false,
+    "testFixtures": false,
+    "tests": false,
+    "temporaryOutput": false
+  },
+  "npmPackDryRun": {
+    "id": "svger-cli@4.0.9",
+    "name": "svger-cli",
+    "version": "4.0.9",
+    "size": 616991,
+    "unpackedSize": 1971238,
+    "shasum": "f832914ce51d35754ce7075f7bcdfc3d6b7fdb76",
+    "integrity": "sha512-qnZ7Q6b9nzXyq6OvpS57GKac8fkcTZ5Pj69qn8brnpVmpw1NdvSm8km93YM/Hlad3GZ3Luy0IPaGsuiNU5zL3A==",
+    "filename": "svger-cli-4.0.9.tgz",
+    "files": [
+      {
+        "path": ".svgerconfig.example.json",
+        "size": 2616,
+        "mode": 420
+      },
+      {
+        "path": "CHANGELOG.md",
+        "size": 58980,
+        "mode": 420
+      },
+      {
+        "path": "LICENSE",
+        "size": 1070,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 93386,
+        "mode": 420
+      },
+      {
+        "path": "SECURITY.md",
+        "size": 3305,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/500px.svg",
+        "size": 4560,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/adobe.svg",
+        "size": 288,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/adonis.svg",
+        "size": 918,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/aeroplane-1.svg",
+        "size": 1610,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/agenda.svg",
+        "size": 859,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/airbnb.svg",
+        "size": 3182,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/airtable.svg",
+        "size": 1338,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/alarm-1.svg",
+        "size": 1629,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/align-text-center.svg",
+        "size": 998,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/align-text-left.svg",
+        "size": 998,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/align-text-right.svg",
+        "size": 998,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/alpinejs.svg",
+        "size": 381,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/amazon-original.svg",
+        "size": 2130,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/amazon-pay.svg",
+        "size": 3402,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/amazon.svg",
+        "size": 5760,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ambulance-1.svg",
+        "size": 2033,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/amd.svg",
+        "size": 871,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/amex.svg",
+        "size": 1150,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/anchor.svg",
+        "size": 1497,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/android-old.svg",
+        "size": 2932,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/android.svg",
+        "size": 2145,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/angellist.svg",
+        "size": 2423,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/angle-double-down.svg",
+        "size": 797,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/angle-double-left.svg",
+        "size": 793,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/angle-double-right.svg",
+        "size": 788,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/angle-double-up.svg",
+        "size": 793,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/angular.svg",
+        "size": 386,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/app-store.svg",
+        "size": 1438,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/apple-brand.svg",
+        "size": 1047,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/apple-music-alt.svg",
+        "size": 2741,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/apple-music.svg",
+        "size": 3770,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/apple-pay.svg",
+        "size": 4638,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arc-browser.svg",
+        "size": 2037,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-all-direction.svg",
+        "size": 2107,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-angular-top-left.svg",
+        "size": 612,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-angular-top-right.svg",
+        "size": 617,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-both-direction-horizontal-1.svg",
+        "size": 817,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-both-direction-vertical-1.svg",
+        "size": 826,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-downward.svg",
+        "size": 624,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-left-circle.svg",
+        "size": 1073,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-left.svg",
+        "size": 639,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-right-circle.svg",
+        "size": 1053,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-right.svg",
+        "size": 669,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/arrow-upward.svg",
+        "size": 632,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/asana.svg",
+        "size": 715,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/astro.svg",
+        "size": 1311,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/atlassian.svg",
+        "size": 621,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/audi-alt.svg",
+        "size": 3173,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/audi.svg",
+        "size": 5109,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/aws.svg",
+        "size": 3425,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/azure.svg",
+        "size": 269,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/badge-decagram-percent.svg",
+        "size": 3442,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/balloons.svg",
+        "size": 1541,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ban-2.svg",
+        "size": 600,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bar-chart-4.svg",
+        "size": 1415,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bar-chart-dollar.svg",
+        "size": 2733,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/basket-shopping-3.svg",
+        "size": 1660,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/beat.svg",
+        "size": 1005,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/behance.svg",
+        "size": 2699,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bell-1.svg",
+        "size": 1063,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bike.svg",
+        "size": 1926,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bing.svg",
+        "size": 4080,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bitbucket.svg",
+        "size": 1572,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bitcoin.svg",
+        "size": 1740,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bittorrent.svg",
+        "size": 5420,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/blogger-alt.svg",
+        "size": 1546,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/blogger.svg",
+        "size": 1971,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bluetooth-logo.svg",
+        "size": 623,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bluetooth.svg",
+        "size": 1082,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bmw.svg",
+        "size": 2527,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/board-writing-3.svg",
+        "size": 888,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bold.svg",
+        "size": 681,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bolt-2.svg",
+        "size": 983,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bolt-3.svg",
+        "size": 946,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/book-1.svg",
+        "size": 788,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bookmark-1.svg",
+        "size": 722,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bookmark-circle.svg",
+        "size": 1196,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/books-2.svg",
+        "size": 1497,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bootstrap-5-square.svg",
+        "size": 886,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bootstrap-5.svg",
+        "size": 1486,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/box-archive-1.svg",
+        "size": 966,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/box-closed.svg",
+        "size": 804,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/box-gift-1.svg",
+        "size": 1417,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/brave.svg",
+        "size": 5378,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bricks.svg",
+        "size": 1008,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bridge-3.svg",
+        "size": 1310,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/briefcase-1.svg",
+        "size": 739,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/briefcase-2.svg",
+        "size": 968,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/briefcase-plus-1.svg",
+        "size": 1236,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/brush-1-rotated.svg",
+        "size": 1376,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/brush-2.svg",
+        "size": 1778,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/btc.svg",
+        "size": 952,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bug-1.svg",
+        "size": 2096,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/buildings-1.svg",
+        "size": 1371,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bulb-2.svg",
+        "size": 1426,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bulb-4.svg",
+        "size": 2458,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/burger-1.svg",
+        "size": 841,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/burger-drink.svg",
+        "size": 1517,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/bus-1.svg",
+        "size": 1424,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/busket-ball.svg",
+        "size": 1225,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cake-1.svg",
+        "size": 1541,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/calculator-1.svg",
+        "size": 2265,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/calculator-2.svg",
+        "size": 2444,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/calendar-days.svg",
+        "size": 2067,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/camera-1.svg",
+        "size": 1413,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/camera-movie-1.svg",
+        "size": 1143,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/candy-cane-2.svg",
+        "size": 1091,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/candy-round-1.svg",
+        "size": 1024,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/canva.svg",
+        "size": 3941,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/capsule-1.svg",
+        "size": 586,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/car-2.svg",
+        "size": 1445,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/car-4.svg",
+        "size": 1112,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/car-6.svg",
+        "size": 1424,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/caravan-1.svg",
+        "size": 795,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cart-1.svg",
+        "size": 1283,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cart-2.svg",
+        "size": 1208,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cash-app.svg",
+        "size": 2350,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/certificate-badge-1.svg",
+        "size": 1543,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chat-bubble-2.svg",
+        "size": 2227,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/check-circle-1.svg",
+        "size": 762,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/check-square-2.svg",
+        "size": 868,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/check.svg",
+        "size": 448,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chevron-down-circle.svg",
+        "size": 847,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chevron-down.svg",
+        "size": 450,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chevron-left-circle.svg",
+        "size": 842,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chevron-left.svg",
+        "size": 445,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chevron-right-circle.svg",
+        "size": 844,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chevron-up-circle.svg",
+        "size": 845,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chevron-up.svg",
+        "size": 448,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chrome.svg",
+        "size": 1411,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/chromecast.svg",
+        "size": 794,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cisco.svg",
+        "size": 8218,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/claude.svg",
+        "size": 2581,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/clickup.svg",
+        "size": 569,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/clipboard.svg",
+        "size": 974,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-2.svg",
+        "size": 840,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-bolt-1.svg",
+        "size": 1746,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-bolt-2.svg",
+        "size": 1764,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-check-circle.svg",
+        "size": 1661,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-download.svg",
+        "size": 1364,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-iot-2.svg",
+        "size": 2339,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-rain.svg",
+        "size": 1724,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-refresh-clockwise.svg",
+        "size": 2362,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-sun.svg",
+        "size": 2692,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloud-upload.svg",
+        "size": 1404,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cloudflare.svg",
+        "size": 4726,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/code-1.svg",
+        "size": 1056,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/code-s.svg",
+        "size": 1589,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/codepen.svg",
+        "size": 1015,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/coffee-cup-2.svg",
+        "size": 1447,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/coinbase.svg",
+        "size": 3762,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/colour-palette-3.svg",
+        "size": 1884,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/comment-1-share.svg",
+        "size": 1370,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/comment-1-text.svg",
+        "size": 1235,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/comment-1.svg",
+        "size": 761,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/compass-drafting-2.svg",
+        "size": 1625,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/connectdevelop.svg",
+        "size": 4076,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/copilot.svg",
+        "size": 2156,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/coral.svg",
+        "size": 5033,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/cpanel.svg",
+        "size": 2647,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/crane-4.svg",
+        "size": 1408,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/creative-commons.svg",
+        "size": 1295,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/credit-card-multiple.svg",
+        "size": 967,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/crop-2.svg",
+        "size": 804,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/crown-3.svg",
+        "size": 985,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/css3.svg",
+        "size": 1454,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dashboard-square-1.svg",
+        "size": 2079,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/database-2.svg",
+        "size": 2500,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/deno.svg",
+        "size": 4481,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dev.svg",
+        "size": 1050,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dialogflow.svg",
+        "size": 709,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/diamonds-1.svg",
+        "size": 1023,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/diamonds-2.svg",
+        "size": 797,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/digitalocean.svg",
+        "size": 605,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/diners-club.svg",
+        "size": 24867,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/direction-ltr.svg",
+        "size": 1181,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/direction-rtl.svg",
+        "size": 1181,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/discord-chat.svg",
+        "size": 2039,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/discord.svg",
+        "size": 1321,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/discover.svg",
+        "size": 3990,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/docker.svg",
+        "size": 1062,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dollar-circle.svg",
+        "size": 1447,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dollar.svg",
+        "size": 1262,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/double-quotes-end-1.svg",
+        "size": 1904,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/download-1.svg",
+        "size": 1010,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/download-circle-1.svg",
+        "size": 1063,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dribbble-symbol.svg",
+        "size": 1638,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dribbble.svg",
+        "size": 5015,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/drizzle.svg",
+        "size": 1166,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dropbox.svg",
+        "size": 537,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/drupal.svg",
+        "size": 2958,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/dumbbell-1.svg",
+        "size": 857,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/edge.svg",
+        "size": 645,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-expressionless-flat-eyes.svg",
+        "size": 1175,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-expressionless.svg",
+        "size": 1128,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-grin.svg",
+        "size": 1372,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-sad.svg",
+        "size": 1306,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-smile-side.svg",
+        "size": 1195,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-smile-sunglass.svg",
+        "size": 1227,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-smile-tongue.svg",
+        "size": 1571,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/emoji-smile.svg",
+        "size": 1300,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/enter-down.svg",
+        "size": 1179,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/enter.svg",
+        "size": 1162,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/envato.svg",
+        "size": 1198,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/envelope-1.svg",
+        "size": 860,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/eraser-1.svg",
+        "size": 1119,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ethereum-logo.svg",
+        "size": 310,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/euro.svg",
+        "size": 1216,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/exit-up.svg",
+        "size": 1175,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/exit.svg",
+        "size": 1157,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/expand-arrow-1.svg",
+        "size": 1411,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/expand-square-4.svg",
+        "size": 1366,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/expressjs.svg",
+        "size": 1068,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/eye.svg",
+        "size": 1184,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/facebook-messenger.svg",
+        "size": 907,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/facebook-rounded.svg",
+        "size": 632,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/facebook-square.svg",
+        "size": 581,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/facebook.svg",
+        "size": 701,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/facetime.svg",
+        "size": 587,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/figma.svg",
+        "size": 1504,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/file-format-zip.svg",
+        "size": 3241,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/file-multiple.svg",
+        "size": 1136,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/file-pencil.svg",
+        "size": 1257,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/file-plus-circle.svg",
+        "size": 1567,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/file-question.svg",
+        "size": 1628,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/file-xmark.svg",
+        "size": 1170,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/firebase.svg",
+        "size": 527,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/firefox.svg",
+        "size": 3305,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/firework-rocket-4.svg",
+        "size": 1746,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/fitbit.svg",
+        "size": 2834,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/flag-1.svg",
+        "size": 773,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/flag-2.svg",
+        "size": 1029,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/flickr.svg",
+        "size": 527,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/floppy-disk-1.svg",
+        "size": 1104,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/flower-2.svg",
+        "size": 5158,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/flutter.svg",
+        "size": 291,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/folder-1.svg",
+        "size": 673,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ford.svg",
+        "size": 5931,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/framer.svg",
+        "size": 252,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/funnel-1.svg",
+        "size": 1130,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/gallery.svg",
+        "size": 1197,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/game-pad-modern-1.svg",
+        "size": 2284,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/gatsby.svg",
+        "size": 681,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/gauge-1.svg",
+        "size": 3735,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/gear-1.svg",
+        "size": 2559,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/gears-3.svg",
+        "size": 3671,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/gemini.svg",
+        "size": 364,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/git.svg",
+        "size": 1158,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/github.svg",
+        "size": 1293,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/glass-juice-1.svg",
+        "size": 901,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/globe-1.svg",
+        "size": 3613,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/globe-stand.svg",
+        "size": 1386,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/go.svg",
+        "size": 2861,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/goodreads.svg",
+        "size": 1267,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/google-cloud.svg",
+        "size": 2152,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/google-drive.svg",
+        "size": 328,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/google-meet.svg",
+        "size": 568,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/google-pay.svg",
+        "size": 3131,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/google-wallet.svg",
+        "size": 959,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/google.svg",
+        "size": 600,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/graduation-cap-1.svg",
+        "size": 1791,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/grammarly.svg",
+        "size": 1454,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hacker-news.svg",
+        "size": 326,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hammer-1.svg",
+        "size": 756,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hammer-2.svg",
+        "size": 896,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hand-mic.svg",
+        "size": 946,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hand-shake.svg",
+        "size": 2234,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hand-stop.svg",
+        "size": 2341,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hand-taking-dollar.svg",
+        "size": 2730,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hand-taking-leaf-1.svg",
+        "size": 3043,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hand-taking-user.svg",
+        "size": 2525,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hashnode.svg",
+        "size": 602,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hat-chef-3.svg",
+        "size": 1206,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/headphone-1.svg",
+        "size": 1290,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/heart.svg",
+        "size": 884,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/helicopter-2.svg",
+        "size": 1656,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/helmet-safety-1.svg",
+        "size": 1170,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hierarchy-1.svg",
+        "size": 2875,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/highlighter-1.svg",
+        "size": 1321,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/highlighter-2.svg",
+        "size": 1306,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/home-2.svg",
+        "size": 1006,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hospital-2.svg",
+        "size": 1237,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/hourglass.svg",
+        "size": 1028,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/html5.svg",
+        "size": 954,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ibm.svg",
+        "size": 2347,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/id-card.svg",
+        "size": 1731,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/imdb.svg",
+        "size": 2654,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/indent.svg",
+        "size": 2028,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/info.svg",
+        "size": 689,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/injection-1.svg",
+        "size": 1493,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/instagram-logotype.svg",
+        "size": 9721,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/instagram.svg",
+        "size": 6235,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/intel.svg",
+        "size": 4330,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ios.svg",
+        "size": 2126,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/island-2.svg",
+        "size": 2468,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/jaguar.svg",
+        "size": 10684,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/jamstack.svg",
+        "size": 1433,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/java.svg",
+        "size": 2013,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/javascript.svg",
+        "size": 1044,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/jcb.svg",
+        "size": 2066,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/joomla.svg",
+        "size": 1984,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/jsfiddle.svg",
+        "size": 2896,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/key-1.svg",
+        "size": 1032,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/keyboard.svg",
+        "size": 2816,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/knife-fork-1.svg",
+        "size": 1038,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/kubernetes.svg",
+        "size": 11127,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/label-dollar-2.svg",
+        "size": 1882,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/laptop-2.svg",
+        "size": 755,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/laptop-phone.svg",
+        "size": 1328,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/laravel.svg",
+        "size": 2890,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/layers-1.svg",
+        "size": 1009,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/layout-9.svg",
+        "size": 707,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/layout-26.svg",
+        "size": 1548,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/leaf-1.svg",
+        "size": 816,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/leaf-6.svg",
+        "size": 2209,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/lemon-squeezy.svg",
+        "size": 1319,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/life-guard-tube-1.svg",
+        "size": 2569,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/line-dashed.svg",
+        "size": 778,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/line-dotted.svg",
+        "size": 1520,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/line-height.svg",
+        "size": 1691,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/line.svg",
+        "size": 2204,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/lineicons.svg",
+        "size": 1862,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/link-2-angular-right.svg",
+        "size": 1536,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/linkedin.svg",
+        "size": 857,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/location-arrow-right.svg",
+        "size": 713,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/locked-1.svg",
+        "size": 846,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/locked-2.svg",
+        "size": 915,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/loom.svg",
+        "size": 761,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/magento.svg",
+        "size": 406,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/magnet.svg",
+        "size": 981,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mailchimp.svg",
+        "size": 5016,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/map-marker-1.svg",
+        "size": 2596,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/map-marker-5.svg",
+        "size": 1353,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/map-pin-5.svg",
+        "size": 715,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/markdown.svg",
+        "size": 869,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mastercard.svg",
+        "size": 6028,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/medium-alt.svg",
+        "size": 693,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/medium.svg",
+        "size": 960,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/megaphone-1.svg",
+        "size": 999,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/menu-cheesburger.svg",
+        "size": 1482,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/menu-hamburger-1.svg",
+        "size": 786,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/menu-meatballs-1.svg",
+        "size": 837,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/menu-meatballs-2.svg",
+        "size": 1532,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mercedes.svg",
+        "size": 750,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/message-2-question.svg",
+        "size": 1506,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/message-2.svg",
+        "size": 607,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/message-3-text.svg",
+        "size": 1262,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/meta-alt.svg",
+        "size": 1130,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/meta.svg",
+        "size": 3701,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/microphone-1.svg",
+        "size": 1018,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/microscope.svg",
+        "size": 1590,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/microsoft-edge.svg",
+        "size": 2672,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/microsoft-teams.svg",
+        "size": 1606,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/microsoft.svg",
+        "size": 755,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/minus-circle.svg",
+        "size": 650,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/minus.svg",
+        "size": 305,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mongodb.svg",
+        "size": 991,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/monitor-code.svg",
+        "size": 1423,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/monitor-mac.svg",
+        "size": 891,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/monitor.svg",
+        "size": 790,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/moon-half-right-5.svg",
+        "size": 939,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mountains-2.svg",
+        "size": 933,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mouse-2.svg",
+        "size": 762,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mushroom-1.svg",
+        "size": 982,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mushroom-5.svg",
+        "size": 1696,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/music.svg",
+        "size": 1826,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/mysql.svg",
+        "size": 3787,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nasa.svg",
+        "size": 22146,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/netflix.svg",
+        "size": 1248,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/netlify.svg",
+        "size": 6642,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/next-step-2.svg",
+        "size": 674,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nextjs.svg",
+        "size": 1991,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nike.svg",
+        "size": 418,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nissan.svg",
+        "size": 4771,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nodejs-alt.svg",
+        "size": 6617,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nodejs.svg",
+        "size": 2173,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/notebook-1.svg",
+        "size": 924,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/notion.svg",
+        "size": 1618,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/npm.svg",
+        "size": 498,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nuxt.svg",
+        "size": 1158,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/nvidia.svg",
+        "size": 1438,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/oculus.svg",
+        "size": 3598,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/open-ai.svg",
+        "size": 2561,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/opera-mini.svg",
+        "size": 755,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/oracle.svg",
+        "size": 672,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/outdent.svg",
+        "size": 2020,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/paddle.svg",
+        "size": 1000,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/page-break-1.svg",
+        "size": 2008,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pagination.svg",
+        "size": 1356,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/paint-bucket.svg",
+        "size": 1264,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/paint-roller-1.svg",
+        "size": 1244,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/paperclip-1.svg",
+        "size": 1151,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/party-flags.svg",
+        "size": 1638,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/party-spray.svg",
+        "size": 725,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/patreon.svg",
+        "size": 352,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pause.svg",
+        "size": 950,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/payoneer.svg",
+        "size": 3407,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/paypal.svg",
+        "size": 1152,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pen-to-square.svg",
+        "size": 1073,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pencil-1.svg",
+        "size": 979,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pepsi.svg",
+        "size": 969,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/phone.svg",
+        "size": 672,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/photos.svg",
+        "size": 1283,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/php.svg",
+        "size": 1393,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pie-chart-2.svg",
+        "size": 612,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pilcrow.svg",
+        "size": 725,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pimjo-logo.svg",
+        "size": 2549,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pimjo-symbol.svg",
+        "size": 523,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pinterest.svg",
+        "size": 1857,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pizza-2.svg",
+        "size": 1426,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/placeholder-dollar.svg",
+        "size": 2303,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/plantscale.svg",
+        "size": 461,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/play-store.svg",
+        "size": 809,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/play.svg",
+        "size": 571,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/playstation.svg",
+        "size": 1227,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/plug-1.svg",
+        "size": 861,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/plus-circle.svg",
+        "size": 912,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/plus.svg",
+        "size": 544,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pnpm.svg",
+        "size": 644,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/postgresql.svg",
+        "size": 10615,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/postman.svg",
+        "size": 3265,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/pound.svg",
+        "size": 1298,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/power-button.svg",
+        "size": 721,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/previous-step-2.svg",
+        "size": 684,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/printer.svg",
+        "size": 1347,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/prisma.svg",
+        "size": 610,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/producthunt.svg",
+        "size": 517,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/proton-mail-logo.svg",
+        "size": 2251,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/proton-mail-symbol.svg",
+        "size": 876,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/python.svg",
+        "size": 1452,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/question-mark-circle.svg",
+        "size": 1327,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/question-mark.svg",
+        "size": 1017,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/quora.svg",
+        "size": 2366,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/radis.svg",
+        "size": 3798,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/react.svg",
+        "size": 5119,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/reddit.svg",
+        "size": 3921,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/refresh-circle-1-clockwise.svg",
+        "size": 1805,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/refresh-dollar-1.svg",
+        "size": 2908,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/refresh-user-1.svg",
+        "size": 2501,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/remix-js.svg",
+        "size": 762,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/road-1.svg",
+        "size": 1332,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/rocket-5.svg",
+        "size": 3414,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/route-1.svg",
+        "size": 3774,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/rss-right.svg",
+        "size": 1329,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ruler-1.svg",
+        "size": 1599,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ruler-pen.svg",
+        "size": 1657,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/rupee.svg",
+        "size": 1001,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/safari.svg",
+        "size": 8583,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sanity.svg",
+        "size": 2280,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/school-bench-1.svg",
+        "size": 855,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/school-bench-2.svg",
+        "size": 928,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/scissors-1-vertical.svg",
+        "size": 1402,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/scoter.svg",
+        "size": 1703,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/scroll-down-2.svg",
+        "size": 1282,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/search-1.svg",
+        "size": 669,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/search-2.svg",
+        "size": 1023,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/search-minus.svg",
+        "size": 944,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/search-plus.svg",
+        "size": 1172,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/search-text.svg",
+        "size": 1209,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/select-cursor-1.svg",
+        "size": 2677,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/seo-monitor.svg",
+        "size": 3212,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/service-bell-1.svg",
+        "size": 665,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/share-1-circle.svg",
+        "size": 1583,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/share-1.svg",
+        "size": 1013,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/share-2.svg",
+        "size": 1214,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shield-2-check.svg",
+        "size": 1182,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shield-2.svg",
+        "size": 837,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shield-dollar.svg",
+        "size": 2430,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shift-left.svg",
+        "size": 851,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shift-right.svg",
+        "size": 842,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ship-1.svg",
+        "size": 2285,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shirt-1.svg",
+        "size": 1457,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shopify.svg",
+        "size": 2115,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shovel.svg",
+        "size": 1142,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/shuffle.svg",
+        "size": 1419,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sign-post-left.svg",
+        "size": 981,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/signal-app.svg",
+        "size": 3351,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/signs-post-2.svg",
+        "size": 1255,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sketch.svg",
+        "size": 694,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/skype.svg",
+        "size": 2571,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/slack.svg",
+        "size": 1833,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/slice-2.svg",
+        "size": 720,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sliders-horizontal-square-2.svg",
+        "size": 1639,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/slideshare.svg",
+        "size": 3843,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/snapchat.svg",
+        "size": 4430,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sort-alphabetical.svg",
+        "size": 1872,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sort-high-to-low.svg",
+        "size": 1468,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/soundcloud.svg",
+        "size": 7319,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/spacex.svg",
+        "size": 493,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/spellcheck.svg",
+        "size": 902,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/spinner-2-sacle.svg",
+        "size": 1944,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/spinner-3.svg",
+        "size": 454,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sports.svg",
+        "size": 1385,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/spotify-alt.svg",
+        "size": 1875,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/spotify.svg",
+        "size": 1130,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/squarespace.svg",
+        "size": 1619,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/stackoverflow.svg",
+        "size": 707,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/stamp.svg",
+        "size": 884,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/star-fat-half-2.svg",
+        "size": 1296,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/star-fat.svg",
+        "size": 1225,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/star-sharp-disabled.svg",
+        "size": 1411,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/statista.svg",
+        "size": 1220,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/steam.svg",
+        "size": 1678,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/stethoscope-1.svg",
+        "size": 1312,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/stopwatch.svg",
+        "size": 1167,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/storage-hdd-2.svg",
+        "size": 1162,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/strikethrough-1.svg",
+        "size": 842,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/stripe.svg",
+        "size": 2487,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/stumbleupon.svg",
+        "size": 898,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/sun-1.svg",
+        "size": 2476,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/supabase.svg",
+        "size": 641,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/surfboard-2.svg",
+        "size": 2275,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/svelte.svg",
+        "size": 3924,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/swift.svg",
+        "size": 2461,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tab.svg",
+        "size": 722,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tailwindcss.svg",
+        "size": 652,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/target-user.svg",
+        "size": 1816,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/telegram.svg",
+        "size": 507,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/telephone-1.svg",
+        "size": 1773,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/telephone-3.svg",
+        "size": 2630,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tesla.svg",
+        "size": 836,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/text-format-remove.svg",
+        "size": 1399,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/text-format.svg",
+        "size": 1092,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/text-paragraph.svg",
+        "size": 973,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/thumbs-down-3.svg",
+        "size": 1813,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/thumbs-up-3.svg",
+        "size": 1770,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ticket-1.svg",
+        "size": 1049,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tickets-3.svg",
+        "size": 1939,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tiktok-alt.svg",
+        "size": 1314,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tiktok.svg",
+        "size": 1193,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tower-broadcast-1.svg",
+        "size": 1782,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/toyota.svg",
+        "size": 4682,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/train-1.svg",
+        "size": 1065,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/train-3.svg",
+        "size": 1292,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/trash-3.svg",
+        "size": 1455,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tree-2.svg",
+        "size": 1049,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/trees-3.svg",
+        "size": 2131,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/trello.svg",
+        "size": 847,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/trend-down-1.svg",
+        "size": 1005,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/trend-up-1.svg",
+        "size": 1005,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/trophy-1.svg",
+        "size": 989,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/trowel-1.svg",
+        "size": 1235,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/truck-delivery-1.svg",
+        "size": 1546,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/tumblr.svg",
+        "size": 812,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/turborepo.svg",
+        "size": 1098,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/twitch.svg",
+        "size": 428,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/twitter-old.svg",
+        "size": 1136,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/typescript.svg",
+        "size": 2405,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/uber-symbol.svg",
+        "size": 753,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/uber.svg",
+        "size": 1467,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ubuntu.svg",
+        "size": 1960,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/underline.svg",
+        "size": 584,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/unlink-2-angular-eft.svg",
+        "size": 2647,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/unlocked-2.svg",
+        "size": 1087,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/unsplash.svg",
+        "size": 261,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/upload-1.svg",
+        "size": 1005,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/upload-circle-1.svg",
+        "size": 1049,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/user-4.svg",
+        "size": 1182,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/user-multiple-4.svg",
+        "size": 3832,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vector-nodes-6.svg",
+        "size": 2157,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vector-nodes-7.svg",
+        "size": 1164,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vercel.svg",
+        "size": 207,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vimeo.svg",
+        "size": 963,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/visa.svg",
+        "size": 1182,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vite.svg",
+        "size": 1695,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vk.svg",
+        "size": 1443,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vmware.svg",
+        "size": 1165,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/volkswagen.svg",
+        "size": 1418,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/volume-1.svg",
+        "size": 1415,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/volume-high.svg",
+        "size": 1746,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/volume-low.svg",
+        "size": 1087,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/volume-mute.svg",
+        "size": 1585,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/volume-off.svg",
+        "size": 754,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vs-code.svg",
+        "size": 1778,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/vuejs.svg",
+        "size": 412,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/wallet-1.svg",
+        "size": 570,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/watch-beat-1.svg",
+        "size": 1770,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/water-drop-1.svg",
+        "size": 1448,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/webflow.svg",
+        "size": 415,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/webhooks.svg",
+        "size": 2635,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/wechat.svg",
+        "size": 2387,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/weight-machine-1.svg",
+        "size": 1274,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/whatsapp.svg",
+        "size": 1846,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/wheelbarrow-empty.svg",
+        "size": 1289,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/wheelchair-1.svg",
+        "size": 1368,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/windows.svg",
+        "size": 908,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/wise.svg",
+        "size": 296,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/wordpress.svg",
+        "size": 1313,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/www-cursor.svg",
+        "size": 3846,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/www.svg",
+        "size": 3398,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/x.svg",
+        "size": 360,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/xampp.svg",
+        "size": 4535,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/xbox.svg",
+        "size": 1979,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/xmark-circle.svg",
+        "size": 964,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/xmark.svg",
+        "size": 654,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/xrp.svg",
+        "size": 2133,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/yahoo.svg",
+        "size": 2150,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/yarn.svg",
+        "size": 6077,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/ycombinator.svg",
+        "size": 323,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/yen.svg",
+        "size": 967,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/youtube-kids.svg",
+        "size": 1744,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/youtube-music.svg",
+        "size": 1431,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/youtube.svg",
+        "size": 580,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/zapier.svg",
+        "size": 1490,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/zero-size.svg",
+        "size": 3106,
+        "mode": 420
+      },
+      {
+        "path": "assets/svges/zoom.svg",
+        "size": 969,
+        "mode": 420
+      },
+      {
+        "path": "bin/svg-tool.js",
+        "size": 46,
+        "mode": 493
+      },
+      {
+        "path": "bin/test-svger.js",
+        "size": 6083,
+        "mode": 493
+      },
+      {
+        "path": "dist/builder.d.ts",
+        "size": 1315,
+        "mode": 420
+      },
+      {
+        "path": "dist/builder.js",
+        "size": 4834,
+        "mode": 420
+      },
+      {
+        "path": "dist/clean.d.ts",
+        "size": 394,
+        "mode": 420
+      },
+      {
+        "path": "dist/clean.js",
+        "size": 746,
+        "mode": 420
+      },
+      {
+        "path": "dist/cli.d.ts",
+        "size": 31,
+        "mode": 420
+      },
+      {
+        "path": "dist/cli.js",
+        "size": 20222,
+        "mode": 420
+      },
+      {
+        "path": "dist/config.d.ts",
+        "size": 1304,
+        "mode": 420
+      },
+      {
+        "path": "dist/config.js",
+        "size": 1525,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/enhanced-plugin-manager.d.ts",
+        "size": 3086,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/enhanced-plugin-manager.js",
+        "size": 12858,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/error-handler.d.ts",
+        "size": 2068,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/error-handler.js",
+        "size": 8987,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/framework-templates.d.ts",
+        "size": 798,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/framework-templates.js",
+        "size": 15539,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/logger.d.ts",
+        "size": 827,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/logger.js",
+        "size": 2896,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/performance-engine.d.ts",
+        "size": 1943,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/performance-engine.js",
+        "size": 9347,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/plugin-manager.d.ts",
+        "size": 1344,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/plugin-manager.js",
+        "size": 6519,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/style-compiler.d.ts",
+        "size": 2798,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/style-compiler.js",
+        "size": 15116,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/template-manager.d.ts",
+        "size": 1739,
+        "mode": 420
+      },
+      {
+        "path": "dist/core/template-manager.js",
+        "size": 16397,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.d.ts",
+        "size": 8047,
+        "mode": 420
+      },
+      {
+        "path": "dist/index.js",
+        "size": 8927,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/babel.d.ts",
+        "size": 1566,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/babel.js",
+        "size": 9890,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/jest-preset.d.ts",
+        "size": 1043,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/jest-preset.js",
+        "size": 6668,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/nextjs.d.ts",
+        "size": 1484,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/nextjs.js",
+        "size": 5098,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/rollup.d.ts",
+        "size": 742,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/rollup.js",
+        "size": 9234,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/vite.d.ts",
+        "size": 718,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/vite.js",
+        "size": 10076,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/webpack.d.ts",
+        "size": 1970,
+        "mode": 420
+      },
+      {
+        "path": "dist/integrations/webpack.js",
+        "size": 11226,
+        "mode": 420
+      },
+      {
+        "path": "dist/lock.d.ts",
+        "size": 629,
+        "mode": 420
+      },
+      {
+        "path": "dist/lock.js",
+        "size": 2033,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/advanced-stages.d.ts",
+        "size": 1575,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/advanced-stages.js",
+        "size": 10125,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/basic-cleaner.d.ts",
+        "size": 2598,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/basic-cleaner.js",
+        "size": 6386,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/collapse-useless-groups.d.ts",
+        "size": 713,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/collapse-useless-groups.js",
+        "size": 3208,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/command-optimizer.d.ts",
+        "size": 1567,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/command-optimizer.js",
+        "size": 11237,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/index.d.ts",
+        "size": 1553,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/index.js",
+        "size": 1413,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/move-attrs-to-parent.d.ts",
+        "size": 787,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/move-attrs-to-parent.js",
+        "size": 3379,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/numeric-optimizer.d.ts",
+        "size": 1441,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/numeric-optimizer.js",
+        "size": 10871,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/optimizer-pipeline.d.ts",
+        "size": 1081,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/optimizer-pipeline.js",
+        "size": 2274,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-deduplicator.d.ts",
+        "size": 1296,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-deduplicator.js",
+        "size": 14129,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-parser.d.ts",
+        "size": 1958,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-parser.js",
+        "size": 14759,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-shortener.d.ts",
+        "size": 1450,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-shortener.js",
+        "size": 9860,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-simplifier.d.ts",
+        "size": 1082,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/path-simplifier.js",
+        "size": 12699,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/remove-hidden-empty.d.ts",
+        "size": 759,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/remove-hidden-empty.js",
+        "size": 3707,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/remove-unused-defs.d.ts",
+        "size": 683,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/remove-unused-defs.js",
+        "size": 4946,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/shape-conversion.d.ts",
+        "size": 2559,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/shape-conversion.js",
+        "size": 9339,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/style-optimizer.d.ts",
+        "size": 879,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/style-optimizer.js",
+        "size": 9968,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/svg-tree-parser.d.ts",
+        "size": 1649,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/svg-tree-parser.js",
+        "size": 10280,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/transform-collapsing.d.ts",
+        "size": 1227,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/transform-collapsing.js",
+        "size": 16094,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/transform-optimizer.d.ts",
+        "size": 1901,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/transform-optimizer.js",
+        "size": 10065,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/tree-serializer.d.ts",
+        "size": 1490,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/tree-serializer.js",
+        "size": 5012,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/tree-stages.d.ts",
+        "size": 1085,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/tree-stages.js",
+        "size": 4216,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/types.d.ts",
+        "size": 5402,
+        "mode": 420
+      },
+      {
+        "path": "dist/optimizers/types.js",
+        "size": 3749,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/builtins.d.ts",
+        "size": 287,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/builtins.js",
+        "size": 1757,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/color-replacer.d.ts",
+        "size": 1170,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/color-replacer.js",
+        "size": 4418,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/gradient-optimizer.d.ts",
+        "size": 1077,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/gradient-optimizer.js",
+        "size": 7549,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/stroke-normalizer.d.ts",
+        "size": 1105,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/stroke-normalizer.js",
+        "size": 6378,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/watermark-remover.d.ts",
+        "size": 1060,
+        "mode": 420
+      },
+      {
+        "path": "dist/plugins/watermark-remover.js",
+        "size": 4947,
+        "mode": 420
+      },
+      {
+        "path": "dist/processors/svg-processor.d.ts",
+        "size": 3484,
+        "mode": 420
+      },
+      {
+        "path": "dist/processors/svg-processor.js",
+        "size": 19085,
+        "mode": 420
+      },
+      {
+        "path": "dist/security/input-safety.d.ts",
+        "size": 929,
+        "mode": 420
+      },
+      {
+        "path": "dist/security/input-safety.js",
+        "size": 5589,
+        "mode": 420
+      },
+      {
+        "path": "dist/services/config.d.ts",
+        "size": 1529,
+        "mode": 420
+      },
+      {
+        "path": "dist/services/config.js",
+        "size": 12015,
+        "mode": 420
+      },
+      {
+        "path": "dist/services/file-watcher.d.ts",
+        "size": 1462,
+        "mode": 420
+      },
+      {
+        "path": "dist/services/file-watcher.js",
+        "size": 6227,
+        "mode": 420
+      },
+      {
+        "path": "dist/services/svg-service.d.ts",
+        "size": 3040,
+        "mode": 420
+      },
+      {
+        "path": "dist/services/svg-service.js",
+        "size": 19260,
+        "mode": 420
+      },
+      {
+        "path": "dist/templates/ComponentTemplate.d.ts",
+        "size": 1149,
+        "mode": 420
+      },
+      {
+        "path": "dist/templates/ComponentTemplate.js",
+        "size": 1909,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/index.d.ts",
+        "size": 5923,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/index.js",
+        "size": 108,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/integrations.d.ts",
+        "size": 5761,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/integrations.js",
+        "size": 67,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/plugin-system.d.ts",
+        "size": 4580,
+        "mode": 420
+      },
+      {
+        "path": "dist/types/plugin-system.js",
+        "size": 109,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/native.d.ts",
+        "size": 3790,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/native.js",
+        "size": 11062,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/package-info.d.ts",
+        "size": 181,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/package-info.js",
+        "size": 2215,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/visual-diff.d.ts",
+        "size": 4858,
+        "mode": 420
+      },
+      {
+        "path": "dist/utils/visual-diff.js",
+        "size": 10530,
+        "mode": 420
+      },
+      {
+        "path": "dist/watch.d.ts",
+        "size": 906,
+        "mode": 420
+      },
+      {
+        "path": "dist/watch.js",
+        "size": 4198,
+        "mode": 420
+      },
+      {
+        "path": "docs/ADR-SVG-INTRGRATION-METHODS-001.adr.md",
+        "size": 5700,
+        "mode": 420
+      },
+      {
+        "path": "docs/ADR-SVG-INTRGRATION-METHODS-002.adr.md",
+        "size": 20327,
+        "mode": 420
+      },
+      {
+        "path": "docs/ERROR-HANDLING-STANDARD.md",
+        "size": 2974,
+        "mode": 420
+      },
+      {
+        "path": "docs/FRAMEWORK-GUIDE.md",
+        "size": 17551,
+        "mode": 420
+      },
+      {
+        "path": "docs/INTEGRATIONS.md",
+        "size": 13975,
+        "mode": 420
+      },
+      {
+        "path": "docs/MIGRATION-4.0.0.md",
+        "size": 7187,
+        "mode": 420
+      },
+      {
+        "path": "docs/OPTIONAL-DEPENDENCIES.md",
+        "size": 4438,
+        "mode": 420
+      },
+      {
+        "path": "docs/performance/PERFORMANCE-RESULTS.md",
+        "size": 1020,
+        "mode": 420
+      },
+      {
+        "path": "docs/performance/REAL-WORLD-BENCHMARKS.md",
+        "size": 5333,
+        "mode": 420
+      },
+      {
+        "path": "docs/phase0-migration-notice.md",
+        "size": 1577,
+        "mode": 420
+      },
+      {
+        "path": "docs/phase0-release-gate.md",
+        "size": 2493,
+        "mode": 420
+      },
+      {
+        "path": "docs/phase0-rollback-plan.md",
+        "size": 1110,
+        "mode": 420
+      },
+      {
+        "path": "docs/PIPELINE-INTEGRATION.md",
+        "size": 11858,
+        "mode": 420
+      },
+      {
+        "path": "docs/PLUGIN-DEVELOPMENT-GUIDE.md",
+        "size": 17730,
+        "mode": 420
+      },
+      {
+        "path": "docs/QUICK-REFERENCE.md",
+        "size": 4101,
+        "mode": 420
+      },
+      {
+        "path": "docs/SAMPLE-SVGS-TESTING.md",
+        "size": 7937,
+        "mode": 420
+      },
+      {
+        "path": "docs/TDR-SVG-INTRGRATION-METHODS-001.tdr.md",
+        "size": 8063,
+        "mode": 420
+      },
+      {
+        "path": "examples/babel.config.example.js",
+        "size": 4917,
+        "mode": 420
+      },
+      {
+        "path": "examples/jest.config.example.js",
+        "size": 3399,
+        "mode": 420
+      },
+      {
+        "path": "examples/next.config.example.js",
+        "size": 2821,
+        "mode": 420
+      },
+      {
+        "path": "examples/rollup.config.example.js",
+        "size": 2912,
+        "mode": 420
+      },
+      {
+        "path": "examples/vite.config.example.js",
+        "size": 2292,
+        "mode": 420
+      },
+      {
+        "path": "examples/webpack.config.example.js",
+        "size": 2068,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 9405,
+        "mode": 420
+      }
+    ],
+    "entryCount": 757,
+    "bundled": []
+  },
+  "tarEntries": [
+    "package/LICENSE",
+    "package/dist/optimizers/advanced-stages.js",
+    "package/examples/babel.config.example.js",
+    "package/dist/integrations/babel.js",
+    "package/dist/optimizers/basic-cleaner.js",
+    "package/dist/builder.js",
+    "package/dist/plugins/builtins.js",
+    "package/dist/clean.js",
+    "package/dist/cli.js",
+    "package/dist/optimizers/collapse-useless-groups.js",
+    "package/dist/plugins/color-replacer.js",
+    "package/dist/optimizers/command-optimizer.js",
+    "package/dist/templates/ComponentTemplate.js",
+    "package/dist/config.js",
+    "package/dist/services/config.js",
+    "package/dist/core/enhanced-plugin-manager.js",
+    "package/dist/core/error-handler.js",
+    "package/dist/services/file-watcher.js",
+    "package/dist/core/framework-templates.js",
+    "package/dist/plugins/gradient-optimizer.js",
+    "package/dist/index.js",
+    "package/dist/optimizers/index.js",
+    "package/dist/types/index.js",
+    "package/dist/security/input-safety.js",
+    "package/dist/types/integrations.js",
+    "package/dist/integrations/jest-preset.js",
+    "package/examples/jest.config.example.js",
+    "package/dist/lock.js",
+    "package/dist/core/logger.js",
+    "package/dist/optimizers/move-attrs-to-parent.js",
+    "package/dist/utils/native.js",
+    "package/examples/next.config.example.js",
+    "package/dist/integrations/nextjs.js",
+    "package/dist/optimizers/numeric-optimizer.js",
+    "package/dist/optimizers/optimizer-pipeline.js",
+    "package/dist/utils/package-info.js",
+    "package/dist/optimizers/path-deduplicator.js",
+    "package/dist/optimizers/path-parser.js",
+    "package/dist/optimizers/path-shortener.js",
+    "package/dist/optimizers/path-simplifier.js",
+    "package/dist/core/performance-engine.js",
+    "package/dist/core/plugin-manager.js",
+    "package/dist/types/plugin-system.js",
+    "package/dist/optimizers/remove-hidden-empty.js",
+    "package/dist/optimizers/remove-unused-defs.js",
+    "package/examples/rollup.config.example.js",
+    "package/dist/integrations/rollup.js",
+    "package/dist/optimizers/shape-conversion.js",
+    "package/dist/plugins/stroke-normalizer.js",
+    "package/dist/core/style-compiler.js",
+    "package/dist/optimizers/style-optimizer.js",
+    "package/dist/processors/svg-processor.js",
+    "package/dist/services/svg-service.js",
+    "package/bin/svg-tool.js",
+    "package/dist/optimizers/svg-tree-parser.js",
+    "package/dist/core/template-manager.js",
+    "package/bin/test-svger.js",
+    "package/dist/optimizers/transform-collapsing.js",
+    "package/dist/optimizers/transform-optimizer.js",
+    "package/dist/optimizers/tree-serializer.js",
+    "package/dist/optimizers/tree-stages.js",
+    "package/dist/optimizers/types.js",
+    "package/dist/utils/visual-diff.js",
+    "package/examples/vite.config.example.js",
+    "package/dist/integrations/vite.js",
+    "package/dist/watch.js",
+    "package/dist/plugins/watermark-remover.js",
+    "package/examples/webpack.config.example.js",
+    "package/dist/integrations/webpack.js",
+    "package/.svgerconfig.example.json",
+    "package/package.json",
+    "package/docs/ADR-SVG-INTRGRATION-METHODS-001.adr.md",
+    "package/docs/ADR-SVG-INTRGRATION-METHODS-002.adr.md",
+    "package/CHANGELOG.md",
+    "package/docs/ERROR-HANDLING-STANDARD.md",
+    "package/docs/FRAMEWORK-GUIDE.md",
+    "package/docs/INTEGRATIONS.md",
+    "package/docs/MIGRATION-4.0.0.md",
+    "package/docs/OPTIONAL-DEPENDENCIES.md",
+    "package/docs/performance/PERFORMANCE-RESULTS.md",
+    "package/docs/phase0-migration-notice.md",
+    "package/docs/phase0-release-gate.md",
+    "package/docs/phase0-rollback-plan.md",
+    "package/docs/PIPELINE-INTEGRATION.md",
+    "package/docs/PLUGIN-DEVELOPMENT-GUIDE.md",
+    "package/docs/QUICK-REFERENCE.md",
+    "package/README.md",
+    "package/docs/performance/REAL-WORLD-BENCHMARKS.md",
+    "package/docs/SAMPLE-SVGS-TESTING.md",
+    "package/SECURITY.md",
+    "package/docs/TDR-SVG-INTRGRATION-METHODS-001.tdr.md",
+    "package/assets/svges/500px.svg",
+    "package/assets/svges/adobe.svg",
+    "package/assets/svges/adonis.svg",
+    "package/assets/svges/aeroplane-1.svg",
+    "package/assets/svges/agenda.svg",
+    "package/assets/svges/airbnb.svg",
+    "package/assets/svges/airtable.svg",
+    "package/assets/svges/alarm-1.svg",
+    "package/assets/svges/align-text-center.svg",
+    "package/assets/svges/align-text-left.svg",
+    "package/assets/svges/align-text-right.svg",
+    "package/assets/svges/alpinejs.svg",
+    "package/assets/svges/amazon-original.svg",
+    "package/assets/svges/amazon-pay.svg",
+    "package/assets/svges/amazon.svg",
+    "package/assets/svges/ambulance-1.svg",
+    "package/assets/svges/amd.svg",
+    "package/assets/svges/amex.svg",
+    "package/assets/svges/anchor.svg",
+    "package/assets/svges/android-old.svg",
+    "package/assets/svges/android.svg",
+    "package/assets/svges/angellist.svg",
+    "package/assets/svges/angle-double-down.svg",
+    "package/assets/svges/angle-double-left.svg",
+    "package/assets/svges/angle-double-right.svg",
+    "package/assets/svges/angle-double-up.svg",
+    "package/assets/svges/angular.svg",
+    "package/assets/svges/app-store.svg",
+    "package/assets/svges/apple-brand.svg",
+    "package/assets/svges/apple-music-alt.svg",
+    "package/assets/svges/apple-music.svg",
+    "package/assets/svges/apple-pay.svg",
+    "package/assets/svges/arc-browser.svg",
+    "package/assets/svges/arrow-all-direction.svg",
+    "package/assets/svges/arrow-angular-top-left.svg",
+    "package/assets/svges/arrow-angular-top-right.svg",
+    "package/assets/svges/arrow-both-direction-horizontal-1.svg",
+    "package/assets/svges/arrow-both-direction-vertical-1.svg",
+    "package/assets/svges/arrow-downward.svg",
+    "package/assets/svges/arrow-left-circle.svg",
+    "package/assets/svges/arrow-left.svg",
+    "package/assets/svges/arrow-right-circle.svg",
+    "package/assets/svges/arrow-right.svg",
+    "package/assets/svges/arrow-upward.svg",
+    "package/assets/svges/asana.svg",
+    "package/assets/svges/astro.svg",
+    "package/assets/svges/atlassian.svg",
+    "package/assets/svges/audi-alt.svg",
+    "package/assets/svges/audi.svg",
+    "package/assets/svges/aws.svg",
+    "package/assets/svges/azure.svg",
+    "package/assets/svges/badge-decagram-percent.svg",
+    "package/assets/svges/balloons.svg",
+    "package/assets/svges/ban-2.svg",
+    "package/assets/svges/bar-chart-4.svg",
+    "package/assets/svges/bar-chart-dollar.svg",
+    "package/assets/svges/basket-shopping-3.svg",
+    "package/assets/svges/beat.svg",
+    "package/assets/svges/behance.svg",
+    "package/assets/svges/bell-1.svg",
+    "package/assets/svges/bike.svg",
+    "package/assets/svges/bing.svg",
+    "package/assets/svges/bitbucket.svg",
+    "package/assets/svges/bitcoin.svg",
+    "package/assets/svges/bittorrent.svg",
+    "package/assets/svges/blogger-alt.svg",
+    "package/assets/svges/blogger.svg",
+    "package/assets/svges/bluetooth-logo.svg",
+    "package/assets/svges/bluetooth.svg",
+    "package/assets/svges/bmw.svg",
+    "package/assets/svges/board-writing-3.svg",
+    "package/assets/svges/bold.svg",
+    "package/assets/svges/bolt-2.svg",
+    "package/assets/svges/bolt-3.svg",
+    "package/assets/svges/book-1.svg",
+    "package/assets/svges/bookmark-1.svg",
+    "package/assets/svges/bookmark-circle.svg",
+    "package/assets/svges/books-2.svg",
+    "package/assets/svges/bootstrap-5-square.svg",
+    "package/assets/svges/bootstrap-5.svg",
+    "package/assets/svges/box-archive-1.svg",
+    "package/assets/svges/box-closed.svg",
+    "package/assets/svges/box-gift-1.svg",
+    "package/assets/svges/brave.svg",
+    "package/assets/svges/bricks.svg",
+    "package/assets/svges/bridge-3.svg",
+    "package/assets/svges/briefcase-1.svg",
+    "package/assets/svges/briefcase-2.svg",
+    "package/assets/svges/briefcase-plus-1.svg",
+    "package/assets/svges/brush-1-rotated.svg",
+    "package/assets/svges/brush-2.svg",
+    "package/assets/svges/btc.svg",
+    "package/assets/svges/bug-1.svg",
+    "package/assets/svges/buildings-1.svg",
+    "package/assets/svges/bulb-2.svg",
+    "package/assets/svges/bulb-4.svg",
+    "package/assets/svges/burger-1.svg",
+    "package/assets/svges/burger-drink.svg",
+    "package/assets/svges/bus-1.svg",
+    "package/assets/svges/busket-ball.svg",
+    "package/assets/svges/cake-1.svg",
+    "package/assets/svges/calculator-1.svg",
+    "package/assets/svges/calculator-2.svg",
+    "package/assets/svges/calendar-days.svg",
+    "package/assets/svges/camera-1.svg",
+    "package/assets/svges/camera-movie-1.svg",
+    "package/assets/svges/candy-cane-2.svg",
+    "package/assets/svges/candy-round-1.svg",
+    "package/assets/svges/canva.svg",
+    "package/assets/svges/capsule-1.svg",
+    "package/assets/svges/car-2.svg",
+    "package/assets/svges/car-4.svg",
+    "package/assets/svges/car-6.svg",
+    "package/assets/svges/caravan-1.svg",
+    "package/assets/svges/cart-1.svg",
+    "package/assets/svges/cart-2.svg",
+    "package/assets/svges/cash-app.svg",
+    "package/assets/svges/certificate-badge-1.svg",
+    "package/assets/svges/chat-bubble-2.svg",
+    "package/assets/svges/check-circle-1.svg",
+    "package/assets/svges/check-square-2.svg",
+    "package/assets/svges/check.svg",
+    "package/assets/svges/chevron-down-circle.svg",
+    "package/assets/svges/chevron-down.svg",
+    "package/assets/svges/chevron-left-circle.svg",
+    "package/assets/svges/chevron-left.svg",
+    "package/assets/svges/chevron-right-circle.svg",
+    "package/assets/svges/chevron-up-circle.svg",
+    "package/assets/svges/chevron-up.svg",
+    "package/assets/svges/chrome.svg",
+    "package/assets/svges/chromecast.svg",
+    "package/assets/svges/cisco.svg",
+    "package/assets/svges/claude.svg",
+    "package/assets/svges/clickup.svg",
+    "package/assets/svges/clipboard.svg",
+    "package/assets/svges/cloud-2.svg",
+    "package/assets/svges/cloud-bolt-1.svg",
+    "package/assets/svges/cloud-bolt-2.svg",
+    "package/assets/svges/cloud-check-circle.svg",
+    "package/assets/svges/cloud-download.svg",
+    "package/assets/svges/cloud-iot-2.svg",
+    "package/assets/svges/cloud-rain.svg",
+    "package/assets/svges/cloud-refresh-clockwise.svg",
+    "package/assets/svges/cloud-sun.svg",
+    "package/assets/svges/cloud-upload.svg",
+    "package/assets/svges/cloudflare.svg",
+    "package/assets/svges/code-1.svg",
+    "package/assets/svges/code-s.svg",
+    "package/assets/svges/codepen.svg",
+    "package/assets/svges/coffee-cup-2.svg",
+    "package/assets/svges/coinbase.svg",
+    "package/assets/svges/colour-palette-3.svg",
+    "package/assets/svges/comment-1-share.svg",
+    "package/assets/svges/comment-1-text.svg",
+    "package/assets/svges/comment-1.svg",
+    "package/assets/svges/compass-drafting-2.svg",
+    "package/assets/svges/connectdevelop.svg",
+    "package/assets/svges/copilot.svg",
+    "package/assets/svges/coral.svg",
+    "package/assets/svges/cpanel.svg",
+    "package/assets/svges/crane-4.svg",
+    "package/assets/svges/creative-commons.svg",
+    "package/assets/svges/credit-card-multiple.svg",
+    "package/assets/svges/crop-2.svg",
+    "package/assets/svges/crown-3.svg",
+    "package/assets/svges/css3.svg",
+    "package/assets/svges/dashboard-square-1.svg",
+    "package/assets/svges/database-2.svg",
+    "package/assets/svges/deno.svg",
+    "package/assets/svges/dev.svg",
+    "package/assets/svges/dialogflow.svg",
+    "package/assets/svges/diamonds-1.svg",
+    "package/assets/svges/diamonds-2.svg",
+    "package/assets/svges/digitalocean.svg",
+    "package/assets/svges/diners-club.svg",
+    "package/assets/svges/direction-ltr.svg",
+    "package/assets/svges/direction-rtl.svg",
+    "package/assets/svges/discord-chat.svg",
+    "package/assets/svges/discord.svg",
+    "package/assets/svges/discover.svg",
+    "package/assets/svges/docker.svg",
+    "package/assets/svges/dollar-circle.svg",
+    "package/assets/svges/dollar.svg",
+    "package/assets/svges/double-quotes-end-1.svg",
+    "package/assets/svges/download-1.svg",
+    "package/assets/svges/download-circle-1.svg",
+    "package/assets/svges/dribbble-symbol.svg",
+    "package/assets/svges/dribbble.svg",
+    "package/assets/svges/drizzle.svg",
+    "package/assets/svges/dropbox.svg",
+    "package/assets/svges/drupal.svg",
+    "package/assets/svges/dumbbell-1.svg",
+    "package/assets/svges/edge.svg",
+    "package/assets/svges/emoji-expressionless-flat-eyes.svg",
+    "package/assets/svges/emoji-expressionless.svg",
+    "package/assets/svges/emoji-grin.svg",
+    "package/assets/svges/emoji-sad.svg",
+    "package/assets/svges/emoji-smile-side.svg",
+    "package/assets/svges/emoji-smile-sunglass.svg",
+    "package/assets/svges/emoji-smile-tongue.svg",
+    "package/assets/svges/emoji-smile.svg",
+    "package/assets/svges/enter-down.svg",
+    "package/assets/svges/enter.svg",
+    "package/assets/svges/envato.svg",
+    "package/assets/svges/envelope-1.svg",
+    "package/assets/svges/eraser-1.svg",
+    "package/assets/svges/ethereum-logo.svg",
+    "package/assets/svges/euro.svg",
+    "package/assets/svges/exit-up.svg",
+    "package/assets/svges/exit.svg",
+    "package/assets/svges/expand-arrow-1.svg",
+    "package/assets/svges/expand-square-4.svg",
+    "package/assets/svges/expressjs.svg",
+    "package/assets/svges/eye.svg",
+    "package/assets/svges/facebook-messenger.svg",
+    "package/assets/svges/facebook-rounded.svg",
+    "package/assets/svges/facebook-square.svg",
+    "package/assets/svges/facebook.svg",
+    "package/assets/svges/facetime.svg",
+    "package/assets/svges/figma.svg",
+    "package/assets/svges/file-format-zip.svg",
+    "package/assets/svges/file-multiple.svg",
+    "package/assets/svges/file-pencil.svg",
+    "package/assets/svges/file-plus-circle.svg",
+    "package/assets/svges/file-question.svg",
+    "package/assets/svges/file-xmark.svg",
+    "package/assets/svges/firebase.svg",
+    "package/assets/svges/firefox.svg",
+    "package/assets/svges/firework-rocket-4.svg",
+    "package/assets/svges/fitbit.svg",
+    "package/assets/svges/flag-1.svg",
+    "package/assets/svges/flag-2.svg",
+    "package/assets/svges/flickr.svg",
+    "package/assets/svges/floppy-disk-1.svg",
+    "package/assets/svges/flower-2.svg",
+    "package/assets/svges/flutter.svg",
+    "package/assets/svges/folder-1.svg",
+    "package/assets/svges/ford.svg",
+    "package/assets/svges/framer.svg",
+    "package/assets/svges/funnel-1.svg",
+    "package/assets/svges/gallery.svg",
+    "package/assets/svges/game-pad-modern-1.svg",
+    "package/assets/svges/gatsby.svg",
+    "package/assets/svges/gauge-1.svg",
+    "package/assets/svges/gear-1.svg",
+    "package/assets/svges/gears-3.svg",
+    "package/assets/svges/gemini.svg",
+    "package/assets/svges/git.svg",
+    "package/assets/svges/github.svg",
+    "package/assets/svges/glass-juice-1.svg",
+    "package/assets/svges/globe-1.svg",
+    "package/assets/svges/globe-stand.svg",
+    "package/assets/svges/go.svg",
+    "package/assets/svges/goodreads.svg",
+    "package/assets/svges/google-cloud.svg",
+    "package/assets/svges/google-drive.svg",
+    "package/assets/svges/google-meet.svg",
+    "package/assets/svges/google-pay.svg",
+    "package/assets/svges/google-wallet.svg",
+    "package/assets/svges/google.svg",
+    "package/assets/svges/graduation-cap-1.svg",
+    "package/assets/svges/grammarly.svg",
+    "package/assets/svges/hacker-news.svg",
+    "package/assets/svges/hammer-1.svg",
+    "package/assets/svges/hammer-2.svg",
+    "package/assets/svges/hand-mic.svg",
+    "package/assets/svges/hand-shake.svg",
+    "package/assets/svges/hand-stop.svg",
+    "package/assets/svges/hand-taking-dollar.svg",
+    "package/assets/svges/hand-taking-leaf-1.svg",
+    "package/assets/svges/hand-taking-user.svg",
+    "package/assets/svges/hashnode.svg",
+    "package/assets/svges/hat-chef-3.svg",
+    "package/assets/svges/headphone-1.svg",
+    "package/assets/svges/heart.svg",
+    "package/assets/svges/helicopter-2.svg",
+    "package/assets/svges/helmet-safety-1.svg",
+    "package/assets/svges/hierarchy-1.svg",
+    "package/assets/svges/highlighter-1.svg",
+    "package/assets/svges/highlighter-2.svg",
+    "package/assets/svges/home-2.svg",
+    "package/assets/svges/hospital-2.svg",
+    "package/assets/svges/hourglass.svg",
+    "package/assets/svges/html5.svg",
+    "package/assets/svges/ibm.svg",
+    "package/assets/svges/id-card.svg",
+    "package/assets/svges/imdb.svg",
+    "package/assets/svges/indent.svg",
+    "package/assets/svges/info.svg",
+    "package/assets/svges/injection-1.svg",
+    "package/assets/svges/instagram-logotype.svg",
+    "package/assets/svges/instagram.svg",
+    "package/assets/svges/intel.svg",
+    "package/assets/svges/ios.svg",
+    "package/assets/svges/island-2.svg",
+    "package/assets/svges/jaguar.svg",
+    "package/assets/svges/jamstack.svg",
+    "package/assets/svges/java.svg",
+    "package/assets/svges/javascript.svg",
+    "package/assets/svges/jcb.svg",
+    "package/assets/svges/joomla.svg",
+    "package/assets/svges/jsfiddle.svg",
+    "package/assets/svges/key-1.svg",
+    "package/assets/svges/keyboard.svg",
+    "package/assets/svges/knife-fork-1.svg",
+    "package/assets/svges/kubernetes.svg",
+    "package/assets/svges/label-dollar-2.svg",
+    "package/assets/svges/laptop-2.svg",
+    "package/assets/svges/laptop-phone.svg",
+    "package/assets/svges/laravel.svg",
+    "package/assets/svges/layers-1.svg",
+    "package/assets/svges/layout-26.svg",
+    "package/assets/svges/layout-9.svg",
+    "package/assets/svges/leaf-1.svg",
+    "package/assets/svges/leaf-6.svg",
+    "package/assets/svges/lemon-squeezy.svg",
+    "package/assets/svges/life-guard-tube-1.svg",
+    "package/assets/svges/line-dashed.svg",
+    "package/assets/svges/line-dotted.svg",
+    "package/assets/svges/line-height.svg",
+    "package/assets/svges/line.svg",
+    "package/assets/svges/lineicons.svg",
+    "package/assets/svges/link-2-angular-right.svg",
+    "package/assets/svges/linkedin.svg",
+    "package/assets/svges/location-arrow-right.svg",
+    "package/assets/svges/locked-1.svg",
+    "package/assets/svges/locked-2.svg",
+    "package/assets/svges/loom.svg",
+    "package/assets/svges/magento.svg",
+    "package/assets/svges/magnet.svg",
+    "package/assets/svges/mailchimp.svg",
+    "package/assets/svges/map-marker-1.svg",
+    "package/assets/svges/map-marker-5.svg",
+    "package/assets/svges/map-pin-5.svg",
+    "package/assets/svges/markdown.svg",
+    "package/assets/svges/mastercard.svg",
+    "package/assets/svges/medium-alt.svg",
+    "package/assets/svges/medium.svg",
+    "package/assets/svges/megaphone-1.svg",
+    "package/assets/svges/menu-cheesburger.svg",
+    "package/assets/svges/menu-hamburger-1.svg",
+    "package/assets/svges/menu-meatballs-1.svg",
+    "package/assets/svges/menu-meatballs-2.svg",
+    "package/assets/svges/mercedes.svg",
+    "package/assets/svges/message-2-question.svg",
+    "package/assets/svges/message-2.svg",
+    "package/assets/svges/message-3-text.svg",
+    "package/assets/svges/meta-alt.svg",
+    "package/assets/svges/meta.svg",
+    "package/assets/svges/microphone-1.svg",
+    "package/assets/svges/microscope.svg",
+    "package/assets/svges/microsoft-edge.svg",
+    "package/assets/svges/microsoft-teams.svg",
+    "package/assets/svges/microsoft.svg",
+    "package/assets/svges/minus-circle.svg",
+    "package/assets/svges/minus.svg",
+    "package/assets/svges/mongodb.svg",
+    "package/assets/svges/monitor-code.svg",
+    "package/assets/svges/monitor-mac.svg",
+    "package/assets/svges/monitor.svg",
+    "package/assets/svges/moon-half-right-5.svg",
+    "package/assets/svges/mountains-2.svg",
+    "package/assets/svges/mouse-2.svg",
+    "package/assets/svges/mushroom-1.svg",
+    "package/assets/svges/mushroom-5.svg",
+    "package/assets/svges/music.svg",
+    "package/assets/svges/mysql.svg",
+    "package/assets/svges/nasa.svg",
+    "package/assets/svges/netflix.svg",
+    "package/assets/svges/netlify.svg",
+    "package/assets/svges/next-step-2.svg",
+    "package/assets/svges/nextjs.svg",
+    "package/assets/svges/nike.svg",
+    "package/assets/svges/nissan.svg",
+    "package/assets/svges/nodejs-alt.svg",
+    "package/assets/svges/nodejs.svg",
+    "package/assets/svges/notebook-1.svg",
+    "package/assets/svges/notion.svg",
+    "package/assets/svges/npm.svg",
+    "package/assets/svges/nuxt.svg",
+    "package/assets/svges/nvidia.svg",
+    "package/assets/svges/oculus.svg",
+    "package/assets/svges/open-ai.svg",
+    "package/assets/svges/opera-mini.svg",
+    "package/assets/svges/oracle.svg",
+    "package/assets/svges/outdent.svg",
+    "package/assets/svges/paddle.svg",
+    "package/assets/svges/page-break-1.svg",
+    "package/assets/svges/pagination.svg",
+    "package/assets/svges/paint-bucket.svg",
+    "package/assets/svges/paint-roller-1.svg",
+    "package/assets/svges/paperclip-1.svg",
+    "package/assets/svges/party-flags.svg",
+    "package/assets/svges/party-spray.svg",
+    "package/assets/svges/patreon.svg",
+    "package/assets/svges/pause.svg",
+    "package/assets/svges/payoneer.svg",
+    "package/assets/svges/paypal.svg",
+    "package/assets/svges/pen-to-square.svg",
+    "package/assets/svges/pencil-1.svg",
+    "package/assets/svges/pepsi.svg",
+    "package/assets/svges/phone.svg",
+    "package/assets/svges/photos.svg",
+    "package/assets/svges/php.svg",
+    "package/assets/svges/pie-chart-2.svg",
+    "package/assets/svges/pilcrow.svg",
+    "package/assets/svges/pimjo-logo.svg",
+    "package/assets/svges/pimjo-symbol.svg",
+    "package/assets/svges/pinterest.svg",
+    "package/assets/svges/pizza-2.svg",
+    "package/assets/svges/placeholder-dollar.svg",
+    "package/assets/svges/plantscale.svg",
+    "package/assets/svges/play-store.svg",
+    "package/assets/svges/play.svg",
+    "package/assets/svges/playstation.svg",
+    "package/assets/svges/plug-1.svg",
+    "package/assets/svges/plus-circle.svg",
+    "package/assets/svges/plus.svg",
+    "package/assets/svges/pnpm.svg",
+    "package/assets/svges/postgresql.svg",
+    "package/assets/svges/postman.svg",
+    "package/assets/svges/pound.svg",
+    "package/assets/svges/power-button.svg",
+    "package/assets/svges/previous-step-2.svg",
+    "package/assets/svges/printer.svg",
+    "package/assets/svges/prisma.svg",
+    "package/assets/svges/producthunt.svg",
+    "package/assets/svges/proton-mail-logo.svg",
+    "package/assets/svges/proton-mail-symbol.svg",
+    "package/assets/svges/python.svg",
+    "package/assets/svges/question-mark-circle.svg",
+    "package/assets/svges/question-mark.svg",
+    "package/assets/svges/quora.svg",
+    "package/assets/svges/radis.svg",
+    "package/assets/svges/react.svg",
+    "package/assets/svges/reddit.svg",
+    "package/assets/svges/refresh-circle-1-clockwise.svg",
+    "package/assets/svges/refresh-dollar-1.svg",
+    "package/assets/svges/refresh-user-1.svg",
+    "package/assets/svges/remix-js.svg",
+    "package/assets/svges/road-1.svg",
+    "package/assets/svges/rocket-5.svg",
+    "package/assets/svges/route-1.svg",
+    "package/assets/svges/rss-right.svg",
+    "package/assets/svges/ruler-1.svg",
+    "package/assets/svges/ruler-pen.svg",
+    "package/assets/svges/rupee.svg",
+    "package/assets/svges/safari.svg",
+    "package/assets/svges/sanity.svg",
+    "package/assets/svges/school-bench-1.svg",
+    "package/assets/svges/school-bench-2.svg",
+    "package/assets/svges/scissors-1-vertical.svg",
+    "package/assets/svges/scoter.svg",
+    "package/assets/svges/scroll-down-2.svg",
+    "package/assets/svges/search-1.svg",
+    "package/assets/svges/search-2.svg",
+    "package/assets/svges/search-minus.svg",
+    "package/assets/svges/search-plus.svg",
+    "package/assets/svges/search-text.svg",
+    "package/assets/svges/select-cursor-1.svg",
+    "package/assets/svges/seo-monitor.svg",
+    "package/assets/svges/service-bell-1.svg",
+    "package/assets/svges/share-1-circle.svg",
+    "package/assets/svges/share-1.svg",
+    "package/assets/svges/share-2.svg",
+    "package/assets/svges/shield-2-check.svg",
+    "package/assets/svges/shield-2.svg",
+    "package/assets/svges/shield-dollar.svg",
+    "package/assets/svges/shift-left.svg",
+    "package/assets/svges/shift-right.svg",
+    "package/assets/svges/ship-1.svg",
+    "package/assets/svges/shirt-1.svg",
+    "package/assets/svges/shopify.svg",
+    "package/assets/svges/shovel.svg",
+    "package/assets/svges/shuffle.svg",
+    "package/assets/svges/sign-post-left.svg",
+    "package/assets/svges/signal-app.svg",
+    "package/assets/svges/signs-post-2.svg",
+    "package/assets/svges/sketch.svg",
+    "package/assets/svges/skype.svg",
+    "package/assets/svges/slack.svg",
+    "package/assets/svges/slice-2.svg",
+    "package/assets/svges/sliders-horizontal-square-2.svg",
+    "package/assets/svges/slideshare.svg",
+    "package/assets/svges/snapchat.svg",
+    "package/assets/svges/sort-alphabetical.svg",
+    "package/assets/svges/sort-high-to-low.svg",
+    "package/assets/svges/soundcloud.svg",
+    "package/assets/svges/spacex.svg",
+    "package/assets/svges/spellcheck.svg",
+    "package/assets/svges/spinner-2-sacle.svg",
+    "package/assets/svges/spinner-3.svg",
+    "package/assets/svges/sports.svg",
+    "package/assets/svges/spotify-alt.svg",
+    "package/assets/svges/spotify.svg",
+    "package/assets/svges/squarespace.svg",
+    "package/assets/svges/stackoverflow.svg",
+    "package/assets/svges/stamp.svg",
+    "package/assets/svges/star-fat-half-2.svg",
+    "package/assets/svges/star-fat.svg",
+    "package/assets/svges/star-sharp-disabled.svg",
+    "package/assets/svges/statista.svg",
+    "package/assets/svges/steam.svg",
+    "package/assets/svges/stethoscope-1.svg",
+    "package/assets/svges/stopwatch.svg",
+    "package/assets/svges/storage-hdd-2.svg",
+    "package/assets/svges/strikethrough-1.svg",
+    "package/assets/svges/stripe.svg",
+    "package/assets/svges/stumbleupon.svg",
+    "package/assets/svges/sun-1.svg",
+    "package/assets/svges/supabase.svg",
+    "package/assets/svges/surfboard-2.svg",
+    "package/assets/svges/svelte.svg",
+    "package/assets/svges/swift.svg",
+    "package/assets/svges/tab.svg",
+    "package/assets/svges/tailwindcss.svg",
+    "package/assets/svges/target-user.svg",
+    "package/assets/svges/telegram.svg",
+    "package/assets/svges/telephone-1.svg",
+    "package/assets/svges/telephone-3.svg",
+    "package/assets/svges/tesla.svg",
+    "package/assets/svges/text-format-remove.svg",
+    "package/assets/svges/text-format.svg",
+    "package/assets/svges/text-paragraph.svg",
+    "package/assets/svges/thumbs-down-3.svg",
+    "package/assets/svges/thumbs-up-3.svg",
+    "package/assets/svges/ticket-1.svg",
+    "package/assets/svges/tickets-3.svg",
+    "package/assets/svges/tiktok-alt.svg",
+    "package/assets/svges/tiktok.svg",
+    "package/assets/svges/tower-broadcast-1.svg",
+    "package/assets/svges/toyota.svg",
+    "package/assets/svges/train-1.svg",
+    "package/assets/svges/train-3.svg",
+    "package/assets/svges/trash-3.svg",
+    "package/assets/svges/tree-2.svg",
+    "package/assets/svges/trees-3.svg",
+    "package/assets/svges/trello.svg",
+    "package/assets/svges/trend-down-1.svg",
+    "package/assets/svges/trend-up-1.svg",
+    "package/assets/svges/trophy-1.svg",
+    "package/assets/svges/trowel-1.svg",
+    "package/assets/svges/truck-delivery-1.svg",
+    "package/assets/svges/tumblr.svg",
+    "package/assets/svges/turborepo.svg",
+    "package/assets/svges/twitch.svg",
+    "package/assets/svges/twitter-old.svg",
+    "package/assets/svges/typescript.svg",
+    "package/assets/svges/uber-symbol.svg",
+    "package/assets/svges/uber.svg",
+    "package/assets/svges/ubuntu.svg",
+    "package/assets/svges/underline.svg",
+    "package/assets/svges/unlink-2-angular-eft.svg",
+    "package/assets/svges/unlocked-2.svg",
+    "package/assets/svges/unsplash.svg",
+    "package/assets/svges/upload-1.svg",
+    "package/assets/svges/upload-circle-1.svg",
+    "package/assets/svges/user-4.svg",
+    "package/assets/svges/user-multiple-4.svg",
+    "package/assets/svges/vector-nodes-6.svg",
+    "package/assets/svges/vector-nodes-7.svg",
+    "package/assets/svges/vercel.svg",
+    "package/assets/svges/vimeo.svg",
+    "package/assets/svges/visa.svg",
+    "package/assets/svges/vite.svg",
+    "package/assets/svges/vk.svg",
+    "package/assets/svges/vmware.svg",
+    "package/assets/svges/volkswagen.svg",
+    "package/assets/svges/volume-1.svg",
+    "package/assets/svges/volume-high.svg",
+    "package/assets/svges/volume-low.svg",
+    "package/assets/svges/volume-mute.svg",
+    "package/assets/svges/volume-off.svg",
+    "package/assets/svges/vs-code.svg",
+    "package/assets/svges/vuejs.svg",
+    "package/assets/svges/wallet-1.svg",
+    "package/assets/svges/watch-beat-1.svg",
+    "package/assets/svges/water-drop-1.svg",
+    "package/assets/svges/webflow.svg",
+    "package/assets/svges/webhooks.svg",
+    "package/assets/svges/wechat.svg",
+    "package/assets/svges/weight-machine-1.svg",
+    "package/assets/svges/whatsapp.svg",
+    "package/assets/svges/wheelbarrow-empty.svg",
+    "package/assets/svges/wheelchair-1.svg",
+    "package/assets/svges/windows.svg",
+    "package/assets/svges/wise.svg",
+    "package/assets/svges/wordpress.svg",
+    "package/assets/svges/www-cursor.svg",
+    "package/assets/svges/www.svg",
+    "package/assets/svges/x.svg",
+    "package/assets/svges/xampp.svg",
+    "package/assets/svges/xbox.svg",
+    "package/assets/svges/xmark-circle.svg",
+    "package/assets/svges/xmark.svg",
+    "package/assets/svges/xrp.svg",
+    "package/assets/svges/yahoo.svg",
+    "package/assets/svges/yarn.svg",
+    "package/assets/svges/ycombinator.svg",
+    "package/assets/svges/yen.svg",
+    "package/assets/svges/youtube-kids.svg",
+    "package/assets/svges/youtube-music.svg",
+    "package/assets/svges/youtube.svg",
+    "package/assets/svges/zapier.svg",
+    "package/assets/svges/zero-size.svg",
+    "package/assets/svges/zoom.svg",
+    "package/dist/optimizers/advanced-stages.d.ts",
+    "package/dist/integrations/babel.d.ts",
+    "package/dist/optimizers/basic-cleaner.d.ts",
+    "package/dist/builder.d.ts",
+    "package/dist/plugins/builtins.d.ts",
+    "package/dist/clean.d.ts",
+    "package/dist/cli.d.ts",
+    "package/dist/optimizers/collapse-useless-groups.d.ts",
+    "package/dist/plugins/color-replacer.d.ts",
+    "package/dist/optimizers/command-optimizer.d.ts",
+    "package/dist/templates/ComponentTemplate.d.ts",
+    "package/dist/config.d.ts",
+    "package/dist/services/config.d.ts",
+    "package/dist/core/enhanced-plugin-manager.d.ts",
+    "package/dist/core/error-handler.d.ts",
+    "package/dist/services/file-watcher.d.ts",
+    "package/dist/core/framework-templates.d.ts",
+    "package/dist/plugins/gradient-optimizer.d.ts",
+    "package/dist/index.d.ts",
+    "package/dist/optimizers/index.d.ts",
+    "package/dist/types/index.d.ts",
+    "package/dist/security/input-safety.d.ts",
+    "package/dist/types/integrations.d.ts",
+    "package/dist/integrations/jest-preset.d.ts",
+    "package/dist/lock.d.ts",
+    "package/dist/core/logger.d.ts",
+    "package/dist/optimizers/move-attrs-to-parent.d.ts",
+    "package/dist/utils/native.d.ts",
+    "package/dist/integrations/nextjs.d.ts",
+    "package/dist/optimizers/numeric-optimizer.d.ts",
+    "package/dist/optimizers/optimizer-pipeline.d.ts",
+    "package/dist/utils/package-info.d.ts",
+    "package/dist/optimizers/path-deduplicator.d.ts",
+    "package/dist/optimizers/path-parser.d.ts",
+    "package/dist/optimizers/path-shortener.d.ts",
+    "package/dist/optimizers/path-simplifier.d.ts",
+    "package/dist/core/performance-engine.d.ts",
+    "package/dist/core/plugin-manager.d.ts",
+    "package/dist/types/plugin-system.d.ts",
+    "package/dist/optimizers/remove-hidden-empty.d.ts",
+    "package/dist/optimizers/remove-unused-defs.d.ts",
+    "package/dist/integrations/rollup.d.ts",
+    "package/dist/optimizers/shape-conversion.d.ts",
+    "package/dist/plugins/stroke-normalizer.d.ts",
+    "package/dist/core/style-compiler.d.ts",
+    "package/dist/optimizers/style-optimizer.d.ts",
+    "package/dist/processors/svg-processor.d.ts",
+    "package/dist/services/svg-service.d.ts",
+    "package/dist/optimizers/svg-tree-parser.d.ts",
+    "package/dist/core/template-manager.d.ts",
+    "package/dist/optimizers/transform-collapsing.d.ts",
+    "package/dist/optimizers/transform-optimizer.d.ts",
+    "package/dist/optimizers/tree-serializer.d.ts",
+    "package/dist/optimizers/tree-stages.d.ts",
+    "package/dist/optimizers/types.d.ts",
+    "package/dist/utils/visual-diff.d.ts",
+    "package/dist/integrations/vite.d.ts",
+    "package/dist/watch.d.ts",
+    "package/dist/plugins/watermark-remover.d.ts",
+    "package/dist/integrations/webpack.d.ts"
+  ]
+}

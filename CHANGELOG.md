@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.9] - 2026-07-17
+
+### Security containment
+
+- Added a non-bypassable raw-input gate for the CLI, legacy builder,
+  `SVGService`, direct processor APIs, watch/optimize flows, and official
+  Webpack, Vite, Rollup, Babel, Next.js, and Jest integrations.
+- SVGs containing `<script>` elements, `on*` event attributes, or
+  `javascript:` URI values now fail by default with
+  `E_UNSAFE_SVG_CONTENT`.
+- Added explicit `--unsafe-input-policy strip` handling. Strip mode emits a
+  prominent warning and is documented as temporary and incomplete.
+- Added a configurable 10 MiB default raw-input ceiling with
+  `E_SVG_INPUT_TOO_LARGE` diagnostics.
+- Added lexical, physical-parent, and existing-symlink output boundary checks
+  with `E_OUTPUT_PATH_ESCAPE` diagnostics.
+
+### Behavioral baseline and release safety
+
+- Archived and hash-locked the immutable v4.0.8 behavioral baseline under
+  `baselines/v4.0.x/`.
+- Added dual-path characterization coverage and the v4.1 compatibility ledger.
+- Added a full Phase 0 release gate, including Jest, existing standalone suites,
+  security containment, baseline verification, and a clean tarball consumer
+  smoke test.
+- Added migration and rollback documentation for the containment patch.
+
 ## [4.0.8] - 2026-05-20
 
 ### 🐛 Bug Fixes

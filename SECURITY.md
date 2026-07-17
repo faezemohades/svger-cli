@@ -6,17 +6,19 @@ We actively support the following versions of SVGER-CLI with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 2.0.x   | :white_check_mark: |
-| 1.x.x   | :x:                |
+| 4.0.9   | :white_check_mark: |
+| < 4.0.9 | :x:                |
 
 ## Reporting a Vulnerability
 
-We take the security of SVGER-CLI seriously. If you discover a security vulnerability, please follow these guidelines:
+We take the security of SVGER-CLI seriously. If you discover a security vulnerability, please follow
+these guidelines:
 
 ### How to Report
 
 1. **DO NOT** create a public GitHub issue for security vulnerabilities
-2. Send an email to **navidrezadoost07@gmail.com** with the subject line: `[SECURITY] SVGER-CLI Vulnerability Report`
+2. Send an email to **navidrezadoost07@gmail.com** with the subject line:
+   `[SECURITY] SVGER-CLI Vulnerability Report`
 3. Include the following information:
    - Description of the vulnerability
    - Steps to reproduce the issue
@@ -46,10 +48,27 @@ When using SVGER-CLI in your projects:
 SVGER-CLI includes several security features:
 
 - **Zero Dependencies**: Eliminates third-party vulnerability vectors
-- **Input Validation**: Validates SVG content before processing
-- **Sandboxed Processing**: Processes files in isolated contexts
-- **Safe Output Generation**: Generates safe, sanitized component code
+- **Reject-by-default input containment**: Rejects script elements, event handlers, and JavaScript
+  URI values with `E_UNSAFE_SVG_CONTENT`
+- **Input size limit**: Rejects raw SVGs over 10 MiB by default; callers may set a smaller positive
+  byte limit
+- **Output boundary validation**: Refuses artifact paths outside the designated output root and
+  refuses existing symlink artifact destinations
 - **File Locking**: Prevents unauthorized modification of protected files
+
+### Temporary Phase 0 sanitizer
+
+The v4.0.9 raw-input gate is an immediate containment measure, not a complete SVG sanitizer. Reject
+mode is the default and is recommended for all untrusted input. Strip mode is available only by
+explicit request:
+
+```sh
+svger build ./icons ./components --unsafe-input-policy strip
+```
+
+Strip mode emits a security warning. It does not make arbitrary untrusted XML safe for every
+downstream renderer. Continue to source SVGs from trusted locations and review generated output. A
+semantic-model sanitizer replaces this temporary gate in the approved Phase 3 architecture.
 
 ### Disclosure Policy
 
