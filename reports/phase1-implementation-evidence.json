@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "phase": 1,
+  "targetVersion": "4.1.0",
+  "date": "2026-07-17",
+  "branch": "phase/1-architectural-stabilization",
+  "phase0BaseCommit": "25310bfabead990b9fdd298be8a12bdf080fde5f",
+  "validatedSourceCommit": "12549ca271175c832e19a0524b9d77a89056a832",
+  "validatedSourceTree": "7588c35f68449d022afb897a6c9662ca957f4835",
+  "implementationStatus": "locally-complete",
+  "engineeringValidation": "passed",
+  "remoteMatrixValidation": "pending",
+  "mergeAuthorization": "blocked",
+  "mainChanged": false,
+  "issues": {
+    "P1-101": "passed",
+    "P1-102": "passed",
+    "P1-103": "passed",
+    "P1-104": "passed",
+    "P1-105": "passed",
+    "P1-106": "passed",
+    "P1-107": "passed",
+    "P1-108": "passed",
+    "P1-109": "passed",
+    "P1-110": "passed",
+    "P1-111": "passed",
+    "P1-112": "passed",
+    "P1-113": "passed",
+    "P1-114": "passed",
+    "P1-115": "implemented-remote-ci-pending",
+    "P1-116": "passed"
+  },
+  "validation": {
+    "phase1Validation": "passed",
+    "packageSmoke": "passed",
+    "immutableBaselineArtifacts": 14,
+    "eslintErrors": 0,
+    "eslintWarnings": 14,
+    "approvedEslintWarnings": 14,
+    "jestPassed": 155,
+    "jestTotal": 155,
+    "frameworkPassed": 11,
+    "configurationPassed": 10,
+    "e2ePassed": 8,
+    "integrationPassed": 7,
+    "phase1ContractGroupsPassed": 9,
+    "securityAssertionsPassed": 27,
+    "entrypointSafetyMatrix": "passed",
+    "privacyScan": "passed",
+    "byteReproducibility": "passed",
+    "typescriptVersions": ["5.6.3", "5.9.3", "7.0.2"]
+  },
+  "package": {
+    "files": 793,
+    "packedBytes": 645631,
+    "approvedFileCeiling": 794,
+    "approvedPackedByteCeiling": 647841,
+    "fileHeadroom": 1,
+    "byteHeadroom": 2210
+  },
+  "authorship": {
+    "name": "Navid Rezadoost",
+    "email": "46137155+navidrezadoost@users.noreply.github.com"
+  },
+  "requiredBeforeMerge": [
+    "v4.0.9 publication and independent verification",
+    "formal compatibility-ledger approval",
+    "baseline approval",
+    "security containment approval",
+    "release approval",
+    "remote Node/OS/TypeScript matrix pass bound to this source candidate"
+  ]
+}
