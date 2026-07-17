@@ -1,7 +1,10 @@
 {
   "schemaVersion": 1,
   "baselineVersion": "4.0.8",
-  "fixtureNames": ["basic.svg", "styled.svg"],
+  "fixtureNames": [
+    "basic.svg",
+    "styled.svg"
+  ],
   "paths": {
     "legacyBuilder": {
       "execution": {
@@ -21,7 +24,10 @@
           }
         ]
       },
-      "generatedFileNames": ["Basic.tsx", "Styled.tsx"],
+      "generatedFileNames": [
+        "Basic.tsx",
+        "Styled.tsx"
+      ],
       "artifacts": {
         "Basic.tsx": {
           "bytes": 839,
@@ -45,7 +51,7 @@
           },
           {
             "stream": "stdout",
-            "message": "[TIMESTAMP] ℹ️ [INFO] Source: /home/navidrezadoost/Documents/Github/svger-cli/baselines/v4.0.x/fixtures\n"
+            "message": "[TIMESTAMP] ℹ️ [INFO] Source: [REPOSITORY_ROOT]/baselines/v4.0.x/fixtures\n"
           },
           {
             "stream": "stdout",
@@ -73,7 +79,11 @@
           }
         ]
       },
-      "generatedFileNames": ["Basic.tsx", "Styled.tsx", "index.ts"],
+      "generatedFileNames": [
+        "Basic.tsx",
+        "Styled.tsx",
+        "index.ts"
+      ],
       "artifacts": {
         "Basic.tsx": {
           "bytes": 839,
@@ -111,9 +121,14 @@
     "diagnosticsEqual": false,
     "exitSemanticsEqual": true,
     "generatedFileNaming": {
-      "shared": ["Basic.tsx", "Styled.tsx"],
+      "shared": [
+        "Basic.tsx",
+        "Styled.tsx"
+      ],
       "legacyOnly": [],
-      "serviceOnly": ["index.ts"]
+      "serviceOnly": [
+        "index.ts"
+      ]
     }
   }
 }

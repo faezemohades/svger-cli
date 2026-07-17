@@ -25,7 +25,8 @@ const normalize = value =>
   value
     .replace(/\u001b\[[0-9;]*m/g, '')
     .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, '[TIMESTAMP]')
-    .replaceAll(workRoot, '[WORK_ROOT]');
+    .replaceAll(workRoot, '[WORK_ROOT]')
+    .replaceAll(repositoryRoot, '[REPOSITORY_ROOT]');
 
 const capture = async operation => {
   const diagnostics = [];
