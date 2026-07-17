@@ -137,7 +137,7 @@
     "baseline:update": "node scripts/update-baseline.mjs",
     "package:conformance": "node scripts/archive-package-conformance.mjs",
     "validate": "npm run typecheck && npm run lint && npm run test",
-    "validate:phase0": "npm run baseline:policy && npm run typecheck && npm run lint:budget && npm run test:jest && npm run test && npm run test:phase0 && npm run test:package"
+    "validate:phase0": "npm run baseline:policy && npm run typecheck && npm run lint:budget && npm run build && npm run test:jest && npm run test && npm run test:phase0 && npm run test:package"
   },
   "keywords": [
     "svg",
