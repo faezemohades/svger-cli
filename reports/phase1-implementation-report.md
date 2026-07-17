@@ -87,6 +87,12 @@ of the matrix is still pending.
 
 ## Source and evidence identity
 
+Evidence anchor commit: `2d86d82266cd7777090e69427a42d9ed74ddef95`
+
+The diff from validated source `6b00b82` to that anchor contains only the four Phase 1 report files,
+so `productionRelevantChangesAfterValidation` is `false`. The subsequent commit that binds this
+exact anchor value is also evidence-only.
+
 The earlier source/evidence pair remains auditable:
 
 ```json

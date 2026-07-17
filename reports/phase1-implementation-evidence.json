@@ -7,7 +7,7 @@
   "phase0BaseCommit": "25310bfabead990b9fdd298be8a12bdf080fde5f",
   "validatedSourceCommit": "6b00b82d85854bd45baba6fe51c0b751946a2d30",
   "validatedSourceTree": "22c0bb46187f40781638cbf3dbb0b24bf73c2646",
-  "evidenceCommit": "PENDING_EVIDENCE_ANCHOR",
+  "evidenceCommit": "2d86d82266cd7777090e69427a42d9ed74ddef95",
   "productionRelevantChangesAfterValidation": false,
   "priorEvidenceAssertion": {
     "validatedSourceCommit": "12549ca271175c832e19a0524b9d77a89056a832",
