@@ -18,6 +18,23 @@ import { pathToFileURL } from 'url';
 import path from 'path';
 import { getPackageInfo } from './utils/package-info.js';
 import { resolveOutputArtifactPath } from './security/input-safety.js';
+import { createSVGCompiler } from './compiler/create-svg-compiler.js';
+import { BuildCommand } from './commands/build-command.js';
+import { executeCommand } from './application/command.js';
+import {
+  DiagnosticError,
+  ExitCode,
+  diagnosticFromUnknown,
+  exitCodeFromUnknown,
+} from './contracts/diagnostics.js';
+import {
+  createBuildReport,
+  formatBuildReport,
+  type BuildMode,
+  type ReportFormat,
+} from './contracts/reporting.js';
+import type { CollisionPolicy } from './application/build-plan.js';
+import type { SymlinkPolicy } from './application/source-discovery.js';
 
 type BuildRuntimeOptions = BuildOptions & {
   framework?: FrameworkType;
@@ -39,13 +56,26 @@ interface SafetyCommandOptions {
 }
 
 interface BuildCommandOptions extends SafetyCommandOptions {
+  'batch-size'?: string;
+  check?: boolean;
+  collision?: CollisionPolicy;
   composition?: boolean;
+  concurrency?: string;
+  diff?: boolean;
+  'dry-run'?: boolean;
+  exclude?: string;
+  format?: ReportFormat;
   framework?: FrameworkType;
+  hidden?: boolean;
+  include?: string;
   listPlugins?: boolean;
+  'max-file-count'?: string;
   optimize?: string;
   plugin?: string;
+  recursive?: boolean;
   signals?: boolean;
   standalone?: boolean;
+  symlinks?: SymlinkPolicy;
   typescript?: boolean;
 }
 
@@ -110,6 +140,31 @@ const CLI_VERSION = getPackageInfo().version;
 
 const program = new CLI();
 let shouldExitAfterParse = true;
+const compilerPromise = createSVGCompiler();
+
+function parsePositiveInteger(
+  value: string | undefined,
+  flag: string
+): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) {
+    throw new DiagnosticError(
+      'E_INVALID_NUMERIC_OPTION',
+      `${flag} must be a positive integer.`,
+      { exitCode: ExitCode.UsageError }
+    );
+  }
+  return parsed;
+}
+
+function parseCSV(value: string | undefined): readonly string[] | undefined {
+  if (value === undefined) return undefined;
+  return value
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean);
+}
 
 function ensureBuiltInPluginsRegistered(): void {
   registerBuiltInPlugins(getPluginManager());
@@ -246,10 +301,23 @@ program
     'Unsafe raw SVG policy: reject (default) or strip'
   )
   .option('--max-input-size <bytes>', 'Maximum raw SVG size in bytes')
+  .option('--format <type>', 'Report format: pretty, json, or ndjson')
+  .option('--recursive', 'Discover SVG files recursively')
+  .option('--include <globs>', 'Comma-separated include globs')
+  .option('--exclude <globs>', 'Comma-separated exclude globs')
+  .option('--hidden', 'Include hidden files and directories')
+  .option('--symlinks <policy>', 'Symlink policy: ignore, follow, or error')
+  .option('--max-file-count <count>', 'Maximum discovered SVG file count')
+  .option('--collision <policy>', 'Collision policy: error, first, or last')
+  .option('--concurrency <count>', 'Maximum concurrent build jobs')
+  .option('--batch-size <count>', 'Maximum scheduler batch size')
+  .option('--dry-run', 'Plan and generate without filesystem changes')
+  .option('--check', 'Fail when generated output is stale')
+  .option('--diff', 'Report output changes without writing')
   .action(async (args: string[], opts: CLIOptions) => {
+    const buildOptions = asCommandOptions<BuildCommandOptions>(opts);
+    const format = buildOptions.format ?? 'pretty';
     try {
-      const buildOptions = asCommandOptions<BuildCommandOptions>(opts);
-
       // Handle --list-plugins flag
       if (buildOptions.listPlugins) {
         listRegisteredPlugins();
@@ -266,51 +334,19 @@ program
 
       const [src, out] = args;
 
-      // Validate required arguments
-      if (!src || !out) {
-        logger.error('Error: Both <src> and <out> paths are required');
-        process.exit(1);
-      }
-
-      // Validate framework type if provided — O(1) Set.has() instead of O(n) Array.includes()
-      const validFrameworks = new Set<FrameworkType>([
-        'react',
-        'react-native',
-        'vue',
-        'svelte',
-        'angular',
-        'solid',
-        'preact',
-        'lit',
-        'vanilla',
-      ]);
-      if (
-        buildOptions.framework &&
-        !validFrameworks.has(buildOptions.framework)
-      ) {
-        logger.error(
-          `Error: Invalid framework "${buildOptions.framework}". Valid options: ${[...validFrameworks].join(', ')}`
-        );
-        process.exit(1);
-      }
-
-      // Validate optimization level if provided — O(1) Set.has()
-      const validOptLevels = new Set([
-        'none',
-        'basic',
-        'balanced',
-        'aggressive',
-        'maximum',
-      ]);
-      if (buildOptions.optimize && !validOptLevels.has(buildOptions.optimize)) {
-        logger.error(
-          `Error: Invalid optimization level "${buildOptions.optimize}". Valid options: ${[...validOptLevels].join(', ')}`
-        );
-        process.exit(1);
-      }
-
       // Build config from CLI options
-      const buildConfig: BuildRuntimeOptions = { src, out };
+      const buildConfig: BuildRuntimeOptions & {
+        mode?: BuildMode;
+        collision?: CollisionPolicy;
+        recursive?: boolean;
+        include?: readonly string[];
+        exclude?: readonly string[];
+        includeHidden?: boolean;
+        symlinks?: SymlinkPolicy;
+        maxFileCount?: number;
+        concurrency?: number;
+        batchSize?: number;
+      } = { src, out };
       applySafetyCommandOptions(buildOptions, buildConfig);
 
       if (buildOptions.framework) {
@@ -343,11 +379,52 @@ program
       if (Object.keys(frameworkOptions).length > 0) {
         buildConfig.frameworkOptions = frameworkOptions;
       }
+      buildConfig.recursive = buildOptions.recursive;
+      buildConfig.include = parseCSV(buildOptions.include);
+      buildConfig.exclude = parseCSV(buildOptions.exclude);
+      buildConfig.includeHidden = buildOptions.hidden;
+      buildConfig.symlinks = buildOptions.symlinks;
+      buildConfig.collision = buildOptions.collision;
+      buildConfig.maxFileCount = parsePositiveInteger(
+        buildOptions['max-file-count'],
+        '--max-file-count'
+      );
+      buildConfig.concurrency = parsePositiveInteger(
+        buildOptions.concurrency,
+        '--concurrency'
+      );
+      buildConfig.batchSize = parsePositiveInteger(
+        buildOptions['batch-size'],
+        '--batch-size'
+      );
+      const selectedModes = [
+        buildOptions['dry-run'] ? 'dry-run' : undefined,
+        buildOptions.check ? 'check' : undefined,
+        buildOptions.diff ? 'diff' : undefined,
+      ].filter((mode): mode is BuildMode => mode !== undefined);
+      if (selectedModes.length > 1) {
+        throw new DiagnosticError(
+          'E_CONFLICTING_BUILD_MODES',
+          '--dry-run, --check, and --diff are mutually exclusive.',
+          { exitCode: ExitCode.UsageError }
+        );
+      }
+      buildConfig.mode = selectedModes[0] ?? 'write';
 
-      await svgService.buildAll(buildConfig);
+      const command = new BuildCommand(await compilerPromise);
+      const report = await executeCommand(command, {
+        ...buildConfig,
+        format,
+      });
+      process.stdout.write(`${formatBuildReport(report, format)}\n`);
+      process.exitCode = report.exitCode;
     } catch (error) {
-      logger.error('Build failed:', error);
-      process.exit(1);
+      const report = createBuildReport({
+        exitCode: exitCodeFromUnknown(error),
+        diagnostics: [diagnosticFromUnknown(error)],
+      });
+      process.stdout.write(`${formatBuildReport(report, format)}\n`);
+      process.exitCode = report.exitCode;
     }
   });
 

@@ -165,6 +165,26 @@ export type {
 } from './contracts/reporting.js';
 export { executeCommand } from './application/command.js';
 export type { Command } from './application/command.js';
+export { BuildCommand } from './commands/build-command.js';
+export type { BuildCommandOptions } from './commands/build-command.js';
+export { SVGCompilerApplicationService } from './application/svg-compiler-application-service.js';
+export type {
+  ApplicationServiceContext,
+  BuildRequest,
+} from './application/svg-compiler-application-service.js';
+export {
+  commitOutputTransaction,
+  recoverOutputTransactions,
+} from './application/output-transaction.js';
+export type {
+  OutputContent,
+  RecoveryReport,
+} from './application/output-transaction.js';
+export { createSVGCompiler } from './compiler/create-svg-compiler.js';
+export type {
+  CreateSVGCompilerOptions,
+  SVGCompiler,
+} from './compiler/create-svg-compiler.js';
 export {
   resolveConfiguration,
   explainConfiguration,

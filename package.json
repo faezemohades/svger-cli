@@ -113,6 +113,8 @@
     "test:phase0": "npm run build && npm run test:characterization && npm run test:security && npm run test:safety-matrix",
     "test:phase1:contracts": "npm run build && node tests/phase1/report-contract.test.mjs",
     "test:phase1:planning": "npm run build && node tests/phase1/planning-contract.test.mjs",
+    "test:phase1:application": "npm run build && node tests/phase1/application-service.contract.test.mjs",
+    "test:phase1:entrypoints": "npm run build && node tests/phase1/unified-entrypoints.contract.test.mjs",
     "test:visual": "node tests/dev/test-visual-diff.js",
     "test:visual:integration": "node tests/dev/test-visual-integration.js",
     "test:visual:ci": "node tests/dev/test-visual-integration.js --strict",

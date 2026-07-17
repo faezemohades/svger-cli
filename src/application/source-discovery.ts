@@ -71,7 +71,11 @@ export async function discoverSVGInputs(
 ): Promise<readonly DiscoveredSource[]> {
   const sourceDir = path.resolve(options.sourceDir);
   const outputDir = path.resolve(options.outputDir);
-  const include = (options.include ?? ['**/*.svg', '*.svg']).map(globToRegExp);
+  const include = (
+    options.include && options.include.length > 0
+      ? options.include
+      : ['**/*.svg', '*.svg']
+  ).map(globToRegExp);
   const exclude = (options.exclude ?? []).map(globToRegExp);
   const maxFileCount = options.maxFileCount ?? 10_000;
   const symlinkPolicy = options.symlinks ?? 'ignore';

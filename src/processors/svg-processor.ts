@@ -46,7 +46,7 @@ export class SVGProcessor {
   private optimizer: OptimizerPipeline | null = null;
   private currentOptimizationLevel: OptLevel = OptLevel.BASIC;
 
-  private constructor() {
+  public constructor() {
     // Initialize optimizer pipeline with basic cleaning stage
     this.optimizer = new OptimizerPipeline({ level: OptLevel.BASIC });
     this.optimizer.registerStage('basic-cleaning', basicCleaningStage);
@@ -324,7 +324,11 @@ export class SVGProcessor {
     fileName: string,
     namingConvention?: 'kebab' | 'pascal' | 'camel'
   ): string {
-    const baseName = path.basename(fileName, '.svg');
+    const extension = path.extname(fileName);
+    const baseName = path.basename(
+      fileName,
+      extension.toLowerCase() === '.svg' ? extension : '.svg'
+    );
     const convention = namingConvention || 'pascal';
     return SVGProcessor.NAMING_HANDLERS[convention](baseName);
   }

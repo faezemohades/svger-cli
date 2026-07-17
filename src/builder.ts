@@ -6,6 +6,18 @@ import { configService } from './services/config.js';
 import { frameworkTemplateEngine } from './core/framework-templates.js';
 import { resolveOutputArtifactPath } from './security/input-safety.js';
 import type { BuildOptions, UnsafeInputPolicy } from './types/index.js';
+import { createSVGCompiler } from './compiler/create-svg-compiler.js';
+
+let facadeWarningEmitted = false;
+
+function emitFacadeDeprecationWarning(): void {
+  if (facadeWarningEmitted) return;
+  facadeWarningEmitted = true;
+  process.emitWarning(
+    'The legacy builder facade is deprecated and will be removed in v5.0. Use createSVGCompiler().build() instead.',
+    { type: 'DeprecationWarning', code: 'DEP_SVGER_BUILDER' }
+  );
+}
 
 /**
  * Converts all SVG files from a source directory into framework components
@@ -18,70 +30,9 @@ import type { BuildOptions, UnsafeInputPolicy } from './types/index.js';
  * @returns {Promise<void>} Resolves when all SVGs have been processed.
  */
 export async function buildAll(config: BuildOptions) {
-  const svgConfig = configService.readConfig();
-  const srcDir = path.resolve(config.src);
-  const outDir = path.resolve(config.out);
-
-  if (!(await FileSystem.exists(srcDir))) {
-    throw new Error(`Source folder not found: ${srcDir}`);
-  }
-
-  await FileSystem.ensureDir(outDir);
-  const files = (await FileSystem.readDir(srcDir)).filter((f: string) =>
-    f.endsWith('.svg')
-  );
-
-  if (!files.length) {
-    console.log('⚠️  No SVG files found in', srcDir);
-    return;
-  }
-
-  const framework = svgConfig.framework || 'react';
-  const typescript = svgConfig.typescript !== false;
-  const fileExtension = frameworkTemplateEngine.getFileExtension(
-    framework,
-    typescript
-  );
-
-  for (const file of files) {
-    const svgPath = path.join(srcDir, file);
-
-    if (isLocked(svgPath)) {
-      console.log(`⚠️ Skipped locked file: ${file}`);
-      continue;
-    }
-
-    const svgContent = await FileSystem.readFile(svgPath, 'utf-8');
-    const componentName = svgProcessor.generateComponentName(
-      file,
-      svgConfig.outputConfig?.naming || 'pascal'
-    );
-
-    const componentCode = await svgProcessor.generateComponent(
-      componentName,
-      svgContent,
-      {
-        framework,
-        typescript,
-        defaultWidth: svgConfig.defaultWidth,
-        defaultHeight: svgConfig.defaultHeight,
-        defaultFill: svgConfig.defaultFill,
-        styleRules: svgConfig.styleRules,
-        maxInputSizeBytes:
-          config.maxInputSizeBytes ?? svgConfig.maxInputSizeBytes,
-        unsafeInputPolicy: config.unsafeInputPolicy,
-      }
-    );
-
-    const outFile = resolveOutputArtifactPath(
-      outDir,
-      `${componentName}.${fileExtension}`
-    );
-    await FileSystem.writeFile(outFile, componentCode, 'utf-8');
-    console.log(`✅ Generated: ${componentName}.${fileExtension}`);
-  }
-
-  console.log('🎉 All SVGs have been converted successfully!');
+  emitFacadeDeprecationWarning();
+  const compiler = await createSVGCompiler();
+  return compiler.build(config);
 }
 
 /**
