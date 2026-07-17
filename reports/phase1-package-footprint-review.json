@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "validatedSourceCommit": "6b00b82d85854bd45baba6fe51c0b751946a2d30",
+  "status": "passed-locally-formal-review-pending",
+  "approvedBaseline": { "files": 757, "packedBytes": 616992 },
+  "initialPhase1": { "files": 793, "packedBytes": 645631 },
+  "approvedCeiling": { "files": 794, "packedBytes": 647841 },
+  "candidate": {
+    "files": 753,
+    "packedBytes": 613130,
+    "unpackedBytes": 1976384,
+    "sha256": "3e711216e3488cc9e370ca1dd00313952dd36322dad8ce6bdc098c891604727f",
+    "groups": {
+      "assets": 606,
+      "dist": 124,
+      "docs": 8,
+      "examples": 6,
+      "bin": 2,
+      "rootMetadataAndPolicies": 7
+    }
+  },
+  "headroom": {
+    "files": 41,
+    "filesPercent": 5.16,
+    "packedBytes": 34711,
+    "packedBytesPercent": 5.36
+  },
+  "compositionDecision": {
+    "intentionalAssetsPreserved": 606,
+    "publicBinariesPreserved": 2,
+    "unreachableInternalDeclarationsExcluded": 30,
+    "developmentAndGovernanceDocumentsExcluded": 10,
+    "runtimeJavaScriptExcluded": 0,
+    "publicDeclarationGraphCompile": "passed",
+    "compatibilityAliasesReusePhysicalFiles": "passed",
+    "forbiddenPackageContent": "absent"
+  }
+}
