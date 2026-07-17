@@ -676,6 +676,9 @@ program
       logger.success(
         `Optimization complete! ${optimized} optimized, ${failed} failed`
       );
+      if (failed > 0) {
+        process.exitCode = 1;
+      }
 
       if (optimizeOptions.validate) {
         logger.warn(
@@ -710,5 +713,5 @@ await program.parse();
 // Ensure the process exits after CLI execution completes
 // (imported singletons may keep the event loop alive)
 if (shouldExitAfterParse) {
-  process.exit(0);
+  process.exit(process.exitCode ?? 0);
 }
