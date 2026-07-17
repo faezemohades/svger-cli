@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, realpathSync } from 'fs';
 import { dirname, resolve } from 'path';
 
 interface PackageInfo {
@@ -7,21 +7,17 @@ interface PackageInfo {
 }
 
 const PACKAGE_NAME = 'svger-cli';
+const PACKAGE_VERSION = '4.0.9';
 
 let cachedPackageRoot: string | null = null;
 let cachedPackageInfo: PackageInfo | null = null;
 
 function findPackageRoot(startDir: string): string | null {
   let currentDir = startDir;
-  let fallbackRoot: string | null = null;
 
   while (currentDir !== dirname(currentDir)) {
     const packageJsonPath = resolve(currentDir, 'package.json');
     if (existsSync(packageJsonPath)) {
-      if (!fallbackRoot) {
-        fallbackRoot = currentDir;
-      }
-
       try {
         const packageJson = JSON.parse(
           readFileSync(packageJsonPath, 'utf-8')
@@ -37,7 +33,7 @@ function findPackageRoot(startDir: string): string | null {
     currentDir = dirname(currentDir);
   }
 
-  return fallbackRoot;
+  return null;
 }
 
 export function getPackageRoot(): string {
@@ -48,7 +44,10 @@ export function getPackageRoot(): string {
   const candidateDirs = new Set<string>();
 
   if (process.argv[1]) {
-    candidateDirs.add(dirname(resolve(process.argv[1])));
+    const entryPath = resolve(process.argv[1]);
+    candidateDirs.add(
+      dirname(existsSync(entryPath) ? realpathSync(entryPath) : entryPath)
+    );
   }
 
   if (typeof require !== 'undefined' && require.main?.filename) {
@@ -65,8 +64,7 @@ export function getPackageRoot(): string {
     }
   }
 
-  cachedPackageRoot = process.cwd();
-  return cachedPackageRoot;
+  return process.cwd();
 }
 
 export function getPackageInfo(): PackageInfo {
@@ -74,11 +72,17 @@ export function getPackageInfo(): PackageInfo {
     return cachedPackageInfo;
   }
 
-  const packageJsonPath = resolve(getPackageRoot(), 'package.json');
-  const packageJson = JSON.parse(
-    readFileSync(packageJsonPath, 'utf-8')
-  ) as PackageInfo;
+  const packageRoot = getPackageRoot();
+  const packageJsonPath = resolve(packageRoot, 'package.json');
+  const packageJson = existsSync(packageJsonPath)
+    ? (JSON.parse(
+        readFileSync(packageJsonPath, 'utf-8')
+      ) as Partial<PackageInfo>)
+    : {};
 
-  cachedPackageInfo = packageJson;
-  return packageJson;
+  cachedPackageInfo =
+    packageJson.name === PACKAGE_NAME && typeof packageJson.version === 'string'
+      ? (packageJson as PackageInfo)
+      : { name: PACKAGE_NAME, version: PACKAGE_VERSION };
+  return cachedPackageInfo;
 }

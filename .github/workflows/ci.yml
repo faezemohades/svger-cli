@@ -2,11 +2,11 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   release:
-    types: [ published ]
+    types: [published]
 
 jobs:
   test:
@@ -17,34 +17,41 @@ jobs:
         node-version: [18.x, 20.x, 22.x]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run linting
-      run: npm run lint
+      - name: Enforce immutable baseline policy
+        run: npm run baseline:policy
+        env:
+          BASELINE_UPDATE_APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'baseline-update-approved') }}
 
-    - name: Run type checking
-      run: npm run typecheck
+      - name: Enforce lint warning budget
+        run: npm run lint:budget
 
-    - name: Run tests
-      run: npm run test:coverage
+      - name: Run type checking
+        run: npm run typecheck
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      if: matrix.node-version == '18.x'
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        directory: ./coverage/
-        fail_ci_if_error: false
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: matrix.node-version == '18.x'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/
+          fail_ci_if_error: false
 
   build:
     name: Build Package
@@ -52,29 +59,29 @@ jobs:
     needs: test
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18.x
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Build package
-      run: npm run build
+      - name: Build package
+        run: npm run build
 
-    - name: Generate documentation
-      run: npm run docs:generate
+      - name: Generate documentation
+        run: npm run docs:generate
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: dist-files
-        path: dist/
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-files
+          path: dist/
 
   integration-test:
     name: Integration Tests
@@ -82,60 +89,60 @@ jobs:
     needs: build
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18.x
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Download build artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: dist-files
-        path: dist/
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
+          path: dist/
 
-    - name: Run integration tests
-      run: npm run test:integration
+      - name: Run integration tests
+        run: npm run test:integration
 
-    - name: Test CLI installation
-      run: |
-        npm pack
-        npm install -g svger-cli-*.tgz
-        svger-cli --version
-        svger-cli --help
+      - name: Test CLI installation
+        run: |
+          npm pack
+          npm install -g svger-cli-*.tgz
+          svger-cli --version
+          svger-cli --help
 
   security:
     name: Security Audit
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18.x
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run security audit
-      run: npm audit --audit-level high
+      - name: Run security audit
+        run: npm audit --audit-level high
 
-    - name: Run Snyk security scan
-      uses: snyk/actions/node@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --severity-threshold=high
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
 
   publish:
     name: Publish to NPM
@@ -144,23 +151,23 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18.x
-        registry-url: 'https://registry.npmjs.org'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Build package
-      run: npm run build
+      - name: Build package
+        run: npm run build
 
-    - name: Publish to NPM
-      run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
