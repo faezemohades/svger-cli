@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "candidate": "svger-cli@4.0.9",
+  "candidateSourceCommit": "3fbf14b12763c3bd6849877c9d5609477b1c7a37",
+  "evidenceDate": "2026-07-17",
+  "scope": "The candidate source commit contains all publishable source, runtime, package metadata, and release documentation. This evidence-only record is intentionally excluded from the npm package.",
+  "tarball": {
+    "filename": "svger-cli-4.0.9.tgz",
+    "entryCount": 757,
+    "packedBytes": 616991,
+    "unpackedBytes": 1971238,
+    "sha256": "c124a2e72446d071d30ff25b58bcd2486760d3b724da91372b938496bc3178ef",
+    "npmShasum": "f832914ce51d35754ce7075f7bcdfc3d6b7fdb76",
+    "npmIntegrity": "sha512-qnZ7Q6b9nzXyq6OvpS57GKac8fkcTZ5Pj69qn8brnpVmpw1NdvSm8km93YM/Hlad3GZ3Luy0IPaGsuiNU5zL3A=="
+  },
+  "evidenceSha256": {
+    "baselines/v4.0.x/baseline.lock.json": "4671b05099779bbafb42b9b91d1ea6332f4033d89d28744960e62a37a9252cc4",
+    "reports/package-conformance-v4.0.9.json": "612b2ef1ec4978a82852a037c2e240c88a1caace87e10a718a8b53b70c881b5d",
+    "reports/package-conformance-v4.0.9.md": "5a644130c25e5c7471404adfa7af9cacfe220246791fabd42e6343c5afd958b6",
+    "reports/phase0-entrypoint-safety-matrix.json": "4acc3bef6a4b6e8a4b82cc6754ab953b1e4d46ef824fbb1807b842afab7e3eca",
+    "reports/phase0-entrypoint-safety-matrix.md": "db4d46cd588c791bfc8d2c57d17aa309bb39f1a78d409b82dbea55424f9e2982",
+    "compatibility-ledger-v4.1.md": "7c437e05b9acb3ca168c901bf675df58e76bc4d3a050fc737fa932a707d22eeb",
+    "docs/phase0-release-gate.md": "d6da3de19834745824c20dd5fe86dfee1207bfac41d004afab64435ffecdd4ba",
+    "reports/phase-0-report.md": "d698135a25c23bb1849bf5dbbccc7b8bf07af27ec7499f20f0f93ddb6f08bb25"
+  },
+  "approvals": {
+    "engineering": "approved by user; recorded in conversation",
+    "baseline": "pending formal approval",
+    "securityContainment": "pending formal approval",
+    "compatibilityLedger": "pending formal approval",
+    "release": "pending formal approval"
+  },
+  "releaseActions": {
+    "tagCreated": false,
+    "pushed": false,
+    "npmPublished": false,
+    "registryVerified": false,
+    "githubReleaseCreated": false,
+    "postPublicationSmokePassed": false
+  }
+}

@@ -4,6 +4,8 @@ Directive: SVGER-REF-2026-07-17-FINAL
 
 Candidate: v4.0.9
 
+Candidate source commit: `3fbf14b12763c3bd6849877c9d5609477b1c7a37`
+
 Date: 2026-07-17
 
 Implementation status: **complete**

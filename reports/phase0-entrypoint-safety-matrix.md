@@ -1,5 +1,7 @@
 # Phase 0 entry-point safety matrix
 
+Candidate source commit: `3fbf14b12763c3bd6849877c9d5609477b1c7a37`
+
 The executable matrix is `tests/phase0/entrypoint-safety-matrix.test.mjs`; its machine-readable
 result is `reports/phase0-entrypoint-safety-matrix.json`. “Sandbox” means that an existing symlink
 artifact cannot redirect a write outside its declared output root and the external target remains

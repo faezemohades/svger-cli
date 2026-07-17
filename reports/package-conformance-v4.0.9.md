@@ -1,5 +1,7 @@
 # v4.0.9 package conformance
 
+Candidate source commit: `3fbf14b12763c3bd6849877c9d5609477b1c7a37`
+
 The complete `npm pack --dry-run` result and `tar -tf` entry list are archived in
 `reports/package-conformance-v4.0.9.json`.
 
