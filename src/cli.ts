@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { CLI, FileSystem, type CLIOptions } from './utils/native.js';
+import { CLI, type CLIOptions } from './utils/native.js';
 import { svgService } from './services/svg-service.js';
 import { configService } from './services/config.js';
 import { logger } from './core/logger.js';
@@ -15,9 +15,7 @@ import type {
 } from './types/index.js';
 import { resolve } from 'path';
 import { pathToFileURL } from 'url';
-import path from 'path';
 import { getPackageInfo } from './utils/package-info.js';
-import { resolveOutputArtifactPath } from './security/input-safety.js';
 import { createSVGCompiler } from './compiler/create-svg-compiler.js';
 import { BuildCommand } from './commands/build-command.js';
 import { executeCommand } from './application/command.js';
@@ -36,6 +34,19 @@ import {
 import type { CollisionPolicy } from './application/build-plan.js';
 import type { SymlinkPolicy } from './application/source-discovery.js';
 import { RecoverCommand } from './commands/recover-command.js';
+import { MigrateCommand } from './commands/migrate-command.js';
+import type { MigrationTarget } from './migration/migration-toolkit.js';
+import {
+  CleanCommand,
+  ConfigCommand,
+  ConfigExplainCommand,
+  GenerateCommand,
+  LockCommand,
+  OptimizeCommand,
+  PluginsCommand,
+  UnlockCommand,
+  WatchCommand,
+} from './commands/operational-commands.js';
 
 type BuildRuntimeOptions = BuildOptions & {
   framework?: FrameworkType;
@@ -69,6 +80,7 @@ interface BuildCommandOptions extends SafetyCommandOptions {
   framework?: FrameworkType;
   hidden?: boolean;
   include?: string;
+  'list-plugins'?: boolean;
   listPlugins?: boolean;
   'max-file-count'?: string;
   optimize?: string;
@@ -77,6 +89,7 @@ interface BuildCommandOptions extends SafetyCommandOptions {
   signals?: boolean;
   standalone?: boolean;
   symlinks?: SymlinkPolicy;
+  'no-typescript'?: boolean;
   typescript?: boolean;
 }
 
@@ -85,10 +98,13 @@ interface GenerateCommandOptions extends SafetyCommandOptions {
   framework?: FrameworkType;
   optimize?: string;
   standalone?: boolean;
+  'no-typescript'?: boolean;
   typescript?: boolean;
 }
 
 interface ConfigCommandOptions {
+  explain?: boolean;
+  format?: string;
   init?: boolean;
   set?: string;
   show?: boolean;
@@ -99,6 +115,7 @@ interface PluginsCommandOptions {
 }
 
 interface OptimizeCommandOptions extends SafetyCommandOptions {
+  'in-place'?: boolean;
   inPlace?: boolean;
   level?: string;
   validate?: boolean;
@@ -114,8 +131,10 @@ function applySafetyCommandOptions(
   if (source['unsafe-input-policy']) {
     const policy = source['unsafe-input-policy'];
     if (policy !== 'reject' && policy !== 'strip') {
-      throw new Error(
-        `E_INVALID_UNSAFE_INPUT_POLICY: Expected "reject" or "strip", received "${policy}".`
+      throw new DiagnosticError(
+        'E_INVALID_UNSAFE_INPUT_POLICY',
+        `E_INVALID_UNSAFE_INPUT_POLICY: Expected "reject" or "strip", received "${policy}".`,
+        { exitCode: ExitCode.UsageError }
       );
     }
     target.unsafeInputPolicy = policy;
@@ -124,8 +143,10 @@ function applySafetyCommandOptions(
   if (source['max-input-size']) {
     const size = Number(source['max-input-size']);
     if (!Number.isSafeInteger(size) || size <= 0) {
-      throw new Error(
-        'E_INVALID_INPUT_SIZE_LIMIT: --max-input-size must be a positive integer.'
+      throw new DiagnosticError(
+        'E_INVALID_INPUT_SIZE_LIMIT',
+        '--max-input-size must be a positive integer.',
+        { exitCode: ExitCode.UsageError }
       );
     }
     target.maxInputSizeBytes = size;
@@ -165,6 +186,12 @@ function parseCSV(value: string | undefined): readonly string[] | undefined {
     .split(',')
     .map(item => item.trim())
     .filter(Boolean);
+}
+
+function reportOperationalError(label: string, error: unknown): void {
+  const diagnostic = diagnosticFromUnknown(error);
+  logger.error(`${label}: ${diagnostic.code}: ${diagnostic.message}`);
+  process.exitCode = exitCodeFromUnknown(error);
 }
 
 function ensureBuiltInPluginsRegistered(): void {
@@ -320,7 +347,7 @@ program
     const format = buildOptions.format ?? 'pretty';
     try {
       // Handle --list-plugins flag
-      if (buildOptions.listPlugins) {
+      if (buildOptions.listPlugins || buildOptions['list-plugins']) {
         listRegisteredPlugins();
         return;
       }
@@ -354,7 +381,9 @@ program
         buildConfig.framework = buildOptions.framework;
       }
 
-      if (buildOptions.typescript !== undefined) {
+      if (buildOptions['no-typescript']) {
+        buildConfig.typescript = false;
+      } else if (buildOptions.typescript !== undefined) {
         buildConfig.typescript = buildOptions.typescript;
       }
 
@@ -445,18 +474,12 @@ program
     try {
       shouldExitAfterParse = false;
       const [src, out] = args;
-
-      // Validate required arguments
-      if (!src || !out) {
-        logger.error('Error: Both <src> and <out> paths are required');
-        process.exit(1);
-      }
       const watchOptions: BuildRuntimeOptions = { src, out };
       applySafetyCommandOptions(
         asCommandOptions<SafetyCommandOptions>(opts),
         watchOptions
       );
-      await svgService.startWatching(watchOptions);
+      await executeCommand(new WatchCommand(svgService), watchOptions);
 
       // Keep the process running
       process.on('SIGINT', () => {
@@ -465,8 +488,8 @@ program
         process.exit(0);
       });
     } catch (error) {
-      logger.error('Watch mode failed:', error);
-      process.exit(1);
+      shouldExitAfterParse = true;
+      reportOperationalError('Watch mode failed', error);
     }
   });
 
@@ -506,7 +529,9 @@ program
         generateConfig.framework = generateOptions.framework;
       }
 
-      if (generateOptions.typescript !== undefined) {
+      if (generateOptions['no-typescript']) {
+        generateConfig.typescript = false;
+      } else if (generateOptions.typescript !== undefined) {
         generateConfig.typescript = generateOptions.typescript;
       }
 
@@ -528,10 +553,9 @@ program
         generateConfig.frameworkOptions = frameworkOptions;
       }
 
-      await svgService.generateSingle(generateConfig);
+      await executeCommand(new GenerateCommand(svgService), generateConfig);
     } catch (error) {
-      logger.error('Generation failed:', error);
-      process.exit(1);
+      reportOperationalError('Generation failed', error);
     }
   });
 
@@ -542,12 +566,11 @@ program
 program
   .command('lock <files...>')
   .description('Lock one or more SVG files')
-  .action((args: string[]) => {
+  .action(async (args: string[]) => {
     try {
-      svgService.lockService.lockFiles(args);
+      await executeCommand(new LockCommand(svgService), { files: args });
     } catch (error) {
-      logger.error('Lock operation failed:', error);
-      process.exit(1);
+      reportOperationalError('Lock operation failed', error);
     }
   });
 
@@ -557,12 +580,11 @@ program
 program
   .command('unlock <files...>')
   .description('Unlock one or more SVG files')
-  .action((args: string[]) => {
+  .action(async (args: string[]) => {
     try {
-      svgService.lockService.unlockFiles(args);
+      await executeCommand(new UnlockCommand(svgService), { files: args });
     } catch (error) {
-      logger.error('Unlock operation failed:', error);
-      process.exit(1);
+      reportOperationalError('Unlock operation failed', error);
     }
   });
 
@@ -571,46 +593,56 @@ program
  * Manage svger-cli configuration.
  */
 program
-  .command('config')
+  .command('config [action] [path]')
   .description('Manage svger-cli configuration')
   .option('--init', 'Create default .svgconfig.json')
   .option('--set <keyValue>', 'Set config key=value')
   .option('--show', 'Show current config')
-  .action(async (_args: string[], opts: CLIOptions) => {
+  .option('--explain', 'Explain resolved configuration value origins')
+  .option('--format <type>', 'Explain report format: pretty or json')
+  .action(async (args: string[], opts: CLIOptions) => {
     try {
       const configOptions = asCommandOptions<ConfigCommandOptions>(opts);
-
-      if (configOptions.init) return await configService.initConfig();
-      if (configOptions.set) {
-        const [key, value] = configOptions.set.split('=');
-        if (!key || value === undefined) {
-          logger.error('Invalid format. Use key=value');
-          process.exit(1);
-        }
-
-        // Parse value with O(1) lookup for known literals, then type detection
-        const literalValues: Record<string, boolean> = {
-          true: true,
-          false: false,
-        };
-        let parsedValue: string | number | boolean;
-
-        if (value in literalValues) {
-          parsedValue = literalValues[value];
-        } else if (!isNaN(Number(value)) && value.trim() !== '') {
-          parsedValue = Number(value);
+      if (configOptions.explain || args[0] === 'explain') {
+        const entries = await executeCommand(
+          new ConfigExplainCommand(await compilerPromise),
+          { path: args[1] }
+        );
+        if (configOptions.format === 'json') {
+          process.stdout.write(`${JSON.stringify(entries, null, 2)}\n`);
         } else {
-          parsedValue = value;
+          entries.forEach(entry =>
+            process.stdout.write(
+              `${entry.path} = ${JSON.stringify(entry.value)} (${entry.origin})\n`
+            )
+          );
         }
-
-        return configService.setConfig(key, parsedValue);
+        return;
       }
-      if (configOptions.show) return configService.showConfig();
-      logger.error('No option provided. Use --init, --set, or --show');
-      process.exit(1);
+      const command = new ConfigCommand(configService);
+      if (configOptions.init) {
+        await executeCommand(command, { action: 'init' });
+        return;
+      }
+      if (configOptions.set) {
+        await executeCommand(command, {
+          action: 'set',
+          keyValue: configOptions.set,
+        });
+        return;
+      }
+      if (configOptions.show) {
+        const value = await executeCommand(command, { action: 'show' });
+        process.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
+        return;
+      }
+      throw new DiagnosticError(
+        'E_CONFIG_ACTION',
+        'Use --init, --set, or --show.',
+        { exitCode: ExitCode.UsageError }
+      );
     } catch (error) {
-      logger.error('Config operation failed:', error);
-      process.exit(1);
+      reportOperationalError('Config operation failed', error);
     }
   });
 
@@ -626,19 +658,15 @@ program
     try {
       const pluginOptions = asCommandOptions<PluginsCommandOptions>(opts);
 
-      // Load plugins if specified
-      if (pluginOptions.load) {
-        const plugins = pluginOptions.load.split(',').map(p => p.trim());
-        for (const pluginNameOrPath of plugins) {
-          await loadPlugin(pluginNameOrPath);
-        }
-      }
-
-      // List all registered plugins
-      listRegisteredPlugins();
+      await executeCommand(
+        new PluginsCommand({
+          load: loadPlugin,
+          list: listRegisteredPlugins,
+        }),
+        { load: parseCSV(pluginOptions.load) }
+      );
     } catch (error) {
-      logger.error('Plugin operation failed:', error);
-      process.exit(1);
+      reportOperationalError('Plugin operation failed', error);
     }
   });
 
@@ -668,104 +696,27 @@ program
         unsafeInputPolicy?: UnsafeInputPolicy;
       } = {};
       applySafetyCommandOptions(optimizeOptions, safetyOptions);
-      const [
-        input,
-        output = optimizeOptions.inPlace ? input : args[1] || input,
-      ] = args;
-
-      if (!input) {
-        logger.error('Error: Input path is required');
-        process.exit(1);
-      }
-
-      // Validate optimization level if provided — O(1) Set.has()
-      const validOptLevels = new Set([
-        'basic',
-        'balanced',
-        'aggressive',
-        'maximum',
-      ]);
+      const input = args[0];
+      const inPlace = optimizeOptions.inPlace || optimizeOptions['in-place'];
+      const output = inPlace ? input : args[1] || input;
       const level = optimizeOptions.level || 'balanced';
-
-      if (!validOptLevels.has(level)) {
-        logger.error(
-          `Error: Invalid optimization level "${level}". Valid options: ${[...validOptLevels].join(', ')}`
-        );
-        process.exit(1);
-      }
-
-      const inputDir = path.resolve(input);
-      const outputDir = optimizeOptions.inPlace
-        ? inputDir
-        : path.resolve(output);
-
-      // Validate input directory
-      if (!(await FileSystem.exists(inputDir))) {
-        logger.error(`Error: Input directory not found: ${inputDir}`);
-        process.exit(1);
-      }
-
-      // Set optimization level
-      svgService.setOptimizerLevel(level);
-
-      logger.info(`Optimizing SVG files at ${level.toUpperCase()} level...`);
-      logger.info(`Input: ${inputDir}`);
-      logger.info(`Output: ${outputDir}`);
-
-      // Ensure output directory exists
-      await FileSystem.ensureDir(outputDir);
-
-      // Read all SVG files
-      const files = await FileSystem.readDir(inputDir);
-      const svgFiles = files.filter((file: string) => file.endsWith('.svg'));
-
-      if (svgFiles.length === 0) {
-        logger.warn('No SVG files found in input directory');
-        return;
-      }
-
-      let optimized = 0;
-      let failed = 0;
-
-      // Process each SVG file
-      for (const file of svgFiles) {
-        try {
-          const inputPath = path.join(inputDir, file);
-          const outputPath = resolveOutputArtifactPath(outputDir, file);
-
-          const content = await FileSystem.readFile(inputPath, 'utf-8');
-          const optimizedContent = await svgProcessor.cleanSVGContent(content, {
-            ...safetyOptions,
-            source: inputPath,
-          });
-
-          await FileSystem.writeFile(outputPath, optimizedContent, 'utf-8');
-          optimized++;
-
-          logger.info(`✓ Optimized: ${file}`);
-        } catch (error) {
-          failed++;
-          logger.error(
-            `✗ Failed: ${file} - ${error instanceof Error ? error.message : String(error)}`
-          );
+      const result = await executeCommand(
+        new OptimizeCommand(svgService, svgProcessor, logger),
+        {
+          input,
+          output,
+          level,
+          inPlace,
+          validate: optimizeOptions.validate,
+          ...safetyOptions,
         }
-      }
-
-      logger.success(
-        `Optimization complete! ${optimized} optimized, ${failed} failed`
       );
-      if (failed > 0) {
-        process.exitCode = 1;
-      }
-
-      if (optimizeOptions.validate) {
-        logger.warn(
-          'Visual validation not yet implemented for optimize command'
-        );
-      }
+      logger.success(
+        `Optimization complete! ${result.optimized} optimized, ${result.failed} failed`
+      );
+      process.exitCode = result.exitCode;
     } catch (error) {
-      logger.error('Optimization failed:', error);
-      process.exit(1);
+      reportOperationalError('Optimization failed', error);
     }
   });
 
@@ -779,10 +730,9 @@ program
   .action(async (args: string[]) => {
     try {
       const [out] = args;
-      await svgService.clean(out);
+      await executeCommand(new CleanCommand(svgService), { output: out });
     } catch (error) {
-      logger.error('Clean operation failed:', error);
-      process.exit(1);
+      reportOperationalError('Clean operation failed', error);
     }
   });
 
@@ -809,6 +759,48 @@ program
       process.exitCode = report.diagnostics.length
         ? ExitCode.FilesystemFailure
         : ExitCode.Success;
+    } catch (error) {
+      const report = createBuildReport({
+        exitCode: exitCodeFromUnknown(error),
+        diagnostics: [diagnosticFromUnknown(error)],
+      });
+      process.stdout.write(`${formatBuildReport(report, format)}\n`);
+      process.exitCode = report.exitCode;
+    }
+  });
+
+// -------- Migration Command --------
+program
+  .command('migrate <target> [path]')
+  .description('Migrate v4 config, imports, or plugin declarations')
+  .option('--dry-run', 'Preview the migration without writing')
+  .option('--no-backup', 'Do not create a backup before writing')
+  .option('--format <type>', 'Report format: pretty or json')
+  .action(async (args: string[], opts: CLIOptions) => {
+    const format = opts.format === 'json' ? 'json' : 'pretty';
+    try {
+      const target = args[0] as MigrationTarget;
+      const inputPath =
+        args[1] ?? (target === 'imports' ? process.cwd() : '.svgconfig.json');
+      const command = new MigrateCommand();
+      const report = await executeCommand(command, {
+        target,
+        inputPath,
+        dryRun: opts['dry-run'] === true,
+        backup: opts['no-backup'] !== true,
+      });
+      if (format === 'json') {
+        process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+      } else if (report.changes.length === 0) {
+        process.stdout.write('No migration changes are required.\n');
+      } else {
+        report.changes.forEach(change =>
+          process.stdout.write(
+            `${report.mode === 'dry-run' ? 'Would migrate' : 'Migrated'} ${change.file}\n`
+          )
+        );
+      }
+      process.exitCode = ExitCode.Success;
     } catch (error) {
       const report = createBuildReport({
         exitCode: exitCodeFromUnknown(error),

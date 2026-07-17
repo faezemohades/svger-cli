@@ -21,6 +21,10 @@ type CLIAction = (args: string[], options: CLIOptions) => void | Promise<void>;
 type CommandOptionConfig = { description: string; hasValue: boolean };
 type WatcherCallback = (...args: unknown[]) => void;
 
+class CLIUsageError extends Error {
+  public readonly exitCode = 2;
+}
+
 function hasErrorCode(error: unknown, code: string): boolean {
   return (
     typeof error === 'object' &&
@@ -293,7 +297,7 @@ export class CLI {
     if (!command) {
       writeStderr(`Unknown command: ${commandName}`);
       this.showHelp();
-      process.exit(1);
+      process.exit(2);
     }
 
     // Check for subcommand help before parsing args
@@ -302,16 +306,22 @@ export class CLI {
       return;
     }
 
-    const { parsedArgs, options } = this.parseArgs(
-      remainingArgs,
-      command.options
-    );
-
     try {
+      const { parsedArgs, options } = this.parseArgs(
+        remainingArgs,
+        command.options
+      );
       await command.action(parsedArgs, options);
     } catch (error) {
       writeStderr(`Command failed: ${formatUnknownError(error)}`);
-      process.exit(1);
+      const exitCode =
+        typeof error === 'object' &&
+        error !== null &&
+        'exitCode' in error &&
+        typeof (error as { exitCode?: unknown }).exitCode === 'number'
+          ? (error as { exitCode: number }).exitCode
+          : 1;
+      process.exit(exitCode);
     }
   }
 
@@ -335,6 +345,11 @@ export class CLI {
 
         if (optionConfig) {
           if (optionConfig.hasValue) {
+            if (args[i + 1] === undefined || args[i + 1].startsWith('--')) {
+              throw new CLIUsageError(
+                `Option --${optionName} requires a value.`
+              );
+            }
             options[optionName] = args[i + 1];
             i += 2;
           } else {
@@ -348,7 +363,7 @@ export class CLI {
             options[key] = value;
             i++;
           } else {
-            i++;
+            throw new CLIUsageError(`Unknown option: ${arg}`);
           }
         }
       } else {

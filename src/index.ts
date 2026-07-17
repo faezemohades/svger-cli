@@ -169,6 +169,25 @@ export { BuildCommand } from './commands/build-command.js';
 export type { BuildCommandOptions } from './commands/build-command.js';
 export { RecoverCommand } from './commands/recover-command.js';
 export type { RecoverCommandOptions } from './commands/recover-command.js';
+export { MigrateCommand } from './commands/migrate-command.js';
+export { runMigration } from './migration/migration-toolkit.js';
+export type {
+  MigrationChange,
+  MigrationOptions,
+  MigrationReport,
+  MigrationTarget,
+} from './migration/migration-toolkit.js';
+export {
+  CleanCommand,
+  ConfigCommand,
+  ConfigExplainCommand,
+  GenerateCommand,
+  LockCommand,
+  OptimizeCommand,
+  PluginsCommand,
+  UnlockCommand,
+  WatchCommand,
+} from './commands/operational-commands.js';
 export { SVGCompilerApplicationService } from './application/svg-compiler-application-service.js';
 export type {
   ApplicationServiceContext,

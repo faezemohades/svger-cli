@@ -117,6 +117,8 @@
     "test:phase1:entrypoints": "npm run build && node tests/phase1/unified-entrypoints.contract.test.mjs",
     "test:phase1:cache": "npm run build && node tests/phase1/cache.contract.test.mjs",
     "test:phase1:recovery": "npm run build && node tests/phase1/recovery.contract.test.mjs",
+    "test:phase1:migration": "npm run build && node tests/phase1/migration.contract.test.mjs",
+    "test:phase1:commands": "npm run build && node tests/phase1/command-hierarchy.contract.test.mjs",
     "test:visual": "node tests/dev/test-visual-diff.js",
     "test:visual:integration": "node tests/dev/test-visual-integration.js",
     "test:visual:ci": "node tests/dev/test-visual-integration.js --strict",

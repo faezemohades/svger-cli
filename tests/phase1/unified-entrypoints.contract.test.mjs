@@ -56,7 +56,7 @@ assert.deepEqual(
     .trim()
     .split('\n')
     .map(line => JSON.parse(line).type),
-  ['report', 'artifact', 'artifact', 'summary']
+  ['report', 'artifact', 'artifact', 'diagnostic', 'summary']
 );
 
 const invalidFormat = spawnSync(

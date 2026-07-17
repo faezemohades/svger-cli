@@ -79,15 +79,32 @@ export function diagnosticFromUnknown(error: unknown): Diagnostic {
     return error.toDiagnostic();
   }
 
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code?: unknown }).code)
+      : 'E_INTERNAL';
   return {
-    code: 'E_INTERNAL',
+    code,
     severity: 'error',
     message: error instanceof Error ? error.message : String(error),
   };
 }
 
 export function exitCodeFromUnknown(error: unknown): ExitCode {
-  return error instanceof DiagnosticError
-    ? error.exitCode
-    : ExitCode.InternalError;
+  if (error instanceof DiagnosticError) return error.exitCode;
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code?: unknown }).code)
+      : '';
+  if (code === 'E_NAME_COLLISION') return ExitCode.NameCollision;
+  if (code === 'E_SVG_INPUT_TOO_LARGE') return ExitCode.InvalidSVGInput;
+  if (code.startsWith('E_UNSAFE_')) return ExitCode.SecurityViolation;
+  if (code.startsWith('E_PLUGIN_')) return ExitCode.PluginFailure;
+  if (code.startsWith('E_OUTPUT_') || code.startsWith('E_FS_')) {
+    return ExitCode.FilesystemFailure;
+  }
+  if (code === 'ABORT_ERR' || code === 'E_BUILD_CANCELLED') {
+    return ExitCode.BuildCancelled;
+  }
+  return ExitCode.InternalError;
 }
