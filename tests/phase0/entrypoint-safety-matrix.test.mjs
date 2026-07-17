@@ -113,7 +113,7 @@ const cliBuildReject = runCLI([
   cliBuildSource.directory,
   path.join(workRoot, 'cli-build-reject'),
 ]);
-assert.equal(cliBuildReject.status, 1);
+assert.equal(cliBuildReject.status, 5);
 assert.match(
   `${cliBuildReject.stdout}${cliBuildReject.stderr}`,
   /E_UNSAFE_SVG_CONTENT/
@@ -143,7 +143,7 @@ const cliBuildSandboxResult = runCLI([
   cliBuildSafeSource.directory,
   cliBuildSandbox.output,
 ]);
-assert.equal(cliBuildSandboxResult.status, 1);
+assert.equal(cliBuildSandboxResult.status, 8);
 await assertSandboxUnchanged(cliBuildSandbox.outside);
 record('CLI build', 'sandbox');
 
@@ -153,7 +153,7 @@ const cliGenerateReject = runCLI([
   cliBuildSource.filePath,
   path.join(workRoot, 'cli-generate-reject'),
 ]);
-assert.equal(cliGenerateReject.status, 1);
+assert.equal(cliGenerateReject.status, 5);
 record('CLI generate', 'reject');
 const cliGenerateStripOutput = path.join(workRoot, 'cli-generate-strip');
 const cliGenerateStrip = runCLI([
@@ -182,7 +182,7 @@ const cliGenerateSandboxResult = runCLI([
   cliGenerateSafe.filePath,
   cliGenerateSandbox.output,
 ]);
-assert.equal(cliGenerateSandboxResult.status, 1);
+assert.equal(cliGenerateSandboxResult.status, 8);
 await assertSandboxUnchanged(cliGenerateSandbox.outside);
 record('CLI generate', 'sandbox');
 
@@ -193,7 +193,7 @@ const cliOptimizeReject = runCLI([
   cliBuildSource.directory,
   cliOptimizeRejectOutput,
 ]);
-assert.equal(cliOptimizeReject.status, 1);
+assert.equal(cliOptimizeReject.status, 5);
 assert.match(
   `${cliOptimizeReject.stdout}${cliOptimizeReject.stderr}`,
   /E_UNSAFE_SVG_CONTENT/
@@ -221,7 +221,7 @@ const cliOptimizeSandboxResult = runCLI([
   cliBuildSafeSource.directory,
   cliOptimizeSandbox.output,
 ]);
-assert.equal(cliOptimizeSandboxResult.status, 1);
+assert.equal(cliOptimizeSandboxResult.status, 8);
 await assertSandboxUnchanged(cliOptimizeSandbox.outside);
 record('CLI optimize', 'sandbox');
 
@@ -255,14 +255,12 @@ await assertSandboxUnchanged(processorSandbox.outside);
 record('SVGProcessor', 'sandbox');
 
 // Legacy builder API
-await expectCode(
-  () =>
-    buildAll({
-      src: cliBuildSource.directory,
-      out: path.join(workRoot, 'legacy-reject'),
-    }),
-  'E_UNSAFE_SVG_CONTENT'
-);
+const legacyReject = await buildAll({
+  src: cliBuildSource.directory,
+  out: path.join(workRoot, 'legacy-reject'),
+});
+assert.equal(legacyReject.exitCode, 5);
+assert.equal(legacyReject.diagnostics[0].code, 'E_UNSAFE_SVG_CONTENT');
 record('Legacy builder API', 'reject');
 const legacyStripOutput = path.join(workRoot, 'legacy-strip');
 await buildAll({
@@ -276,10 +274,12 @@ assertSanitized(
 record('Legacy builder API', 'strip');
 const legacySafe = await createSource('legacy-safe', 'legacy.svg', safeSVG);
 const legacySandbox = await createSandbox('legacy-sandbox', 'Legacy.tsx');
-await expectCode(
-  () => buildAll({ src: legacySafe.directory, out: legacySandbox.output }),
-  'E_OUTPUT_PATH_ESCAPE'
-);
+const legacySandboxReport = await buildAll({
+  src: legacySafe.directory,
+  out: legacySandbox.output,
+});
+assert.equal(legacySandboxReport.exitCode, 8);
+assert.equal(legacySandboxReport.diagnostics[0].code, 'E_OUTPUT_PATH_ESCAPE');
 await assertSandboxUnchanged(legacySandbox.outside);
 record('Legacy builder API', 'sandbox');
 

@@ -593,17 +593,6 @@ export class SVGCompilerApplicationService {
 
   private exitCodeForDiagnostic(diagnostic?: Diagnostic): ExitCode {
     if (!diagnostic) return ExitCode.InternalError;
-    return exitCodeFromUnknown(
-      new DiagnosticError(diagnostic.code, diagnostic.message, {
-        exitCode:
-          diagnostic.code === 'E_BUILD_CANCELLED'
-            ? ExitCode.BuildCancelled
-            : diagnostic.code === 'E_SVG_INPUT_TOO_LARGE'
-              ? ExitCode.InvalidSVGInput
-              : diagnostic.code.startsWith('E_UNSAFE_')
-                ? ExitCode.SecurityViolation
-                : ExitCode.InternalError,
-      })
-    );
+    return exitCodeFromUnknown({ code: diagnostic.code });
   }
 }
