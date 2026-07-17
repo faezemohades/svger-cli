@@ -27,7 +27,7 @@ const __packageJson = JSON.parse(
  * Logger Service - Professional logging with configurable levels and color formatting
  * Provides: debug, info, warn, error, success methods with timestamp and context
  */
-export { LoggerService, logger } from './core/logger.js';
+export { LoggerService, NullLogger, logger } from './core/logger.js';
 
 /**
  * Configuration Management Service - Centralized configuration with validation and caching
@@ -167,6 +167,8 @@ export { executeCommand } from './application/command.js';
 export type { Command } from './application/command.js';
 export { BuildCommand } from './commands/build-command.js';
 export type { BuildCommandOptions } from './commands/build-command.js';
+export { RecoverCommand } from './commands/recover-command.js';
+export type { RecoverCommandOptions } from './commands/recover-command.js';
 export { SVGCompilerApplicationService } from './application/svg-compiler-application-service.js';
 export type {
   ApplicationServiceContext,
@@ -185,6 +187,16 @@ export type {
   CreateSVGCompilerOptions,
   SVGCompiler,
 } from './compiler/create-svg-compiler.js';
+export {
+  ContentAddressableCache,
+  createCacheKey,
+  createPipelineFingerprint,
+  stableSerialize,
+} from './cache/content-addressable-cache.js';
+export type {
+  CacheReadResult,
+  PipelineFingerprint,
+} from './cache/content-addressable-cache.js';
 export {
   resolveConfiguration,
   explainConfiguration,

@@ -35,6 +35,7 @@ import {
 } from './contracts/reporting.js';
 import type { CollisionPolicy } from './application/build-plan.js';
 import type { SymlinkPolicy } from './application/source-discovery.js';
+import { RecoverCommand } from './commands/recover-command.js';
 
 type BuildRuntimeOptions = BuildOptions & {
   framework?: FrameworkType;
@@ -782,6 +783,39 @@ program
     } catch (error) {
       logger.error('Clean operation failed:', error);
       process.exit(1);
+    }
+  });
+
+// -------- Recover Command --------
+program
+  .command('recover <directory>')
+  .description('Inspect and roll back incomplete output transactions')
+  .option('--format <type>', 'Report format: pretty or json')
+  .action(async (args: string[], opts: CLIOptions) => {
+    const format = opts.format === 'json' ? 'json' : 'pretty';
+    try {
+      const command = new RecoverCommand();
+      const report = await executeCommand(command, { directory: args[0] });
+      if (format === 'json') {
+        process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+      } else {
+        process.stdout.write(
+          `Inspected ${report.inspected} transaction journal(s); recovered ${report.recovered}.\n`
+        );
+        report.diagnostics.forEach(diagnostic =>
+          process.stderr.write(`${diagnostic}\n`)
+        );
+      }
+      process.exitCode = report.diagnostics.length
+        ? ExitCode.FilesystemFailure
+        : ExitCode.Success;
+    } catch (error) {
+      const report = createBuildReport({
+        exitCode: exitCodeFromUnknown(error),
+        diagnostics: [diagnosticFromUnknown(error)],
+      });
+      process.stdout.write(`${formatBuildReport(report, format)}\n`);
+      process.exitCode = report.exitCode;
     }
   });
 

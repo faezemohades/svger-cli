@@ -9,7 +9,6 @@ import type {
   UnsafeInputPolicy,
 } from '../types/index.js';
 import type { SVGProcessor } from '../processors/svg-processor.js';
-import { frameworkTemplateEngine } from '../core/framework-templates.js';
 import { OptLevel } from '../optimizers/types.js';
 import { resolveOutputArtifactPath } from '../security/input-safety.js';
 import {
@@ -40,6 +39,12 @@ import {
   type OutputContent,
 } from './output-transaction.js';
 import { discoverSVGInputs, type SymlinkPolicy } from './source-discovery.js';
+import {
+  createCacheKey,
+  createPipelineFingerprint,
+  type ContentAddressableCache,
+  type PipelineFingerprint,
+} from '../cache/content-addressable-cache.js';
 
 export interface BuildRequest {
   src: string;
@@ -71,6 +76,7 @@ export interface ApplicationServiceContext {
   configurationLayers: readonly ConfigurationLayer[];
   processor: SVGProcessor;
   logger: Logger;
+  cache: ContentAddressableCache;
   isLocked(filePath: string): boolean;
 }
 
@@ -79,6 +85,8 @@ interface GeneratedWork {
   artifact?: GeneratedArtifact;
   content?: string;
   diagnostic?: Diagnostic;
+  cacheKey?: string;
+  cacheStatus?: 'hit' | 'miss' | 'corrupt';
 }
 
 const OPTIMIZATION_LEVELS: Readonly<Record<string, OptLevel>> = Object.freeze({
@@ -203,7 +211,7 @@ export class SVGCompilerApplicationService {
       signal: request.signal,
     });
 
-    const extension = frameworkTemplateEngine.getFileExtension(
+    const extension = this.context.processor.getFileExtension(
       config.framework,
       config.typescript
     );
@@ -239,11 +247,11 @@ export class SVGCompilerApplicationService {
       });
     }
 
-    if (request.optimize !== undefined) {
-      this.context.processor.setOptimizationLevel(
-        OPTIMIZATION_LEVELS[request.optimize]
-      );
-    }
+    const optimizationLevel = request.optimize ?? 'basic';
+    this.context.processor.setOptimizationLevel(
+      OPTIMIZATION_LEVELS[optimizationLevel]
+    );
+    const fingerprint = createPipelineFingerprint(config, optimizationLevel);
 
     const startRss = process.memoryUsage().rss;
     const work = await runBounded(
@@ -253,6 +261,7 @@ export class SVGCompilerApplicationService {
           item,
           config,
           mode,
+          fingerprint,
           request.frameworkOptions,
           request.signal
         ),
@@ -268,6 +277,27 @@ export class SVGCompilerApplicationService {
       ...plan.diagnostics,
       ...work.flatMap(result =>
         result.diagnostic === undefined ? [] : [result.diagnostic]
+      ),
+      ...work.flatMap<Diagnostic>(result =>
+        result.cacheStatus === 'hit'
+          ? [
+              {
+                code: 'I_CACHE_HIT',
+                severity: 'info',
+                message: `Reused cached output for ${result.item.relativePath}.`,
+                file: result.item.relativePath,
+              },
+            ]
+          : result.cacheStatus === 'corrupt'
+            ? [
+                {
+                  code: 'W_CACHE_CORRUPT',
+                  severity: 'warning',
+                  message: `Ignored a corrupt cache entry for ${result.item.relativePath}.`,
+                  file: result.item.relativePath,
+                },
+              ]
+            : []
       ),
     ];
     const artifacts = work.flatMap(result =>
@@ -342,6 +372,26 @@ export class SVGCompilerApplicationService {
 
     if (mode === 'write') {
       await commitOutputTransaction(outputDir, outputContents);
+      if (config.cache) {
+        for (const result of work) {
+          if (
+            result.cacheKey &&
+            result.content &&
+            result.cacheStatus !== 'hit'
+          ) {
+            try {
+              await this.context.cache.write(result.cacheKey, result.content);
+            } catch (error) {
+              diagnostics.push({
+                code: 'W_CACHE_WRITE_FAILED',
+                severity: 'warning',
+                message: `Unable to cache ${result.item.relativePath}: ${error instanceof Error ? error.message : String(error)}`,
+                file: result.item.relativePath,
+              });
+            }
+          }
+        }
+      }
     } else {
       artifacts.forEach(artifact => {
         if (artifact.status !== 'unchanged') artifact.status = 'planned';
@@ -394,6 +444,7 @@ export class SVGCompilerApplicationService {
     item: BuildPlanItem,
     config: Readonly<SVGConfig>,
     mode: BuildMode,
+    fingerprint: PipelineFingerprint,
     frameworkOptions?: FrameworkOptions,
     signal?: AbortSignal
   ): Promise<GeneratedWork> {
@@ -429,30 +480,44 @@ export class SVGCompilerApplicationService {
 
     try {
       const svgContent = await fs.readFile(item.absolutePath, 'utf8');
-      const content = await this.context.processor.generateComponent(
-        item.componentName,
-        svgContent,
-        {
-          framework: config.framework,
-          typescript: config.typescript,
-          frameworkOptions,
-          defaultWidth: config.defaultWidth,
-          defaultHeight: config.defaultHeight,
-          defaultFill: config.defaultFill,
-          namingConvention: config.outputConfig.naming,
-          styleRules: Object.fromEntries(
-            Object.entries(config.styleRules).filter(
-              ([, value]) => value !== undefined
-            )
-          ) as Record<string, string>,
-          maxInputSizeBytes: config.maxInputSizeBytes,
-          unsafeInputPolicy: config.unsafeInputPolicy,
-        }
+      const cacheKey = createCacheKey(
+        `${item.componentName}\0${svgContent}`,
+        fingerprint
       );
+      const cached = config.cache
+        ? await this.context.cache.read(cacheKey, {
+            evictCorrupt: mode === 'write',
+          })
+        : { status: 'miss' as const };
+      const content =
+        cached.status === 'hit' && cached.content !== undefined
+          ? cached.content
+          : await this.context.processor.generateComponent(
+              item.componentName,
+              svgContent,
+              {
+                framework: config.framework,
+                typescript: config.typescript,
+                frameworkOptions,
+                defaultWidth: config.defaultWidth,
+                defaultHeight: config.defaultHeight,
+                defaultFill: config.defaultFill,
+                namingConvention: config.outputConfig.naming,
+                styleRules: Object.fromEntries(
+                  Object.entries(config.styleRules).filter(
+                    ([, value]) => value !== undefined
+                  )
+                ) as Record<string, string>,
+                maxInputSizeBytes: config.maxInputSizeBytes,
+                unsafeInputPolicy: config.unsafeInputPolicy,
+              }
+            );
       const status = await this.determineStatus(item.outputPath, content);
       return {
         item,
         content,
+        cacheKey,
+        cacheStatus: cached.status,
         artifact: {
           source: relativePortable(this.context.cwd, item.absolutePath),
           output: relativePortable(this.context.cwd, item.outputPath),

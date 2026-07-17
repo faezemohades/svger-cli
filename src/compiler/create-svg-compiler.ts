@@ -1,6 +1,6 @@
 import path from 'path';
 import { promises as fs } from 'fs';
-import { logger as defaultLogger } from '../core/logger.js';
+import { NullLogger } from '../core/logger.js';
 import { configService } from '../services/config.js';
 import { SVGProcessor } from '../processors/svg-processor.js';
 import { isLocked } from '../lock.js';
@@ -15,11 +15,16 @@ import {
   type BuildRequest,
 } from '../application/svg-compiler-application-service.js';
 import type { BuildReport } from '../contracts/reporting.js';
+import { ContentAddressableCache } from '../cache/content-addressable-cache.js';
+import { PerformanceEngine } from '../core/performance-engine.js';
+import { FrameworkTemplateEngine } from '../core/framework-templates.js';
+import { EnhancedPluginManager } from '../core/enhanced-plugin-manager.js';
 
 export interface CreateSVGCompilerOptions {
   cwd?: string;
   config?: Partial<SVGConfig>;
   logger?: Logger;
+  cacheDirectory?: string;
 }
 
 export interface SVGCompiler {
@@ -61,12 +66,21 @@ export async function createSVGCompiler(
       ? []
       : [{ origin: 'compiler' as const, value: options.config }]),
   ];
+  const scopedLogger = options.logger ?? new NullLogger();
   const service = new SVGCompilerApplicationService({
     cwd,
     defaultConfig,
     configurationLayers: Object.freeze(layers),
-    processor: new SVGProcessor(),
-    logger: options.logger ?? defaultLogger,
+    processor: new SVGProcessor({
+      logger: scopedLogger,
+      performanceEngine: new PerformanceEngine(),
+      frameworkTemplateEngine: new FrameworkTemplateEngine(),
+      pluginManager: new EnhancedPluginManager(),
+    }),
+    logger: scopedLogger,
+    cache: new ContentAddressableCache(
+      path.resolve(cwd, options.cacheDirectory ?? '.svger-cache')
+    ),
     isLocked,
   });
 
