@@ -10,11 +10,13 @@ on:
 
 jobs:
   test:
-    name: Test on Node.js ${{ matrix.node-version }}
-    runs-on: ubuntu-latest
+    name: Core - ${{ matrix.os }} / Node.js ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.17.0, 22.x, 24.x, 26.x]
 
     steps:
       - name: Checkout code
@@ -42,16 +44,47 @@ jobs:
       - name: Run type checking
         run: npm run typecheck
 
-      - name: Run tests
+      - name: Run Phase 1 validation
+        run: npm run validate:phase1
+
+      - name: Run coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '24.x'
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
-        if: matrix.node-version == '18.x'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '24.x'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/
           fail_ci_if_error: false
+
+  typescript-compatibility:
+    name: TypeScript ${{ matrix.typescript }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript: [5.6.3, 5.9.3, 7.0.2]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install TypeScript ${{ matrix.typescript }}
+        run: npm install --no-save --package-lock=false typescript@${{ matrix.typescript }}
+
+      - name: Type-check
+        run: npx tsc --noEmit -p tsconfig.json
 
   build:
     name: Build Package

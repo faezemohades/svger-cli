@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {
-  ExitCode,
-  createSVGCompiler,
-} from '../../dist/index.js';
+import { ExitCode, createSVGCompiler } from '../../dist/index.js';
 
 const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'svger-p1-app-'));
 const source = path.join(fixture, 'icons');
@@ -32,7 +29,10 @@ assert.deepEqual(
   written.artifacts.map(artifact => path.basename(artifact.output)).sort(),
   ['Check.tsx', 'index.ts']
 );
-assert.match(await fs.readFile(path.join(output, 'Check.tsx'), 'utf8'), /Check/);
+assert.match(
+  await fs.readFile(path.join(output, 'Check.tsx'), 'utf8'),
+  /Check/
+);
 assert.match(await fs.readFile(path.join(output, 'index.ts'), 'utf8'), /Check/);
 
 const check = await compiler.build({
@@ -43,7 +43,10 @@ const check = await compiler.build({
 assert.equal(check.exitCode, ExitCode.Success);
 assert.ok(check.artifacts.every(artifact => artifact.status === 'unchanged'));
 
-const previousOutput = await fs.readFile(path.join(output, 'Check.tsx'), 'utf8');
+const previousOutput = await fs.readFile(
+  path.join(output, 'Check.tsx'),
+  'utf8'
+);
 await fs.writeFile(
   path.join(source, 'check.svg'),
   '<svg viewBox="0 0 24 24"><circle cx="4" cy="4" r="2"/></svg>'
@@ -94,6 +97,16 @@ const [react, vue] = await Promise.all([
 assert.ok(react.artifacts.some(artifact => artifact.output.endsWith('.tsx')));
 assert.ok(vue.artifacts.some(artifact => artifact.output.endsWith('.vue')));
 assert.ok(!vue.artifacts.some(artifact => artifact.componentName === 'index'));
+
+const controller = new AbortController();
+controller.abort('contract cancellation');
+const cancelled = await compiler.build({
+  src: 'icons',
+  out: 'cancelled-output',
+  signal: controller.signal,
+});
+assert.equal(cancelled.exitCode, ExitCode.BuildCancelled);
+await assert.rejects(fs.access(path.join(fixture, 'cancelled-output')));
 
 await fs.rm(fixture, { recursive: true, force: true });
 console.log('Phase 1 canonical application service contracts passed.');

@@ -49,6 +49,7 @@ export async function runBounded<TInput, TResult>(
   assertSchedulerOptions(options);
   assertNotAborted(options.signal);
   const results: TResult[] = new Array(inputs.length);
+  const completionResults: TResult[] = [];
   const batchSize = options.batchSize ?? Math.max(inputs.length, 1);
 
   for (
@@ -63,13 +64,15 @@ export async function runBounded<TInput, TResult>(
       while (nextIndex < batchEnd) {
         assertNotAborted(options.signal);
         const index = nextIndex++;
-        results[index] = await worker(inputs[index], index, options.signal);
+        const result = await worker(inputs[index], index, options.signal);
+        results[index] = result;
+        completionResults.push(result);
       }
     });
     await Promise.all(workers);
   }
 
   return Object.freeze(
-    options.preserveOrder === false ? results.filter(Boolean) : results
+    options.preserveOrder === false ? completionResults : results
   );
 }

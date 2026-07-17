@@ -27,7 +27,7 @@ export class ConfigService {
   private static readonly CONFIG_FILE = '.svgconfig.json';
   private cachedConfig: SVGConfig | null = null;
 
-  private constructor() {}
+  public constructor() {}
 
   public static getInstance(): ConfigService {
     if (!ConfigService.instance) {

@@ -55,6 +55,37 @@ assert.deepEqual(
   sources.map(item => item.relativePath),
   ['alpha.svg', 'nested/beta.svg', 'Zulu.SVG']
 );
+const withHidden = await discoverSVGInputs({
+  sourceDir: source,
+  outputDir: output,
+  recursive: true,
+  includeHidden: true,
+});
+assert.deepEqual(
+  withHidden.map(item => item.relativePath),
+  ['.hidden.svg', 'alpha.svg', 'nested/beta.svg', 'Zulu.SVG']
+);
+await assert.rejects(
+  discoverSVGInputs({
+    sourceDir: source,
+    outputDir: output,
+    recursive: true,
+    maxFileCount: 1,
+  }),
+  error => error.code === 'E_MAX_FILE_COUNT'
+);
+if (process.platform !== 'win32') {
+  await fs.symlink(path.join(source, 'nested'), path.join(source, 'linked'));
+  await assert.rejects(
+    discoverSVGInputs({
+      sourceDir: source,
+      outputDir: output,
+      recursive: true,
+      symlinks: 'error',
+    }),
+    error => error.code === 'E_SYMLINK_NOT_ALLOWED'
+  );
+}
 
 const collisionSources = [
   { absolutePath: '/tmp/a.svg', relativePath: 'a.svg' },
@@ -96,6 +127,15 @@ const scheduled = await runBounded(
 );
 assert.deepEqual(scheduled, [2, 4, 6, 8, 10]);
 assert.equal(peak, 2);
+const completionOrder = await runBounded(
+  [1, 2],
+  async value => {
+    await new Promise(resolve => setTimeout(resolve, value === 1 ? 10 : 0));
+    return value;
+  },
+  { concurrency: 2, preserveOrder: false }
+);
+assert.deepEqual(completionOrder, [2, 1]);
 
 await fs.rm(fixture, { recursive: true, force: true });
 console.log(

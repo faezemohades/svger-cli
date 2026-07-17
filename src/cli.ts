@@ -11,6 +11,7 @@ import type {
   FrameworkOptions,
   FrameworkType,
   GenerateOptions,
+  SVGConfig,
   UnsafeInputPolicy,
 } from './types/index.js';
 import { resolve } from 'path';
@@ -84,11 +85,14 @@ interface BuildCommandOptions extends SafetyCommandOptions {
   listPlugins?: boolean;
   'max-file-count'?: string;
   optimize?: string;
+  out?: string;
   plugin?: string;
   recursive?: boolean;
   signals?: boolean;
   standalone?: boolean;
   symlinks?: SymlinkPolicy;
+  src?: string;
+  naming?: string;
   'no-typescript'?: boolean;
   typescript?: boolean;
 }
@@ -100,6 +104,12 @@ interface GenerateCommandOptions extends SafetyCommandOptions {
   standalone?: boolean;
   'no-typescript'?: boolean;
   typescript?: boolean;
+}
+
+interface LegacyPathCommandOptions extends SafetyCommandOptions {
+  out?: string;
+  src?: string;
+  watch?: boolean;
 }
 
 interface ConfigCommandOptions {
@@ -192,6 +202,13 @@ function reportOperationalError(label: string, error: unknown): void {
   const diagnostic = diagnosticFromUnknown(error);
   logger.error(`${label}: ${diagnostic.code}: ${diagnostic.message}`);
   process.exitCode = exitCodeFromUnknown(error);
+}
+
+function warnLegacyOption(legacy: string, replacement: string): void {
+  process.emitWarning(
+    `${legacy} is a deprecated v4 CLI alias; use ${replacement}. The alias will be removed in v5.0.`,
+    { type: 'DeprecationWarning', code: 'DEP_SVGER_CLI_OPTION' }
+  );
 }
 
 function ensureBuiltInPluginsRegistered(): void {
@@ -329,6 +346,9 @@ program
     'Unsafe raw SVG policy: reject (default) or strip'
   )
   .option('--max-input-size <bytes>', 'Maximum raw SVG size in bytes')
+  .option('--src <path>', 'Deprecated alias for positional <src>')
+  .option('--out <path>', 'Deprecated alias for positional <out>')
+  .option('--naming <type>', 'Deprecated v4 naming option')
   .option('--format <type>', 'Report format: pretty, json, or ndjson')
   .option('--recursive', 'Discover SVG files recursively')
   .option('--include <globs>', 'Comma-separated include globs')
@@ -360,7 +380,21 @@ program
         }
       }
 
-      const [src, out] = args;
+      const [positionalSrc, positionalOut] = args;
+      const src = positionalSrc ?? buildOptions.src;
+      const out = positionalOut ?? buildOptions.out;
+      if (buildOptions.src) warnLegacyOption('--src', 'the <src> argument');
+      if (buildOptions.out) warnLegacyOption('--out', 'the <out> argument');
+      if (buildOptions.naming) {
+        warnLegacyOption('--naming', 'configuration outputConfig.naming');
+        if (!['kebab', 'pascal', 'camel'].includes(buildOptions.naming)) {
+          throw new DiagnosticError(
+            'E_INVALID_NAMING_CONVENTION',
+            `Unknown naming convention: ${buildOptions.naming}`,
+            { exitCode: ExitCode.InvalidConfiguration }
+          );
+        }
+      }
 
       // Build config from CLI options
       const buildConfig: BuildRuntimeOptions & {
@@ -374,7 +408,19 @@ program
         maxFileCount?: number;
         concurrency?: number;
         batchSize?: number;
-      } = { src, out };
+      } = {
+        src,
+        out,
+        ...(buildOptions.naming
+          ? {
+              config: {
+                outputConfig: {
+                  naming: buildOptions.naming,
+                },
+              } as Partial<SVGConfig>,
+            }
+          : {}),
+      };
       applySafetyCommandOptions(buildOptions, buildConfig);
 
       if (buildOptions.framework) {
@@ -470,10 +516,18 @@ program
     'Unsafe raw SVG policy: reject (default) or strip'
   )
   .option('--max-input-size <bytes>', 'Maximum raw SVG size in bytes')
+  .option('--src <path>', 'Deprecated alias for positional <src>')
+  .option('--out <path>', 'Deprecated alias for positional <out>')
+  .option('--watch', 'Deprecated compatibility flag')
   .action(async (args: string[], opts: CLIOptions) => {
     try {
       shouldExitAfterParse = false;
-      const [src, out] = args;
+      const legacyOptions = asCommandOptions<LegacyPathCommandOptions>(opts);
+      const src = args[0] ?? legacyOptions.src;
+      const out = args[1] ?? legacyOptions.out;
+      if (legacyOptions.src) warnLegacyOption('--src', 'the <src> argument');
+      if (legacyOptions.out) warnLegacyOption('--out', 'the <out> argument');
+      if (legacyOptions.watch) warnLegacyOption('--watch', 'the watch command');
       const watchOptions: BuildRuntimeOptions = { src, out };
       applySafetyCommandOptions(
         asCommandOptions<SafetyCommandOptions>(opts),
@@ -727,9 +781,12 @@ program
 program
   .command('clean <out>')
   .description('Remove all generated SVG React components from output folder')
-  .action(async (args: string[]) => {
+  .option('--out <path>', 'Deprecated alias for positional <out>')
+  .action(async (args: string[], opts: CLIOptions) => {
     try {
-      const [out] = args;
+      const legacyOptions = asCommandOptions<LegacyPathCommandOptions>(opts);
+      const out = args[0] ?? legacyOptions.out;
+      if (legacyOptions.out) warnLegacyOption('--out', 'the <out> argument');
       await executeCommand(new CleanCommand(svgService), { output: out });
     } catch (error) {
       reportOperationalError('Clean operation failed', error);

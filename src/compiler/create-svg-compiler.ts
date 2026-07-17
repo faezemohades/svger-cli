@@ -1,9 +1,9 @@
 import path from 'path';
 import { promises as fs } from 'fs';
+import { readFileSync } from 'fs';
 import { NullLogger } from '../core/logger.js';
-import { configService } from '../services/config.js';
+import { ConfigService } from '../services/config.js';
 import { SVGProcessor } from '../processors/svg-processor.js';
-import { isLocked } from '../lock.js';
 import type { Logger, SVGConfig } from '../types/index.js';
 import type { ConfigurationLayer } from '../configuration/resolver.js';
 import {
@@ -53,12 +53,24 @@ async function readConfigurationLayer(
   }
 }
 
+function createLockChecker(cwd: string): (filePath: string) => boolean {
+  const lockPath = path.join(cwd, '.svg-lock');
+  return filePath => {
+    try {
+      const locks = JSON.parse(readFileSync(lockPath, 'utf8')) as unknown;
+      return Array.isArray(locks) && locks.includes(path.basename(filePath));
+    } catch {
+      return false;
+    }
+  };
+}
+
 /** Create an isolated compiler context with no mutable configuration globals. */
 export async function createSVGCompiler(
   options: CreateSVGCompilerOptions = {}
 ): Promise<SVGCompiler> {
   const cwd = path.resolve(options.cwd ?? process.cwd());
-  const defaultConfig = configService.getDefaultConfig();
+  const defaultConfig = new ConfigService().getDefaultConfig();
   const fileLayer = await readConfigurationLayer(cwd);
   const layers: ConfigurationLayer[] = [
     ...(fileLayer === undefined ? [] : [fileLayer]),
@@ -81,7 +93,7 @@ export async function createSVGCompiler(
     cache: new ContentAddressableCache(
       path.resolve(cwd, options.cacheDirectory ?? '.svger-cache')
     ),
-    isLocked,
+    isLocked: createLockChecker(cwd),
   });
 
   return Object.freeze({

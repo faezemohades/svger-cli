@@ -510,6 +510,7 @@ export class SVGCompilerApplicationService {
                 ) as Record<string, string>,
                 maxInputSizeBytes: config.maxInputSizeBytes,
                 unsafeInputPolicy: config.unsafeInputPolicy,
+                signal,
               }
             );
       const status = await this.determineStatus(item.outputPath, content);

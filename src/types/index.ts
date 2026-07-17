@@ -168,6 +168,7 @@ export interface BuildOptions {
   config?: Partial<SVGConfig>;
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  signal?: AbortSignal;
 }
 
 export interface GenerateOptions {
@@ -176,6 +177,7 @@ export interface GenerateOptions {
   config?: Partial<SVGConfig>;
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  signal?: AbortSignal;
 }
 
 export interface WatchOptions {
@@ -184,6 +186,7 @@ export interface WatchOptions {
   config?: Partial<SVGConfig>;
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  signal?: AbortSignal;
 }
 
 export interface ComponentGenerationOptions {
@@ -200,6 +203,7 @@ export interface ComponentGenerationOptions {
   namingConvention?: 'kebab' | 'pascal' | 'camel';
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  signal?: AbortSignal;
 }
 
 export interface TemplateConfig {

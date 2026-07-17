@@ -23,6 +23,8 @@ const OPTIMIZATION_LEVELS = new Set([
   'maximum',
 ]);
 const REPORT_FORMATS = new Set<ReportFormat>(['pretty', 'json', 'ndjson']);
+const COLLISION_POLICIES = new Set(['error', 'first', 'last']);
+const SYMLINK_POLICIES = new Set(['ignore', 'follow', 'error']);
 
 export interface BuildCommandOptions extends BuildRequest {
   format?: ReportFormat;
@@ -58,6 +60,20 @@ export class BuildCommand implements Command<BuildCommandOptions, BuildReport> {
       throw new DiagnosticError(
         'E_INVALID_REPORT_FORMAT',
         `Unknown report format: ${options.format}`,
+        { exitCode: ExitCode.UsageError }
+      );
+    }
+    if (options.collision && !COLLISION_POLICIES.has(options.collision)) {
+      throw new DiagnosticError(
+        'E_INVALID_COLLISION_POLICY',
+        `Unknown collision policy: ${options.collision}`,
+        { exitCode: ExitCode.UsageError }
+      );
+    }
+    if (options.symlinks && !SYMLINK_POLICIES.has(options.symlinks)) {
+      throw new DiagnosticError(
+        'E_INVALID_SYMLINK_POLICY',
+        `Unknown symlink policy: ${options.symlinks}`,
         { exitCode: ExitCode.UsageError }
       );
     }

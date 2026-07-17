@@ -76,6 +76,7 @@
     "LICENSE",
     "CHANGELOG.md",
     "SECURITY.md",
+    "PRIVACY.md",
     "DEVELOPMENT.md",
     "docs/ADR-*.md",
     "docs/ERROR-HANDLING-STANDARD.md",
@@ -89,6 +90,7 @@
     "docs/PLUGIN-DEVELOPMENT-GUIDE.md",
     "docs/QUICK-REFERENCE.md",
     "docs/SAMPLE-SVGS-TESTING.md",
+    "docs/SUPPORT-MATRIX.md",
     "docs/TDR-*.md",
     "examples/**/*.js",
     ".svgerconfig.example.json",
@@ -119,6 +121,9 @@
     "test:phase1:recovery": "npm run build && node tests/phase1/recovery.contract.test.mjs",
     "test:phase1:migration": "npm run build && node tests/phase1/migration.contract.test.mjs",
     "test:phase1:commands": "npm run build && node tests/phase1/command-hierarchy.contract.test.mjs",
+    "test:phase1:reproducibility": "npm run build && node tests/phase1/reproducibility.contract.test.mjs",
+    "test:phase1": "npm run build && node tests/phase1/report-contract.test.mjs && node tests/phase1/planning-contract.test.mjs && node tests/phase1/application-service.contract.test.mjs && node tests/phase1/unified-entrypoints.contract.test.mjs && node tests/phase1/cache.contract.test.mjs && node tests/phase1/recovery.contract.test.mjs && node tests/phase1/migration.contract.test.mjs && node tests/phase1/command-hierarchy.contract.test.mjs && node tests/phase1/reproducibility.contract.test.mjs",
+    "test:privacy": "node scripts/check-no-telemetry.mjs",
     "test:visual": "node tests/dev/test-visual-diff.js",
     "test:visual:integration": "node tests/dev/test-visual-integration.js",
     "test:visual:ci": "node tests/dev/test-visual-integration.js --strict",
@@ -145,7 +150,8 @@
     "baseline:update": "node scripts/update-baseline.mjs",
     "package:conformance": "node scripts/archive-package-conformance.mjs",
     "validate": "npm run typecheck && npm run lint && npm run test",
-    "validate:phase0": "npm run baseline:policy && npm run typecheck && npm run lint:budget && npm run build && npm run test:jest && npm run test && npm run test:phase0 && npm run test:package"
+    "validate:phase0": "npm run baseline:policy && npm run typecheck && npm run lint:budget && npm run build && npm run test:jest && npm run test && npm run test:phase0 && npm run test:package",
+    "validate:phase1": "npm run baseline:policy && npm run typecheck && npm run lint:budget && npm run test:privacy && npm run build && npm run test:jest && npm run test && npm run test:phase1 && npm run test:security && npm run test:safety-matrix"
   },
   "keywords": [
     "svg",

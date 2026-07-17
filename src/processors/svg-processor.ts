@@ -40,6 +40,13 @@ import {
   type SVGInputSafetyOptions,
 } from '../security/input-safety.js';
 
+function throwIfAborted(signal?: AbortSignal): void {
+  if (!signal?.aborted) return;
+  const error = new Error('SVG processing was cancelled.');
+  Object.assign(error, { code: 'ABORT_ERR', cause: signal.reason });
+  throw error;
+}
+
 /**
  * SVG content processor and component generator
  */
@@ -367,6 +374,7 @@ export class SVGProcessor {
     options: Partial<ComponentGenerationOptions> = {}
   ): Promise<string> {
     try {
+      throwIfAborted(options.signal);
       // Clean and optimize SVG content (now async)
       const cleanedContent = await this.cleanSVGContent(svgContent, {
         maxInputSizeBytes: options.maxInputSizeBytes,
@@ -375,6 +383,7 @@ export class SVGProcessor {
       });
       const pluginProcessedContent =
         await this.applyActivePlugins(cleanedContent);
+      throwIfAborted(options.signal);
 
       // Create full options object with required fields
       const fullOptions: ComponentGenerationOptions = {
@@ -413,6 +422,7 @@ export class SVGProcessor {
     options: ComponentGenerationOptions
   ): Promise<string> {
     try {
+      throwIfAborted(options.signal);
       // Optimize SVG content based on framework requirements
       const optimizationLevel =
         options.framework === 'vanilla' ? 'maximum' : 'balanced';
@@ -426,6 +436,7 @@ export class SVGProcessor {
         safeContent,
         optimizationLevel
       );
+      throwIfAborted(options.signal);
 
       // Generate framework-specific component
       const component = this.frameworkTemplateEngine.generateComponent({
@@ -460,6 +471,7 @@ export class SVGProcessor {
       batchSize?: number;
       parallel?: boolean;
       maxConcurrency?: number;
+      signal?: AbortSignal;
     } = {}
   ): Promise<
     Array<{
@@ -472,7 +484,9 @@ export class SVGProcessor {
     this.logger.info(`Starting batch processing of ${files.length} files`);
 
     try {
+      throwIfAborted(config.signal);
       const results = await this.performanceEngine.processBatch(files, config);
+      throwIfAborted(config.signal);
 
       // Log performance metrics
       const metrics = this.performanceEngine.getPerformanceMetrics();
@@ -543,6 +557,7 @@ export class SVGProcessor {
     this.logger.debug(`Processing SVG file: ${svgFilePath}`);
 
     try {
+      throwIfAborted(options.signal);
       // Read SVG content
       const svgContent = await FileSystem.readFile(svgFilePath, 'utf-8');
 
@@ -559,6 +574,7 @@ export class SVGProcessor {
         svgContent,
         options
       );
+      throwIfAborted(options.signal);
 
       // Ensure output directory exists
       await FileSystem.ensureDir(outputDir);
@@ -581,6 +597,7 @@ export class SVGProcessor {
 
       // Write component file
       const outputFilePath = resolveOutputArtifactPath(outputDir, fileName);
+      throwIfAborted(options.signal);
       await FileSystem.writeFile(outputFilePath, componentCode, 'utf-8');
 
       // Update job status

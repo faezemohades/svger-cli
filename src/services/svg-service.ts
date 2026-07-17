@@ -36,6 +36,7 @@ type ResolvedRuntimeConfig = SVGConfig & RuntimeProcessingOverrides;
 export class SVGService {
   private static instance: SVGService;
   private activeWatchers: Set<string> = new Set();
+  private activeWatchJobs = new Map<string, AbortController>();
   public lockService: LockService;
 
   private constructor() {
@@ -320,6 +321,21 @@ export class SVGService {
       });
     });
 
+    if (options.signal) {
+      if (options.signal.aborted) {
+        this.stopWatching(watchId);
+        throw Object.assign(new Error('Watch operation was cancelled.'), {
+          code: 'ABORT_ERR',
+          cause: options.signal.reason,
+        });
+      }
+      options.signal.addEventListener(
+        'abort',
+        () => this.stopWatching(watchId),
+        { once: true }
+      );
+    }
+
     logger.success(`Watch mode active - waiting for file changes...`);
     return watchId;
   }
@@ -364,6 +380,10 @@ export class SVGService {
     outDir: string,
     config?: Partial<SVGConfig>
   ): Promise<void> {
+    const previousController = this.activeWatchJobs.get(filePath);
+    previousController?.abort('Superseded by a newer watch event.');
+    const controller = new AbortController();
+    this.activeWatchJobs.set(filePath, controller);
     try {
       // Check if file is locked
       if (this.lockService.isLocked(filePath)) {
@@ -376,7 +396,7 @@ export class SVGService {
       const mergedConfig = { ...fullConfig, ...config };
 
       // Process the file
-      await svgProcessor.processSVGFile(filePath, outDir, {
+      const result = await svgProcessor.processSVGFile(filePath, outDir, {
         defaultWidth: mergedConfig.defaultWidth,
         defaultHeight: mergedConfig.defaultHeight,
         defaultFill: mergedConfig.defaultFill,
@@ -387,12 +407,22 @@ export class SVGService {
         ) as Record<string, string>,
         maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
         unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
+        signal: controller.signal,
       });
+      if (!result.success && result.error) {
+        const code = (result.error as { code?: string }).code;
+        if (code !== 'ABORT_ERR') throw result.error;
+      }
     } catch (error) {
+      if ((error as { code?: string }).code === 'ABORT_ERR') return;
       logger.error(
         `Failed to process watched file ${path.basename(filePath)}:`,
         error
       );
+    } finally {
+      if (this.activeWatchJobs.get(filePath) === controller) {
+        this.activeWatchJobs.delete(filePath);
+      }
     }
   }
 
@@ -574,6 +604,8 @@ ${imports}
    * Shutdown service
    */
   public shutdown(): void {
+    for (const controller of this.activeWatchJobs.values()) controller.abort();
+    this.activeWatchJobs.clear();
     this.stopWatching();
     fileWatcher.shutdown();
     svgProcessor.clearQueue();
