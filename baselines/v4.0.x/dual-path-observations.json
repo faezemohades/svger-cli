@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "4.0.8",
+  "legacyBuilder": {
+    "diagnostics": [
+      {
+        "level": "log",
+        "message": "✅ Generated: Basic.tsx"
+      },
+      {
+        "level": "log",
+        "message": "✅ Generated: Styled.tsx"
+      },
+      {
+        "level": "log",
+        "message": "🎉 All SVGs have been converted successfully!"
+      }
+    ]
+  },
+  "svgService": {
+    "diagnostics": []
+  }
+}

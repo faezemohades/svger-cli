@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32px" height="32px">
+  <!-- canonical style fixture -->
+  <g id="layer" style="fill: none; stroke: #abcdef; stroke-width: 2px;">
+    <circle cx="16" cy="16" r="12" fill-rule="evenodd"/>
+  </g>
+</svg>

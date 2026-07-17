@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "node scripts/capture-v4-baseline.mjs",
+  "updateReason": "Initial Phase 0 behavioral baseline captured from v4.0.8 before architectural refoundation.",
+  "packageVersion": "4.0.8",
+  "sourceCommit": "0d48aff",
+  "files": {
+    "cli-behavior.json": "96bfa399bae7a1ec91dc660b6049282de0e403f3aa08814e8c5b4ace5802cd5f",
+    "config-schema.json": "346a04b4f10cccbebc2353ac1ee01d402a0d07356acb2b2cf17c2ec504edad33",
+    "dual-path-observations.json": "7d87a7be07bde1907169bda49a2dcd0515a3409eb15593930572fd277cd48307",
+    "fixtures/basic.svg": "f41fc1881a5a890d3b7f00579f28d0a99214ab83b30060fbc27d982e4cbaf469",
+    "fixtures/styled.svg": "80131b3264c1d9d9cb6bb0dc39ed3cf1ec7568436aa9003453497c54f51b289e",
+    "outputs/legacy-builder/Basic.tsx": "df63264aaeee1703ceeb57af81e962d0bb3e63fb16e298f36a0b4fd912d15edc",
+    "outputs/legacy-builder/Styled.tsx": "5f5c582a46f07953acafe6023eb1279a36bade06ecfe2f056dbc4797618c9db5",
+    "outputs/svg-service/Basic.tsx": "df63264aaeee1703ceeb57af81e962d0bb3e63fb16e298f36a0b4fd912d15edc",
+    "outputs/svg-service/index.ts": "f762e3a21a100b8cff593d15f2a546de3d65200a81812be3f9e82496eaef3c8b",
+    "outputs/svg-service/Styled.tsx": "5f5c582a46f07953acafe6023eb1279a36bade06ecfe2f056dbc4797618c9db5",
+    "performance-trace.json": "c849f97c72dc6185033298d23cc23b5f06516c8848cde89f9d91b8207433503a",
+    "public-api.json": "213717d809bab750e8d6c5253268e82bc701b590e1ac1bca0af3c0768ff2431b",
+    "README.md": "d24fc6c5a4bbeebfe46f58e92623e5b6a487057759d9446aed27ea376dce139a",
+    "resolved-config.json": "ccfd64c0eeabc23fc2b12409a9ba75b6ad3970169e2918e3ca10fc3cb3766608"
+  }
+}

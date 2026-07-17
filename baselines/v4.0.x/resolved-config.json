@@ -1,0 +1,94 @@
+{
+  "version": "4.0.8",
+  "source": "./svg-icons",
+  "output": "./components/icons",
+  "framework": "react",
+  "typescript": true,
+  "componentType": "functional",
+  "watch": false,
+  "parallel": true,
+  "batchSize": 10,
+  "maxConcurrency": 4,
+  "cache": true,
+  "defaultWidth": 48,
+  "defaultHeight": 48,
+  "defaultFill": "#000000",
+  "defaultStroke": "none",
+  "defaultStrokeWidth": 1,
+  "styleRules": {
+    "fill": "currentColor",
+    "stroke": "none"
+  },
+  "responsive": {
+    "breakpoints": [
+      "sm",
+      "md",
+      "lg",
+      "xl"
+    ],
+    "values": {
+      "width": [
+        "16px",
+        "20px",
+        "24px",
+        "32px"
+      ],
+      "height": [
+        "16px",
+        "20px",
+        "24px",
+        "32px"
+      ]
+    }
+  },
+  "theme": {
+    "mode": "auto",
+    "variables": {
+      "primary": "currentColor",
+      "secondary": "#6b7280",
+      "accent": "#3b82f6"
+    }
+  },
+  "animations": [],
+  "plugins": [],
+  "exclude": [
+    "test.svg"
+  ],
+  "include": [],
+  "errorHandling": {
+    "strategy": "continue",
+    "maxRetries": 3,
+    "timeout": 30000
+  },
+  "performance": {
+    "optimization": "balanced",
+    "memoryLimit": 512,
+    "cacheTimeout": 3600000
+  },
+  "outputConfig": {
+    "naming": "pascal",
+    "extension": "tsx",
+    "directory": "./src/components/icons"
+  },
+  "react": {
+    "componentType": "functional",
+    "forwardRef": true,
+    "memo": false,
+    "propsInterface": "SVGProps",
+    "styledComponents": false,
+    "cssModules": false
+  },
+  "vue": {
+    "api": "composition",
+    "setup": true,
+    "typescript": true,
+    "scoped": true,
+    "cssVariables": true
+  },
+  "angular": {
+    "standalone": true,
+    "signals": true,
+    "changeDetection": "OnPush",
+    "encapsulation": "Emulated"
+  }
+}

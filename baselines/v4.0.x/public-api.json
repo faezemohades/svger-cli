@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "4.0.8",
+  "rootExports": [
+    "CLI",
+    "ConfigService",
+    "FileSystem",
+    "FileWatcher",
+    "FrameworkTemplateEngine",
+    "LoggerService",
+    "OptLevel",
+    "PACKAGE_NAME",
+    "PerformanceEngine",
+    "PluginManager",
+    "SVGER",
+    "SVGErrorHandler",
+    "SVGProcessor",
+    "SVGStyleCompiler",
+    "SvgerNextJsPlugin",
+    "SvgerWebpackPlugin",
+    "TemplateManager",
+    "VERSION",
+    "babelPlugin",
+    "buildAll",
+    "clean",
+    "configService",
+    "configureSvgImports",
+    "createBabelPlugin",
+    "createJestTransformer",
+    "default",
+    "errorHandler",
+    "frameworkTemplateEngine",
+    "generateSVG",
+    "handleErrors",
+    "isLocked",
+    "jestPreset",
+    "jestTransformer",
+    "lockFiles",
+    "logger",
+    "nextjsPlugin",
+    "performanceEngine",
+    "pluginManager",
+    "reactTemplate",
+    "rollupPlugin",
+    "styleCompiler",
+    "svgProcessor",
+    "svgerBabelPlugin",
+    "svgerJestTransformer",
+    "svgerLoader",
+    "svgerRollupPlugin",
+    "svgerVitePlugin",
+    "templateManager",
+    "toCamelCase",
+    "toKebabCase",
+    "toPascalCase",
+    "unlockFiles",
+    "vitePlugin",
+    "watchSVGs",
+    "webpackPlugin",
+    "withErrorHandling",
+    "withSvger"
+  ],
+  "integrationExports": {
+    "webpack": [
+      "SvgerWebpackPlugin",
+      "default",
+      "svgerLoader"
+    ],
+    "vite": [
+      "default",
+      "svgerVitePlugin"
+    ],
+    "rollup": [
+      "default",
+      "svgerRollupPlugin"
+    ],
+    "babel": [
+      "createBabelPlugin",
+      "default",
+      "svgerBabelPlugin"
+    ],
+    "nextjs": [
+      "SvgerNextJsPlugin",
+      "configureSvgImports",
+      "default",
+      "withSvger"
+    ],
+    "jest": [
+      "createJestTransformer",
+      "default",
+      "jestPreset",
+      "svgerJestTransformer"
+    ]
+  },
+  "packageExports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./webpack": {
+      "types": "./dist/integrations/webpack.d.ts",
+      "import": "./dist/integrations/webpack.js",
+      "default": "./dist/integrations/webpack.js"
+    },
+    "./webpack-loader": {
+      "types": "./dist/integrations/webpack.d.ts",
+      "import": "./dist/integrations/webpack.js",
+      "default": "./dist/integrations/webpack.js"
+    },
+    "./vite": {
+      "types": "./dist/integrations/vite.d.ts",
+      "import": "./dist/integrations/vite.js",
+      "default": "./dist/integrations/vite.js"
+    },
+    "./rollup": {
+      "types": "./dist/integrations/rollup.d.ts",
+      "import": "./dist/integrations/rollup.js",
+      "default": "./dist/integrations/rollup.js"
+    },
+    "./babel": {
+      "types": "./dist/integrations/babel.d.ts",
+      "import": "./dist/integrations/babel.js",
+      "default": "./dist/integrations/babel.js"
+    },
+    "./babel-plugin": {
+      "types": "./dist/integrations/babel.d.ts",
+      "import": "./dist/integrations/babel.js",
+      "default": "./dist/integrations/babel.js"
+    },
+    "./nextjs": {
+      "types": "./dist/integrations/nextjs.d.ts",
+      "import": "./dist/integrations/nextjs.js",
+      "default": "./dist/integrations/nextjs.js"
+    },
+    "./jest": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./jest-transformer": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./jest-preset": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./package.json": "./package.json"
+  }
+}

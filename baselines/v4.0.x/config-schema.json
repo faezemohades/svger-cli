@@ -1,0 +1,337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svger.dev/baselines/v4.0.x/config.schema.json",
+  "title": "Resolved SVGER v4.0.x configuration",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "output": {
+      "type": "string"
+    },
+    "framework": {
+      "type": "string"
+    },
+    "typescript": {
+      "type": "boolean"
+    },
+    "componentType": {
+      "type": "string"
+    },
+    "watch": {
+      "type": "boolean"
+    },
+    "parallel": {
+      "type": "boolean"
+    },
+    "batchSize": {
+      "type": "number"
+    },
+    "maxConcurrency": {
+      "type": "number"
+    },
+    "cache": {
+      "type": "boolean"
+    },
+    "defaultWidth": {
+      "type": "number"
+    },
+    "defaultHeight": {
+      "type": "number"
+    },
+    "defaultFill": {
+      "type": "string"
+    },
+    "defaultStroke": {
+      "type": "string"
+    },
+    "defaultStrokeWidth": {
+      "type": "number"
+    },
+    "styleRules": {
+      "type": "object",
+      "properties": {
+        "fill": {
+          "type": "string"
+        },
+        "stroke": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "fill",
+        "stroke"
+      ],
+      "additionalProperties": true
+    },
+    "responsive": {
+      "type": "object",
+      "properties": {
+        "breakpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "values": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "height": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "breakpoints",
+        "values"
+      ],
+      "additionalProperties": true
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string"
+        },
+        "variables": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "type": "string"
+            },
+            "secondary": {
+              "type": "string"
+            },
+            "accent": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "primary",
+            "secondary",
+            "accent"
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "mode",
+        "variables"
+      ],
+      "additionalProperties": true
+    },
+    "animations": {
+      "type": "array",
+      "items": {}
+    },
+    "plugins": {
+      "type": "array",
+      "items": {}
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "include": {
+      "type": "array",
+      "items": {}
+    },
+    "errorHandling": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string"
+        },
+        "maxRetries": {
+          "type": "number"
+        },
+        "timeout": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "strategy",
+        "maxRetries",
+        "timeout"
+      ],
+      "additionalProperties": true
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "optimization": {
+          "type": "string"
+        },
+        "memoryLimit": {
+          "type": "number"
+        },
+        "cacheTimeout": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "optimization",
+        "memoryLimit",
+        "cacheTimeout"
+      ],
+      "additionalProperties": true
+    },
+    "outputConfig": {
+      "type": "object",
+      "properties": {
+        "naming": {
+          "type": "string"
+        },
+        "extension": {
+          "type": "string"
+        },
+        "directory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "naming",
+        "extension",
+        "directory"
+      ],
+      "additionalProperties": true
+    },
+    "react": {
+      "type": "object",
+      "properties": {
+        "componentType": {
+          "type": "string"
+        },
+        "forwardRef": {
+          "type": "boolean"
+        },
+        "memo": {
+          "type": "boolean"
+        },
+        "propsInterface": {
+          "type": "string"
+        },
+        "styledComponents": {
+          "type": "boolean"
+        },
+        "cssModules": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "componentType",
+        "forwardRef",
+        "memo",
+        "propsInterface",
+        "styledComponents",
+        "cssModules"
+      ],
+      "additionalProperties": true
+    },
+    "vue": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "setup": {
+          "type": "boolean"
+        },
+        "typescript": {
+          "type": "boolean"
+        },
+        "scoped": {
+          "type": "boolean"
+        },
+        "cssVariables": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "api",
+        "setup",
+        "typescript",
+        "scoped",
+        "cssVariables"
+      ],
+      "additionalProperties": true
+    },
+    "angular": {
+      "type": "object",
+      "properties": {
+        "standalone": {
+          "type": "boolean"
+        },
+        "signals": {
+          "type": "boolean"
+        },
+        "changeDetection": {
+          "type": "string"
+        },
+        "encapsulation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "standalone",
+        "signals",
+        "changeDetection",
+        "encapsulation"
+      ],
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "version",
+    "source",
+    "output",
+    "framework",
+    "typescript",
+    "componentType",
+    "watch",
+    "parallel",
+    "batchSize",
+    "maxConcurrency",
+    "cache",
+    "defaultWidth",
+    "defaultHeight",
+    "defaultFill",
+    "defaultStroke",
+    "defaultStrokeWidth",
+    "styleRules",
+    "responsive",
+    "theme",
+    "animations",
+    "plugins",
+    "exclude",
+    "include",
+    "errorHandling",
+    "performance",
+    "outputConfig",
+    "react",
+    "vue",
+    "angular"
+  ],
+  "additionalProperties": true
+}

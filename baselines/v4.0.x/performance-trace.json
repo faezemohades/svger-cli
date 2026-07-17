@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "4.0.8",
+  "corpus": [
+    {
+      "name": "basic.svg",
+      "bytes": 135
+    },
+    {
+      "name": "styled.svg",
+      "bytes": 306
+    }
+  ],
+  "iterations": 10,
+  "samplesMs": [
+    0.254,
+    0.195,
+    0.175,
+    0.119,
+    0.089,
+    0.072,
+    0.075,
+    0.079,
+    0.07,
+    0.066
+  ],
+  "medianMs": 0.089,
+  "runtime": {
+    "node": "v24.18.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "memory": {
+    "rss": 68001792,
+    "heapTotal": 17281024,
+    "heapUsed": 10043080,
+    "external": 2579020,
+    "arrayBuffers": 228516
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "4.0.8",
+  "rootHelp": {
+    "args": [
+      "--help"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "stdout": "svger-cli - Custom SVG to Angular, React, Vue, Svelte, Solid, and other component converter\nVersion: 4.0.8\n\nCommands:\n  build           Build all SVGs from source to output\n  watch           Watch source folder and rebuild SVGs automatically\n  generate        Convert a single SVG file into a component\n  lock            Lock one or more SVG files\n  unlock          Unlock one or more SVG files\n  config          Manage svger-cli configuration\n  plugins         List all registered plugins and their metrics\n  optimize        Optimize SVG files without converting to components\n  clean           Remove all generated SVG React components from output folder\n\nOptions:\n  --help, -h      Show help\n  --version, -v   Show version\n",
+    "stderr": ""
+  },
+  "version": {
+    "args": [
+      "--version"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "stdout": "4.0.8\n",
+    "stderr": ""
+  },
+  "commands": {
+    "build": {
+      "args": [
+        "build",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli build\n\nBuild all SVGs from source to output\n\nOptions:\n  --framework <value>       Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla)\n  --typescript              Generate TypeScript components (default: true)\n  --no-typescript           Generate JavaScript components\n  --composition             Use Vue Composition API with <script setup>\n  --standalone              Generate Angular standalone components\n  --signals                 Use Angular signals for reactive state\n  --optimize <value>        Optimization level: none, basic, balanced, aggressive, maximum (default: basic)\n  --validate                Run visual diff validation after build\n  --plugin <value>          Load plugin(s) by name or path (comma-separated for multiple)\n  --list-plugins            List all registered plugins and exit\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "watch": {
+      "args": [
+        "watch",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli watch\n\nWatch source folder and rebuild SVGs automatically\n\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "generate": {
+      "args": [
+        "generate",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli generate\n\nConvert a single SVG file into a component\n\nOptions:\n  --framework <value>       Target framework (react|vue|svelte|angular|solid|preact|lit|vanilla)\n  --typescript              Generate TypeScript component (default: true)\n  --no-typescript           Generate JavaScript component\n  --composition             Use Vue Composition API with <script setup>\n  --standalone              Generate Angular standalone component\n  --optimize <value>        Optimization level: none, basic, balanced, aggressive, maximum (default: basic)\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "lock": {
+      "args": [
+        "lock",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli lock\n\nLock one or more SVG files\n\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "unlock": {
+      "args": [
+        "unlock",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli unlock\n\nUnlock one or more SVG files\n\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "config": {
+      "args": [
+        "config",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli config\n\nManage svger-cli configuration\n\nOptions:\n  --init                    Create default .svgconfig.json\n  --set <value>             Set config key=value\n  --show                    Show current config\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "plugins": {
+      "args": [
+        "plugins",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli plugins\n\nList all registered plugins and their metrics\n\nOptions:\n  --load <value>            Load plugin(s) by name or path (comma-separated)\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "optimize": {
+      "args": [
+        "optimize",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli optimize\n\nOptimize SVG files without converting to components\n\nOptions:\n  --level <value>           Optimization level: basic, balanced, aggressive, maximum (default: balanced)\n  --validate                Run visual diff validation\n  --in-place                Optimize files in-place (overwrite originals)\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    },
+    "clean": {
+      "args": [
+        "clean",
+        "--help"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "svger-cli clean\n\nRemove all generated SVG React components from output folder\n\n\nGlobal Options:\n  --help, -h                Show help\n",
+      "stderr": ""
+    }
+  },
+  "unknownCommand": {
+    "args": [
+      "not-a-command"
+    ],
+    "exitCode": 1,
+    "signal": null,
+    "stdout": "svger-cli - Custom SVG to Angular, React, Vue, Svelte, Solid, and other component converter\nVersion: 4.0.8\n\nCommands:\n  build           Build all SVGs from source to output\n  watch           Watch source folder and rebuild SVGs automatically\n  generate        Convert a single SVG file into a component\n  lock            Lock one or more SVG files\n  unlock          Unlock one or more SVG files\n  config          Manage svger-cli configuration\n  plugins         List all registered plugins and their metrics\n  optimize        Optimize SVG files without converting to components\n  clean           Remove all generated SVG React components from output folder\n\nOptions:\n  --help, -h      Show help\n  --version, -v   Show version\n",
+    "stderr": "Unknown command: not-a-command\n"
+  },
+  "missingBuildArguments": {
+    "args": [
+      "build"
+    ],
+    "exitCode": 1,
+    "signal": null,
+    "stdout": "",
+    "stderr": "2026-07-16T23:51:20.096Z \u001b[31m❌ [ERROR]\u001b[0m Error: Both <src> and <out> paths are required\n"
+  }
+}

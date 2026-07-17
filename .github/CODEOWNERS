@@ -1,0 +1,4 @@
+# Immutable behavioral baselines require explicit maintainer review.
+/baselines/ @faezemohades @navidrezadoost
+/compatibility-ledger-v4.1.md @faezemohades @navidrezadoost
+/src/security/ @faezemohades @navidrezadoost
