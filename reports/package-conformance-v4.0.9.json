@@ -3,8 +3,8 @@
   "package": "svger-cli@4.0.9",
   "summary": {
     "filename": "svger-cli-4.0.9.tgz",
-    "packedBytes": 616991,
-    "unpackedBytes": 1971238,
+    "packedBytes": 616992,
+    "unpackedBytes": 1971255,
     "entryCount": 757,
     "groups": {
       ".svgerconfig.example.json": 1,
@@ -27,12 +27,12 @@
   "budgets": {
     "approvedBaseline": {
       "entryCount": 757,
-      "packedBytes": 616930,
+      "packedBytes": 616991,
       "intentionalAssetCount": 606,
       "growthTolerance": 0.05
     },
     "maximumEntryCount": 794,
-    "maximumPackedBytes": 647776
+    "maximumPackedBytes": 647840
   },
   "forbiddenContentReview": {
     "baselines": false,
@@ -52,10 +52,10 @@
     "id": "svger-cli@4.0.9",
     "name": "svger-cli",
     "version": "4.0.9",
-    "size": 616991,
-    "unpackedSize": 1971238,
-    "shasum": "f832914ce51d35754ce7075f7bcdfc3d6b7fdb76",
-    "integrity": "sha512-qnZ7Q6b9nzXyq6OvpS57GKac8fkcTZ5Pj69qn8brnpVmpw1NdvSm8km93YM/Hlad3GZ3Luy0IPaGsuiNU5zL3A==",
+    "size": 616992,
+    "unpackedSize": 1971255,
+    "shasum": "1f7dd4751c7c70044a59e3db52f4871ac02b0cec",
+    "integrity": "sha512-SwrVkkp+wtX7+Ltdtz1/236/crhjJr/7380GPkXp6/MTP3fyamy1krHbfImbzvluuwjCPxlj5arsUkVwLuQuMQ==",
     "filename": "svger-cli-4.0.9.tgz",
     "files": [
       {
@@ -3840,7 +3840,7 @@
       },
       {
         "path": "package.json",
-        "size": 9405,
+        "size": 9422,
         "mode": 420
       }
     ],

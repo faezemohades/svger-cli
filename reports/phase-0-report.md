@@ -4,7 +4,7 @@ Directive: SVGER-REF-2026-07-17-FINAL
 
 Candidate: v4.0.9
 
-Candidate source commit: `3fbf14b12763c3bd6849877c9d5609477b1c7a37`
+Candidate source commit: `5698731cfcdaa50d4bc04e3d3665d16ba2b40bf4`
 
 Date: 2026-07-17
 
@@ -93,23 +93,26 @@ version lookup before the final gate passed.
 
 `npm run validate:phase0` final result: **PASS**.
 
-| Gate                           | Result                                                   |
-| ------------------------------ | -------------------------------------------------------- |
-| Baseline verification/policy   | 14/14 locked files verified; policy pass                 |
-| TypeScript                     | Pass                                                     |
-| ESLint budget                  | 0 errors; 14/14 approved warnings; one approved category |
-| Jest                           | 10 suites, 155/155 tests passed                          |
-| Framework standalone suite     | 11/11 passed                                             |
-| Configuration standalone suite | 10/10 passed                                             |
-| End-to-end standalone suite    | 8/8 passed                                               |
-| Integration verification       | 7/7 passed                                               |
-| Dual-path characterization     | Pass                                                     |
-| Security containment           | 26 core assertions plus entry-point matrix passed        |
-| Package consumer smoke         | Pass; 757 files, 616,991 bytes                           |
-| Package conformance            | Pass; 606 intentional assets; forbidden content absent   |
-| Production dependency audit    | 0 vulnerabilities                                        |
-| Diff whitespace check          | Pass                                                     |
-| Version consistency            | package and lock metadata all v4.0.9                     |
+| Gate                           | Result                                                         |
+| ------------------------------ | -------------------------------------------------------------- |
+| Baseline verification/policy   | 14/14 locked files verified; policy pass                       |
+| TypeScript                     | Pass                                                           |
+| ESLint budget                  | 0 errors; 14/14 approved warnings; one approved category       |
+| Jest                           | 10 suites, 155/155 tests passed                                |
+| Framework standalone suite     | 11/11 passed                                                   |
+| Configuration standalone suite | 10/10 passed                                                   |
+| End-to-end standalone suite    | 8/8 passed                                                     |
+| Integration verification       | 7/7 passed                                                     |
+| Dual-path characterization     | Pass                                                           |
+| Security containment           | 26 core assertions plus entry-point matrix passed              |
+| Package consumer smoke         | Pass; 757 files, 616,992 bytes                                 |
+| Package conformance            | Pass; 606 intentional assets; forbidden content absent         |
+| Disposable-clone validation    | Pass at source tree `0b10e0f59bc79e3a55ab4855b88c675b55d64d4f` |
+| Tarball reproducibility        | Pass; SHA-256 `adc50aefaccc15bc…`                              |
+| Full dependency audit          | 0 vulnerabilities                                              |
+| Production dependency audit    | 0 vulnerabilities                                              |
+| Diff whitespace check          | Pass                                                           |
+| Version consistency            | package and lock metadata all v4.0.9                           |
 
 The tarball smoke validates inspection, clean installation, executable binary, root and subpath ESM
 imports, runtime/config version, declarations, shebang, and a real component build. Package content
@@ -119,11 +122,14 @@ full `npm pack --dry-run` and `tar -tf` evidence is archived in
 
 ## Gate decision
 
-The Phase 0 implementation is complete and locally release-ready for v4.0.9. The official Phase 0
-gate is not closed. No commit, npm publication, Git tag, GitHub release, push, merge, or formal
-approval was performed. Clean-checkout verification is also pending until the implementation is in
-auditable commits; running `git clean -xfd` in the current uncommitted worktree would destroy the
-candidate.
+The Phase 0 implementation is complete and locally release-ready for v4.0.9. Auditable commits and
+disposable-clone verification are complete. The clean clone used TLS verification, `npm ci`, the
+full `validate:phase0` gate, a new package archive, both full-tree and production audits, and a
+tracked-worktree cleanliness check. The gate initially exposed and then verified fixes for missing
+pre-test build ordering and machine-specific characterization paths.
+
+The official Phase 0 gate is not closed. No npm publication, Git tag, GitHub release, push, merge,
+or formal baseline/security/ledger/release approval was performed.
 
 Phase 1 must remain closed until both conditions are recorded:
 

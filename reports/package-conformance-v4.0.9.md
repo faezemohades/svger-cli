@@ -1,6 +1,8 @@
 # v4.0.9 package conformance
 
-Candidate source commit: `3fbf14b12763c3bd6849877c9d5609477b1c7a37`
+Candidate source commit: `5698731cfcdaa50d4bc04e3d3665d16ba2b40bf4`
+
+Reproduced tarball SHA-256: `adc50aefaccc15bc09bf6daa1c37d4446ced69fe754bc3663e0841063171a02b`
 
 The complete `npm pack --dry-run` result and `tar -tf` entry list are archived in
 `reports/package-conformance-v4.0.9.json`.
@@ -8,8 +10,8 @@ The complete `npm pack --dry-run` result and `tar -tf` entry list are archived i
 | Measure       | Approved baseline |  Current result |         Unapproved-growth ceiling |
 | ------------- | ----------------: | --------------: | --------------------------------: |
 | Entries       |               757 |             757 |           794 (+5%, rounded down) |
-| Packed size   |     616,991 bytes |   616,991 bytes | 647,840 bytes (+5%, rounded down) |
-| Unpacked size |     Informational | 1,971,238 bytes |                     Informational |
+| Packed size   |     616,992 bytes |   616,992 bytes | 647,841 bytes (+5%, rounded down) |
+| Unpacked size |     Informational | 1,971,255 bytes |                     Informational |
 
 ## Composition
 

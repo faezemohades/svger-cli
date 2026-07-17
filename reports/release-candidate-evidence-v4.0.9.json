@@ -1,27 +1,46 @@
 {
   "schemaVersion": 1,
   "candidate": "svger-cli@4.0.9",
-  "candidateSourceCommit": "3fbf14b12763c3bd6849877c9d5609477b1c7a37",
+  "candidateSourceCommit": "5698731cfcdaa50d4bc04e3d3665d16ba2b40bf4",
+  "candidateSourceTree": "0b10e0f59bc79e3a55ab4855b88c675b55d64d4f",
+  "releaseEvidenceIdentity": "the commit containing this record, locked by the v4.0.9 tag and release approval",
+  "productionBehaviorChangedAfterSourceCandidate": false,
+  "authorship": {
+    "name": "Navid Rezadoost",
+    "email": "46137155+navidrezadoost@users.noreply.github.com",
+    "sourceTreeChangedByAuthorshipCorrection": false
+  },
   "evidenceDate": "2026-07-17",
   "scope": "The candidate source commit contains all publishable source, runtime, package metadata, and release documentation. This evidence-only record is intentionally excluded from the npm package.",
   "tarball": {
     "filename": "svger-cli-4.0.9.tgz",
     "entryCount": 757,
-    "packedBytes": 616991,
-    "unpackedBytes": 1971238,
-    "sha256": "c124a2e72446d071d30ff25b58bcd2486760d3b724da91372b938496bc3178ef",
-    "npmShasum": "f832914ce51d35754ce7075f7bcdfc3d6b7fdb76",
-    "npmIntegrity": "sha512-qnZ7Q6b9nzXyq6OvpS57GKac8fkcTZ5Pj69qn8brnpVmpw1NdvSm8km93YM/Hlad3GZ3Luy0IPaGsuiNU5zL3A=="
+    "packedBytes": 616992,
+    "unpackedBytes": 1971255,
+    "sha256": "adc50aefaccc15bc09bf6daa1c37d4446ced69fe754bc3663e0841063171a02b",
+    "npmShasum": "1f7dd4751c7c70044a59e3db52f4871ac02b0cec",
+    "npmIntegrity": "sha512-SwrVkkp+wtX7+Ltdtz1/236/crhjJr/7380GPkXp6/MTP3fyamy1krHbfImbzvluuwjCPxlj5arsUkVwLuQuMQ=="
+  },
+  "cleanCheckoutValidation": {
+    "validatedCommit": "5698731cfcdaa50d4bc04e3d3665d16ba2b40bf4",
+    "cloneMode": "git clone --no-local into a disposable directory",
+    "tlsVerificationEnabled": true,
+    "npmCi": "pass",
+    "validatePhase0": "pass",
+    "tarballSha256Matches": true,
+    "trackedWorktreeCleanAfterValidation": true,
+    "fullDependencyAuditVulnerabilities": 0,
+    "productionDependencyAuditVulnerabilities": 0
   },
   "evidenceSha256": {
     "baselines/v4.0.x/baseline.lock.json": "4671b05099779bbafb42b9b91d1ea6332f4033d89d28744960e62a37a9252cc4",
-    "reports/package-conformance-v4.0.9.json": "612b2ef1ec4978a82852a037c2e240c88a1caace87e10a718a8b53b70c881b5d",
-    "reports/package-conformance-v4.0.9.md": "5a644130c25e5c7471404adfa7af9cacfe220246791fabd42e6343c5afd958b6",
+    "reports/package-conformance-v4.0.9.json": "730ae63e7503e7e35708ac26a0c61ff63b48ebfd03f0278f53b42986e23e7f90",
+    "reports/package-conformance-v4.0.9.md": "574f566fec839ada62ff93dcd5d3fbabb83659981e8e81bb25e9930f625d92b6",
     "reports/phase0-entrypoint-safety-matrix.json": "4acc3bef6a4b6e8a4b82cc6754ab953b1e4d46ef824fbb1807b842afab7e3eca",
-    "reports/phase0-entrypoint-safety-matrix.md": "db4d46cd588c791bfc8d2c57d17aa309bb39f1a78d409b82dbea55424f9e2982",
+    "reports/phase0-entrypoint-safety-matrix.md": "1aa62d306ce6d527de277b038d40a40939056b6489f76bf47e2d280b05a1ca55",
     "compatibility-ledger-v4.1.md": "7c437e05b9acb3ca168c901bf675df58e76bc4d3a050fc737fa932a707d22eeb",
     "docs/phase0-release-gate.md": "d6da3de19834745824c20dd5fe86dfee1207bfac41d004afab64435ffecdd4ba",
-    "reports/phase-0-report.md": "d698135a25c23bb1849bf5dbbccc7b8bf07af27ec7499f20f0f93ddb6f08bb25"
+    "reports/phase-0-report.md": "f6d80e5ffac7f1beac521f2d9815211abac35fcc14535a5f1308552c57b59a26"
   },
   "approvals": {
     "engineering": "approved by user; recorded in conversation",
