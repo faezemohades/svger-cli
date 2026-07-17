@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "phase": 1,
+  "scope": "SVGER-P1-101 through SVGER-P1-116",
+  "reviewStatus": "pending-formal-review",
+  "items": [
+    {
+      "issue": "P1-101",
+      "implementationFiles": ["src/builder.ts", "src/compiler/create-svg-compiler.ts", "src/application/svg-compiler-application-service.ts"],
+      "contractTests": ["tests/phase1/unified-entrypoints.contract.test.mjs"],
+      "evidence": "The deprecated facade warns once, identifies v5 removal, and returns the canonical BuildReport used by CLI and compiler entry points.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-102",
+      "implementationFiles": ["src/application/command.ts", "src/cli.ts", "src/commands/build-command.ts", "src/commands/operational-commands.ts"],
+      "contractTests": ["tests/phase1/report-contract.test.mjs", "tests/phase1/command-hierarchy.contract.test.mjs"],
+      "evidence": "Every command exposes validate and execute phases; unknown options fail before execute with usage exit code 2.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-103",
+      "implementationFiles": ["src/contracts/diagnostics.ts", "src/contracts/reporting.ts"],
+      "contractTests": ["tests/phase1/report-contract.test.mjs", "tests/phase1/unified-entrypoints.contract.test.mjs"],
+      "evidence": "Frozen versioned diagnostics, artifacts, BuildReport, and stable pretty/JSON/NDJSON rendering are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-104",
+      "implementationFiles": ["src/application/source-discovery.ts", "src/application/build-plan.ts", "src/application/svg-compiler-application-service.ts"],
+      "contractTests": ["tests/phase1/planning-contract.test.mjs", "tests/phase1/application-service.contract.test.mjs"],
+      "evidence": "Collision exit 7 is produced before output, stage, transaction journal, cache index, or cache entry mutation; error/first/last policies are tested.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-105",
+      "implementationFiles": ["src/application/output-transaction.ts", "src/io/atomic-write.ts", "src/commands/recover-command.ts"],
+      "contractTests": ["tests/phase1/recovery.contract.test.mjs", "tests/phase1/application-service.contract.test.mjs"],
+      "evidence": "Same-filesystem staging, atomic replacement, rollback journal recovery, backup restoration, created-file removal, and cancellation cleanup are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-106",
+      "implementationFiles": ["src/compiler/create-svg-compiler.ts", "src/application/svg-compiler-application-service.ts"],
+      "contractTests": ["tests/phase1/application-service.contract.test.mjs", "tests/phase1/unified-entrypoints.contract.test.mjs"],
+      "evidence": "Concurrent React and Vue compiler instances use isolated configuration and produce framework-specific artifacts without cross-contamination.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-107",
+      "implementationFiles": ["src/configuration/resolver.ts", "src/compiler/create-svg-compiler.ts", "src/commands/operational-commands.ts"],
+      "contractTests": ["tests/phase1/planning-contract.test.mjs", "tests/phase1/command-hierarchy.contract.test.mjs"],
+      "evidence": "Recursive merge, array replacement, immutable configuration, per-value origins, and config explain output are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-108",
+      "implementationFiles": ["src/application/bounded-scheduler.ts", "src/application/svg-compiler-application-service.ts", "src/services/file-watcher.ts"],
+      "contractTests": ["tests/phase1/planning-contract.test.mjs", "tests/phase1/application-service.contract.test.mjs"],
+      "evidence": "Peak concurrency, batch bounds, ordered and completion-order results, AbortSignal propagation, and pre-mutation cancellation are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-109",
+      "implementationFiles": ["src/cache/content-addressable-cache.ts", "src/application/svg-compiler-application-service.ts"],
+      "contractTests": ["tests/phase1/cache.contract.test.mjs"],
+      "evidence": "Every fingerprint leaf changes the cache key; hit/miss, corrupt read-only verification, eviction/repair, atomic entries, and no-cache-on-failure are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-110",
+      "implementationFiles": ["src/application/source-discovery.ts", "src/application/build-plan.ts"],
+      "contractTests": ["tests/phase1/planning-contract.test.mjs"],
+      "evidence": "Unicode-normalized lexical discovery, case-insensitive SVG extensions, recursion, hidden/output exclusion, symlink policy, and maximum-file guard are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-111",
+      "implementationFiles": ["src/contracts/diagnostics.ts", "src/cli.ts", "src/commands/build-command.ts", "src/commands/operational-commands.ts"],
+      "contractTests": ["tests/phase1/report-contract.test.mjs", "tests/phase1/command-hierarchy.contract.test.mjs", "tests/phase1/application-service.contract.test.mjs"],
+      "evidence": "Public exit codes 0 through 12 and mappings for usage, configuration, security, collision, stale output, filesystem, and cancellation failures are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-112",
+      "implementationFiles": ["src/application/svg-compiler-application-service.ts", "src/commands/build-command.ts"],
+      "contractTests": ["tests/phase1/application-service.contract.test.mjs", "tests/phase1/command-hierarchy.contract.test.mjs"],
+      "evidence": "Dry-run creates no output; check and diff preserve existing bytes; incompatible verification modes are rejected before execution.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-113",
+      "implementationFiles": ["src/migration/migration-toolkit.ts", "src/commands/migrate-command.ts"],
+      "contractTests": ["tests/phase1/migration.contract.test.mjs"],
+      "evidence": "Config/import/plugin migration dry-run, diff, backup bytes, atomic write, and second-run idempotency are asserted.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-114",
+      "implementationFiles": ["src/application/svg-compiler-application-service.ts", "src/application/output-transaction.ts", "src/io/atomic-write.ts"],
+      "contractTests": ["tests/phase1/reproducibility.contract.test.mjs"],
+      "evidence": "Two distinct temporary build environments with different concurrency and batch settings produce identical file sets, bytes, SHA-256 values, byte lengths, and manifest ordering.",
+      "result": "passed"
+    },
+    {
+      "issue": "P1-115",
+      "implementationFiles": [".github/workflows/ci.yml", "docs/SUPPORT-MATRIX.md", "package.json"],
+      "contractTests": ["tests/phase1/traceability.contract.test.mjs"],
+      "evidence": "CI distinguishes production LTS, Current forward-compatibility, and EOL legacy compatibility jobs across Ubuntu, Windows, and macOS; execution evidence requires a pushed commit and remains pending.",
+      "result": "implemented-remote-ci-pending"
+    },
+    {
+      "issue": "P1-116",
+      "implementationFiles": ["PRIVACY.md", "scripts/check-no-telemetry.mjs", ".github/CODEOWNERS", ".github/pull_request_template.md"],
+      "contractTests": ["scripts/check-no-telemetry.mjs"],
+      "evidence": "The privacy policy and source scan reject network telemetry primitives and require explicit privacy review for any future opt-in telemetry.",
+      "result": "passed"
+    }
+  ]
+}

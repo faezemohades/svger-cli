@@ -22,6 +22,7 @@ const dryRun = await compiler.build({
 assert.equal(dryRun.exitCode, ExitCode.Success);
 assert.ok(dryRun.artifacts.every(artifact => artifact.status === 'planned'));
 await assert.rejects(fs.access(output));
+await assert.rejects(fs.access(path.join(fixture, '.svger-cache')));
 
 const written = await compiler.build({ src: 'icons', out: 'components' });
 assert.equal(written.status, 'success');
@@ -69,6 +70,10 @@ const collisionOutput = path.join(fixture, 'collision-output');
 await fs.mkdir(collisionSource);
 await fs.writeFile(path.join(collisionSource, 'home-icon.svg'), '<svg/>');
 await fs.writeFile(path.join(collisionSource, 'home_icon.svg'), '<svg/>');
+const cacheVersionDirectory = path.join(fixture, '.svger-cache', '1.0.0');
+const cacheEntriesBeforeCollision = (
+  await fs.readdir(cacheVersionDirectory)
+).sort();
 const collision = await compiler.build({
   src: 'collisions',
   out: 'collision-output',
@@ -80,6 +85,18 @@ assert.equal(
   (await fs.readdir(fixture)).some(name => name.startsWith('.svger-stage-')),
   false,
   'collision validation must happen before staging'
+);
+assert.equal(
+  (await fs.readdir(fixture)).some(name =>
+    name.startsWith('.svger-transaction-')
+  ),
+  false,
+  'collision validation must happen before journal creation'
+);
+assert.deepEqual(
+  (await fs.readdir(cacheVersionDirectory)).sort(),
+  cacheEntriesBeforeCollision,
+  'collision validation must happen before cache mutation'
 );
 
 const reactCompiler = await createSVGCompiler({

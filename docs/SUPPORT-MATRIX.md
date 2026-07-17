@@ -5,19 +5,26 @@ release-gated.
 
 ## Runtime and operating systems
 
-| Runtime           | Ubuntu             | Windows            | macOS              | Status                                     |
-| ----------------- | ------------------ | ------------------ | ------------------ | ------------------------------------------ |
-| Node 18.17.0      | Core compatibility | Core compatibility | Core compatibility | v4 compatibility floor; Node itself is EOL |
-| Node 22.x LTS     | Full               | Full               | Full               | Production supported                       |
-| Node 24.x LTS     | Full               | Full               | Full               | Primary production line                    |
-| Node 26.x Current | Full               | Full               | Full               | Current-line support                       |
+| Runtime           | Ubuntu       | Windows        | macOS          | Status                                      |
+| ----------------- | ------------ | -------------- | -------------- | ------------------------------------------- |
+| Node 18.17.0      | Legacy smoke | Not gated      | Not gated      | EOL compatibility floor; unsupported in production |
+| Node 22.x LTS     | Full         | Platform suite | Platform suite | Production supported                        |
+| Node 24.x LTS     | Full         | Full           | Full           | Primary production line                     |
+| Node 26.x Current | Smoke        | Smoke          | Smoke          | Forward compatibility; not an LTS guarantee |
 
 Node 18.17 remains only because the published v4 package contract declares `>=18.17.0`. It no longer
 receives upstream Node security fixes and is not recommended for production. Node 20 is EOL and is
 not a release-gated line. Production users should use Node 22 or 24 LTS. Runtime status is tracked
 against the [official Node.js release table](https://nodejs.org/en/about/previous-releases).
 
-CI runs the core Phase 1 suite on all twelve runtime/OS combinations.
+The `engines.node` floor remains `>=18.17.0` for v4 source compatibility; this does not imply
+upstream security support. Raising that floor is a major-version Compatibility Ledger decision.
+
+CI runs the full canonical suite on Ubuntu Node 22/24 and on Windows/macOS Node 24. The
+filesystem-sensitive platform suite runs on Windows/macOS Node 22. Node 26 runs forward-
+compatibility smoke on all three operating systems. Node 18.17 runs one explicitly named EOL
+legacy smoke on Ubuntu. A scheduled expansion may run every combination, but Phase 1 merge requires
+at least the documented full Windows and macOS paths plus all listed jobs above.
 
 ## TypeScript
 
@@ -56,3 +63,4 @@ integration outside these lines requires an explicit compatibility review.
 - Removing a supported runtime or renumbering an existing exit code requires a major release.
 - Adding a runtime, operating system, compiler, framework, or bundler line is a minor change.
 - CI and this document must change in the same reviewed commit.
+- Passing Node 26 smoke does not promote Current to production-supported LTS status.

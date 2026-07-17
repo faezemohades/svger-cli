@@ -2,7 +2,11 @@ import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createSVGCompiler } from '../../dist/index.js';
+import {
+  createCacheKey,
+  createPipelineFingerprint,
+  createSVGCompiler,
+} from '../../dist/index.js';
 
 const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'svger-p1-cache-'));
 await fs.mkdir(path.join(fixture, 'icons'));
@@ -11,6 +15,59 @@ await fs.writeFile(
   '<svg viewBox="0 0 2 2"><path d="M0 0h1v1z"/></svg>'
 );
 const compiler = await createSVGCompiler({ cwd: fixture });
+const fingerprint = createPipelineFingerprint(
+  compiler.config.explain().reduce((config, entry) => {
+    const segments = entry.path.split('.');
+    let target = config;
+    for (const segment of segments.slice(0, -1)) {
+      target[segment] ??= {};
+      target = target[segment];
+    }
+    target[segments.at(-1)] = entry.value;
+    return config;
+  }, {}),
+  'basic'
+);
+const sourceBytes = '<svg/>';
+const baselineKey = createCacheKey(sourceBytes, fingerprint);
+const fingerprintLeafPaths = [
+  ['compilerVersion'],
+  ['parser', 'id'],
+  ['parser', 'version'],
+  ['optimizer', 'passIds'],
+  ['optimizer', 'version'],
+  ['optimizer', 'configHash'],
+  ['frameworkAdapter', 'id'],
+  ['frameworkAdapter', 'version'],
+  ['formatter', 'id'],
+  ['formatter', 'version'],
+  ['pluginGraphHash'],
+  ['policyHash'],
+  ['target', 'platform'],
+  ['target', 'nodeMajor'],
+  ['accessibilityMode'],
+  ['namingStrategy'],
+  ['featureFlags', 'typescript'],
+  ['featureFlags', 'framework'],
+  ['featureFlags', 'stripUnsafeInput'],
+  ['resolvedConfigHash'],
+];
+for (const leafPath of fingerprintLeafPaths) {
+  const changed = structuredClone(fingerprint);
+  let target = changed;
+  for (const segment of leafPath.slice(0, -1)) target = target[segment];
+  const leaf = leafPath.at(-1);
+  target[leaf] = Array.isArray(target[leaf])
+    ? [...target[leaf], 'contract-change']
+    : typeof target[leaf] === 'boolean'
+      ? !target[leaf]
+      : `${target[leaf]}-contract-change`;
+  assert.notEqual(
+    createCacheKey(sourceBytes, changed),
+    baselineKey,
+    `cache key ignored fingerprint leaf ${leafPath.join('.')}`
+  );
+}
 const first = await compiler.build({ src: 'icons', out: 'output' });
 assert.equal(first.status, 'success');
 const cacheVersionDirectory = path.join(fixture, '.svger-cache', '1.0.0');

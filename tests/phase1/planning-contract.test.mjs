@@ -137,6 +137,22 @@ const completionOrder = await runBounded(
 );
 assert.deepEqual(completionOrder, [2, 1]);
 
+const cancellation = new AbortController();
+const started = [];
+await assert.rejects(
+  runBounded(
+    [1, 2, 3],
+    async value => {
+      started.push(value);
+      cancellation.abort('superseded contract job');
+      return value;
+    },
+    { concurrency: 1, signal: cancellation.signal }
+  ),
+  error => error.code === 'E_BUILD_CANCELLED' && error.exitCode === 12
+);
+assert.deepEqual(started, [1]);
+
 await fs.rm(fixture, { recursive: true, force: true });
 console.log(
   'Phase 1 configuration, discovery, planning, and scheduler passed.'
