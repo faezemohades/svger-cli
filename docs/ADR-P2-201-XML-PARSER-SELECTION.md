@@ -309,7 +309,8 @@ not in this ADR-only branch.
 | License and supply chain | Pending | — | Pending | License inventory and SBOM diff |
 | Support matrix | Pending | — | Pending | Remote qualification matrix |
 | Release/package footprint | Pending | — | Pending | Install and packed-package impact |
+| Performance and resource behavior | Pending | — | Pending | Benchmark and resource-limit evidence |
 
-`P2-202` production implementation is blocked until all five reviews are named and this ADR status
+`P2-202` production implementation is blocked until all six reviews are named and this ADR status
 is changed to `Accepted`. A rejected qualification returns the decision to `Proposed`, with `saxes`
 as the first fallback candidate.

@@ -22,19 +22,24 @@ This plan defines the evidence required before `@xml-tools/parser@1.0.11` can be
 SVGER-CLI. It does not add dependencies, does not modify the lockfile, and does not authorize
 P2-202 production work.
 
-## Registry Evidence
+## Registry And Tarball Evidence
 
 The following metadata was read from the TLS-verified npm registry on 2026-07-18 using
-`env -u NODE_TLS_REJECT_UNAUTHORIZED`.
+`env -u NODE_TLS_REJECT_UNAUTHORIZED`. The tarballs were then downloaded and extracted in a
+disposable directory outside the repository. No repository dependency file was modified.
 
-| Package | Version | License | Direct dependencies | Integrity |
-| --- | ---: | --- | --- | --- |
-| `@xml-tools/parser` | 1.0.11 | Apache-2.0 | `chevrotain@7.1.1` | `sha512-aKqQ077XnR+oQtHJlrAflaZaL7qZsulWc/i/ZEooar5JiWj1eLt0+Wg28cpa+XLney107wXqneC+oG1IZvxkTA==` |
-| `chevrotain` | 7.1.1 | Apache-2.0 | `regexp-to-ast@0.5.0` | `sha512-wy3mC1x4ye+O+QkEinVJkPf5u2vsrDIYW9G7ZuwFl6v/Yu0LwUuT2POsb+NUWApebyxfkQq6+yDfRExbnI5rcw==` |
-| `regexp-to-ast` | 0.5.0 | MIT | None | `sha512-tlbJqcMHnPKI9zSrystikWKwHkBqu2a/Sgw01h3zFjvYrMxEDYHzzoMZnUrbIfpTFEsoRnnviOXNCzFiSc54Qw==` |
+| Package | Version | License | Direct dependencies | SHA-256 | Files | Install scripts |
+| --- | ---: | --- | --- | --- | ---: | --- |
+| `@xml-tools/parser` | 1.0.11 | Apache-2.0 | `chevrotain@7.1.1` | `ff9d96ab22f7ca0b5f11d4a2b4b6ad65ee62c73e186d1b13021a475e6e12afd5` | 9 | None |
+| `chevrotain` | 7.1.1 | Apache-2.0 | `regexp-to-ast@0.5.0` | `9cbea943f1aef15a1054d3e3d8f0cfb3736720ae77a926df9a83207f6bf522af` | 240 | None |
+| `regexp-to-ast` | 0.5.0 | MIT | None | `19a7f98b1610fb450eb0f584374ecae2d200f84c102f1ea6860c249b2c910c08` | 6 | None |
 
 The direct parser version must be pinned exactly if adopted. The lockfile graph must be reviewed
 and bound to the accepted ADR before any production integration begins.
+
+Initial extracted evidence is recorded in `reports/phase2-parser-supply-chain-evidence.md`. Final
+approval still requires repository/source correspondence, SBOM delta, vulnerability audit, and a
+complete published-file inventory attached to the qualification PR.
 
 ## Qualification Boundary
 
@@ -77,6 +82,32 @@ The qualification corpus must include the following groups before the ADR can mo
 | Location fidelity | Source ranges for document, elements, attributes, text, CDATA, comments, PI, and references |
 | Platform matrix | Node 22/24 on Ubuntu, Windows, and macOS; Node 26 smoke; Node 18 legacy smoke only |
 
+## Named Fixture Contracts
+
+Every corpus requirement must be represented as a named fixture in the qualification harness. The
+first required fixture set is:
+
+| ID | Category | Expected decision | Expected diagnostic | AST absent | I/O zero | Timeout | Platforms |
+| --- | --- | --- | --- | --- | --- | ---: | --- |
+| `XML-VALID-BASIC-001` | valid-svg | accept | None | No | Yes | 1000 | linux, windows, macos |
+| `XML-LEXICAL-CDATA-001` | lexical | accept | None | No | Yes | 1000 | linux, windows, macos |
+| `XML-LEXICAL-COMMENT-001` | lexical | accept | None | No | Yes | 1000 | linux, windows, macos |
+| `XML-LEXICAL-PI-001` | lexical | accept | None | No | Yes | 1000 | linux, windows, macos |
+| `XML-MALFORMED-001` | malformed | reject | `E_XML_PARSE_FAILED` | Yes | Yes | 1000 | linux, windows, macos |
+| `RECOVERY-INSERTED-TOKEN-001` | recovery | reject | `E_XML_RECOVERY_FORBIDDEN` | Yes | Yes | 1000 | linux, windows, macos |
+| `RECOVERY-SKIPPED-TOKEN-001` | recovery | reject | `E_XML_RECOVERY_FORBIDDEN` | Yes | Yes | 1000 | linux, windows, macos |
+| `DOCTYPE-SYSTEM-001` | security | reject | `E_XML_DOCTYPE_FORBIDDEN` | Yes | Yes | 1000 | linux, windows, macos |
+| `ENTITY-INTERNAL-001` | security | reject | `E_XML_CUSTOM_ENTITY_FORBIDDEN` | Yes | Yes | 1000 | linux, windows, macos |
+| `ENTITY-EXTERNAL-001` | security | reject | `E_XML_EXTERNAL_ENTITY_FORBIDDEN` | Yes | Yes | 1000 | linux, windows, macos |
+| `ENTITY-BOMB-001` | security | reject | `E_XML_ENTITY_EXPANSION_FORBIDDEN` | Yes | Yes | 1000 | linux, windows, macos |
+| `NAMESPACE-UNDECLARED-PREFIX-001` | namespace | reject | `E_XML_NAMESPACE_UNDECLARED_PREFIX` | Yes | Yes | 1000 | linux, windows, macos |
+| `NAMESPACE-DUPLICATE-EXPANDED-ATTR-001` | namespace | reject | `E_XML_NAMESPACE_DUPLICATE_ATTRIBUTE` | Yes | Yes | 1000 | linux, windows, macos |
+| `LOCATION-CRLF-UNICODE-001` | location | accept | None | No | Yes | 1000 | linux, windows, macos |
+| `DETERMINISM-REPEAT-100` | determinism | accept | None | No | Yes | 5000 | linux, windows, macos |
+| `RESOURCE-MAX-DEPTH-001` | resource | reject | `E_XML_RESOURCE_LIMIT_EXCEEDED` | Yes | Yes | 1000 | linux, windows, macos |
+| `RESOURCE-MAX-ATTRIBUTE-001` | resource | reject | `E_XML_RESOURCE_LIMIT_EXCEEDED` | Yes | Yes | 1000 | linux, windows, macos |
+| `SUPPLYCHAIN-INTEGRITY-001` | supply-chain | accept | None | N/A | N/A | 1000 | linux |
+
 ## Acceptance Checks
 
 The future qualification harness must produce machine-readable evidence with these checks:
@@ -117,6 +148,7 @@ P2-201 cannot become `Accepted` until every row has a named approver and timesta
 | License and supply chain | Pending | Pending | License review and SBOM diff |
 | Support matrix | Pending | Pending | Remote matrix evidence |
 | Release/package footprint | Pending | Pending | Package impact and conformance review |
+| Performance and resource behavior | Pending | Pending | Benchmark and resource-limit evidence |
 
 If any review rejects the selected parser, the ADR remains `Proposed` and `saxes@6.0.0` becomes the
 first fallback candidate for a revised ADR.

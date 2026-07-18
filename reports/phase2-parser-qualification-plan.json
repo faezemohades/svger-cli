@@ -42,6 +42,44 @@
       "tarball": "https://registry.npmjs.org/regexp-to-ast/-/regexp-to-ast-0.5.0.tgz"
     }
   ],
+  "tarballEvidence": [
+    {
+      "name": "@xml-tools/parser",
+      "version": "1.0.11",
+      "tarballSha256": "ff9d96ab22f7ca0b5f11d4a2b4b6ad65ee62c73e186d1b13021a475e6e12afd5",
+      "packedBytes": 13127,
+      "unpackedBytes": 39038,
+      "fileCount": 9,
+      "licenseFiles": ["LICENSE"],
+      "installScriptInventory": "none",
+      "repository": "https://github.com/sap/xml-tools/"
+    },
+    {
+      "name": "chevrotain",
+      "version": "7.1.1",
+      "tarballSha256": "9cbea943f1aef15a1054d3e3d8f0cfb3736720ae77a926df9a83207f6bf522af",
+      "packedBytes": 387384,
+      "unpackedBytes": 2229343,
+      "fileCount": 240,
+      "licenseFiles": ["LICENSE.txt"],
+      "installScriptInventory": "none",
+      "repository": {
+        "type": "git",
+        "url": "git://github.com/SAP/chevrotain.git"
+      }
+    },
+    {
+      "name": "regexp-to-ast",
+      "version": "0.5.0",
+      "tarballSha256": "19a7f98b1610fb450eb0f584374ecae2d200f84c102f1ea6860c249b2c910c08",
+      "packedBytes": 9035,
+      "unpackedBytes": 42518,
+      "fileCount": 6,
+      "licenseFiles": ["LICENSE"],
+      "installScriptInventory": "none",
+      "repository": "https://github.com/bd82/regexp-to-ast.git"
+    }
+  ],
   "corpusGroups": [
     "valid-svg-basics",
     "lexical-preservation",
@@ -66,6 +104,188 @@
     "byte-for-byte-determinism",
     "record-performance-without-approval-waiver",
     "license-sbom-lockfile-audit-review"
+  ],
+  "fixtureContracts": [
+    {
+      "id": "XML-VALID-BASIC-001",
+      "category": "valid-svg",
+      "expectedDecision": "accept",
+      "expectedDiagnosticCode": null,
+      "astMustBeAbsent": false,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "XML-LEXICAL-CDATA-001",
+      "category": "lexical",
+      "expectedDecision": "accept",
+      "expectedDiagnosticCode": null,
+      "astMustBeAbsent": false,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "XML-LEXICAL-COMMENT-001",
+      "category": "lexical",
+      "expectedDecision": "accept",
+      "expectedDiagnosticCode": null,
+      "astMustBeAbsent": false,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "XML-LEXICAL-PI-001",
+      "category": "lexical",
+      "expectedDecision": "accept",
+      "expectedDiagnosticCode": null,
+      "astMustBeAbsent": false,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "XML-MALFORMED-001",
+      "category": "malformed",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_PARSE_FAILED",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "RECOVERY-INSERTED-TOKEN-001",
+      "category": "recovery",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_RECOVERY_FORBIDDEN",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "RECOVERY-SKIPPED-TOKEN-001",
+      "category": "recovery",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_RECOVERY_FORBIDDEN",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "DOCTYPE-SYSTEM-001",
+      "category": "security",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_DOCTYPE_FORBIDDEN",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "ENTITY-INTERNAL-001",
+      "category": "security",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_CUSTOM_ENTITY_FORBIDDEN",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "ENTITY-EXTERNAL-001",
+      "category": "security",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_EXTERNAL_ENTITY_FORBIDDEN",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "ENTITY-BOMB-001",
+      "category": "security",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_ENTITY_EXPANSION_FORBIDDEN",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "NAMESPACE-UNDECLARED-PREFIX-001",
+      "category": "namespace",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_NAMESPACE_UNDECLARED_PREFIX",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "NAMESPACE-DUPLICATE-EXPANDED-ATTR-001",
+      "category": "namespace",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_NAMESPACE_DUPLICATE_ATTRIBUTE",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "LOCATION-CRLF-UNICODE-001",
+      "category": "location",
+      "expectedDecision": "accept",
+      "expectedDiagnosticCode": null,
+      "astMustBeAbsent": false,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "DETERMINISM-REPEAT-100",
+      "category": "determinism",
+      "expectedDecision": "accept",
+      "expectedDiagnosticCode": null,
+      "astMustBeAbsent": false,
+      "ioMustRemainZero": true,
+      "timeoutMs": 5000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "RESOURCE-MAX-DEPTH-001",
+      "category": "resource",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_RESOURCE_LIMIT_EXCEEDED",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "RESOURCE-MAX-ATTRIBUTE-001",
+      "category": "resource",
+      "expectedDecision": "reject",
+      "expectedDiagnosticCode": "E_XML_RESOURCE_LIMIT_EXCEEDED",
+      "astMustBeAbsent": true,
+      "ioMustRemainZero": true,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux", "windows", "macos"]
+    },
+    {
+      "id": "SUPPLYCHAIN-INTEGRITY-001",
+      "category": "supply-chain",
+      "expectedDecision": "accept",
+      "expectedDiagnosticCode": null,
+      "astMustBeAbsent": null,
+      "ioMustRemainZero": null,
+      "timeoutMs": 1000,
+      "requiredPlatforms": ["linux"]
+    }
   ],
   "blockedActions": [
     "package-json-parser-dependency",
@@ -102,6 +322,12 @@
     },
     {
       "review": "release-package-footprint",
+      "approver": "Pending",
+      "timestamp": null,
+      "status": "Pending"
+    },
+    {
+      "review": "performance-resource-behavior",
       "approver": "Pending",
       "timestamp": null,
       "status": "Pending"
