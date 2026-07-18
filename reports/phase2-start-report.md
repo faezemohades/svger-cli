@@ -6,11 +6,14 @@ Branch: `phase/2-parser-selection-adr`
 
 Base evidence commit: `20feb57d3084a08043785de52b6db0e0671f0506`
 
+Governance reconciliation commit: `9f5503e85716679e31c4470e15dff1170f4b4918`
+
 ## Verdict
 
 ```text
 PHASE 2 PLANNING: STARTED
 P2-201 PARSER-SELECTION ADR: DRAFTED
+P2-201 QUALIFICATION PLAN: DRAFTED
 P2-201 FORMAL APPROVAL: PENDING
 P2-202 THROUGH P2-207 PRODUCTION IMPLEMENTATION: BLOCKED
 PHASE 2 MERGE/RELEASE: PROHIBITED
@@ -27,6 +30,17 @@ boundary, requires a project-owned immutable `ParsedXMLAST`, rejects the compani
 AST, and defines binding DTD/entity, determinism, security-corpus, license, support-matrix, and
 approval gates.
 
+The governance reconciliation has now been accepted as correct and compliant. That acceptance closes
+local corrective-action review items, but it does not close Phase 0 publication, Phase 1 remote
+acceptance, or Phase 2 parser approval. Phase 2 therefore remains limited to ADR research and
+qualification design.
+
+## Phase 2 output
+
+- `docs/ADR-P2-201-XML-PARSER-SELECTION.md`
+- `docs/P2-201-PARSER-QUALIFICATION-PLAN.md`
+- `reports/phase2-parser-qualification-plan.json`
+
 ## Repository impact
 
 - No production source changed.
@@ -35,6 +49,7 @@ approval gates.
 - No P2-202 model or parser integration code was created.
 - `main`, the Phase 1 branch, and their commits remain unchanged.
 - The work is isolated on `phase/2-parser-selection-adr`.
+- The qualification plan records registry metadata and approval requirements only.
 
 ## Required next authorization
 

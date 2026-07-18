@@ -93,6 +93,7 @@ Primary references:
 - [`libxmljs2` native binding source](https://github.com/marudor/libxmljs2)
 - [W3C XML 1.0](https://www.w3.org/TR/xml/)
 - [W3C Namespaces in XML](https://www.w3.org/TR/xml-names/)
+- [P2-201 parser qualification plan](./P2-201-PARSER-QUALIFICATION-PLAN.md)
 
 ## Evaluation matrix
 
@@ -255,12 +256,17 @@ Before this ADR may become `Accepted`, an isolated parser qualification change m
 8. Cold parse, standard-corpus throughput, p95 latency, and peak RSS are recorded for the P2-207
    budget decision; this ADR does not invent or waive those budgets.
 
+The required corpus, instrumentation, matrix, and approval evidence are specified in
+`docs/P2-201-PARSER-QUALIFICATION-PLAN.md`. That plan is documentation and evidence only; it does
+not authorize parser installation or production parser integration.
+
 ## License and supply-chain decision
 
-`@xml-tools/parser`, Chevrotain, and `regexp-to-ast` report Apache-2.0 licenses. This is acceptable in
-principle for an MIT-distributed application, but final adoption requires repository license review,
-retained license/notice obligations, SBOM inclusion, exact-version locking, provenance inspection,
-and vulnerability scanning. This ADR is not legal approval.
+`@xml-tools/parser@1.0.11` and `chevrotain@7.1.1` report Apache-2.0 licenses.
+`regexp-to-ast@0.5.0` reports MIT. This is acceptable in principle for an MIT-distributed
+application, but final adoption requires repository license review, retained license/notice
+obligations, SBOM inclusion, exact-version locking, provenance inspection, and vulnerability
+scanning. This ADR is not legal approval.
 
 Adopting one direct and two transitive core dependencies requires removing or qualifying the
 absolute “zero-dependency” marketing claim. The accurate replacement is “no framework runtime
