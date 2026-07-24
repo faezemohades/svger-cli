@@ -1,0 +1,84 @@
+{
+  "date": "2026-07-24",
+  "branch": "agent/docs-site-v409-review",
+  "liveSite": "https://faezemohades.github.io/svger-cli/",
+  "sourceDirectory": "docs-site",
+  "verdict": {
+    "live_github_pages_status_before_change": "stale",
+    "docs_site_landing_page": "updated_for_v4_0_9_source",
+    "complete_command_reference": "added",
+    "live_runtime_evidence": "added",
+    "cli_command_accuracy": "updated",
+    "feature_coverage": "updated",
+    "security_governance_status": "added",
+    "phase2_production_implementation": "blocked"
+  },
+  "reviewedFiles": [
+    "docs-site/index.html",
+    "docs-site/commands.html",
+    "docs-site/README.md",
+    "docs-site/COMPARISON.md",
+    "docs-site/BENCHMARK_TESTING.md",
+    "docs-site/optimizer.html",
+    "docs-site/benchmark-demo.html",
+    "src/cli.ts",
+    "src/types/index.ts",
+    "src/types/integrations.ts",
+    "src/services/config.ts",
+    "package.json",
+    "docs/SUPPORT-MATRIX.md",
+    "docs/OPTIONAL-DEPENDENCIES.md",
+    "reports/package-conformance-v4.0.9.md",
+    "reports/docs-site-live-evidence-2026-07-24.md",
+    "reports/docs-site-live-evidence-2026-07-24.json",
+    "reports/phase2-start-report.md"
+  ],
+  "resolvedFindings": [
+    {
+      "area": "version",
+      "before": "older v4.0.3/v4.0.7 public copy",
+      "after": "v4.0.9 source status documented"
+    },
+    {
+      "area": "cli",
+      "before": "obsolete convert and batch examples",
+      "after": "current build and generate commands"
+    },
+    {
+      "area": "coverage",
+      "before": "incomplete command, integration, safety, and governance coverage",
+      "after": "complete public surface matrices and commands.html reference added"
+    },
+    {
+      "area": "runtime_evidence",
+      "before": "live docs did not prove commands execute",
+      "after": "15/15 smoke assertions, formal validation, and optimizer benchmark evidence recorded"
+    },
+    {
+      "area": "claims",
+      "before": "broad benchmark and comparison claims",
+      "after": "claim governance and benchmark scope rules"
+    }
+  ],
+  "liveRuntimeEvidence": {
+    "report": "reports/docs-site-live-evidence-2026-07-24.md",
+    "machineReadableReport": "reports/docs-site-live-evidence-2026-07-24.json",
+    "smokeAssertions": "15/15",
+    "formalValidation": {
+      "typecheck": "pass",
+      "lintBudget": "pass",
+      "test": "pass",
+      "security": "pass",
+      "safetyMatrix": "pass",
+      "phase1Smoke": "pass"
+    },
+    "knownLimitationsDocumented": [
+      "single-file optimize input currently exits ENOTDIR because OptimizeCommand reads input as a directory"
+    ]
+  },
+  "registryRealityAtReview": {
+    "sourceVersion": "4.0.9",
+    "npmLatest": "4.0.8",
+    "npm409": "pending"
+  }
+}

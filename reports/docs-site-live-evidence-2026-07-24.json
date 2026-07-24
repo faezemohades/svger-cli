@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-24T07:05:14.422Z",
+  "environment": {
+    "platform": "linux",
+    "arch": "x64",
+    "node": "v24.18.0",
+    "npm": "11.16.0"
+  },
+  "source": {
+    "packageVersion": "4.0.9",
+    "commit": "9454b5f1e6638d92f1a726f58703f82d039e3900",
+    "cliEntrypoint": "bin/svg-tool.js -> dist/cli.js"
+  },
+  "liveRuntimeSmoke": {
+    "passedAssertions": 15,
+    "totalAssertions": 15,
+    "assertions": {
+      "versionMatchesPackage": true,
+      "rootHelpListsCommands": true,
+      "buildHelpListsAllMajorOptions": true,
+      "allCommandHelpScreensAvailable": true,
+      "safeGenerateSucceeded": true,
+      "safeBuildSucceeded": true,
+      "unsafeScriptRejected": true,
+      "unsafeEventRejected": true,
+      "unsafeJavascriptUriRejected": true,
+      "explicitStripModeSucceeded": true,
+      "oversizedInputRejected": true,
+      "optimizeDirectorySucceeded": true,
+      "optimizeUnsafeDirectoryNonzero": true,
+      "esmImportSucceeded": true,
+      "optimizedOutputSmaller": true
+    },
+    "generatedFiles": {
+      "generateReact": ["Safe.tsx"],
+      "buildVue": ["Safe.vue"],
+      "stripMode": ["UnsafeEvent.tsx"],
+      "optimizeDirectory": ["safe.svg"]
+    },
+    "sizeEvidence": {
+      "safeSvgBytes": 173,
+      "optimizedSafeSvgBytes": 151,
+      "optimizedReductionPercent": 12.72
+    },
+    "knownLimitationsObserved": {
+      "singleFileOptimizeCurrentlyFails": true,
+      "note": "The current OptimizeCommand reads the input path as a directory. Documentation should teach directory input/output for `svger optimize` until single-file optimization is implemented or the CLI help is corrected."
+    }
+  },
+  "formalValidation": [
+    {
+      "command": "npm run build",
+      "status": "pass",
+      "scope": "TypeScript production build"
+    },
+    {
+      "command": "npm run typecheck",
+      "status": "pass",
+      "scope": "TypeScript no-emit typecheck"
+    },
+    {
+      "command": "npm run lint:budget",
+      "status": "pass",
+      "scope": "ESLint budget: 0 errors, 14/14 approved warnings, 1 approved warning category"
+    },
+    {
+      "command": "npm run test",
+      "status": "pass",
+      "scope": "Frameworks 11/11, config 10/10, E2E 8/8, integrations 7/7"
+    },
+    {
+      "command": "npm run test:security",
+      "status": "pass",
+      "scope": "Phase 0 containment assertions passed: 27"
+    },
+    {
+      "command": "npm run test:safety-matrix",
+      "status": "pass",
+      "scope": "Reject/strip/sandbox matrix passed for CLI, APIs, bundlers, Jest, and delegated Next.js paths"
+    },
+    {
+      "command": "npm run test:phase1:smoke",
+      "status": "pass",
+      "scope": "Phase 1 report, canonical application service, and transaction recovery contracts"
+    }
+  ],
+  "benchmarkEvidence": {
+    "command": "node scripts/benchmark-comprehensive.js",
+    "status": "pass",
+    "scope": "Optimizer size/time comparison across repository sample SVGs. Visual column is not treated as authoritative proof because the script falls back to zero when optional visual comparison fails.",
+    "summary": [
+      {
+        "level": "BASIC",
+        "averageSizeReductionPercent": 6.26,
+        "averageProcessingTimeMs": 0.51,
+        "averageMemoryKb": 47.69
+      },
+      {
+        "level": "BALANCED",
+        "averageSizeReductionPercent": 7.76,
+        "averageProcessingTimeMs": 1.46,
+        "averageMemoryKb": 158.67
+      },
+      {
+        "level": "AGGRESSIVE",
+        "averageSizeReductionPercent": 6.86,
+        "averageProcessingTimeMs": 5.07,
+        "averageMemoryKb": 110.52
+      },
+      {
+        "level": "MAXIMUM",
+        "averageSizeReductionPercent": 11.75,
+        "averageProcessingTimeMs": 3.22,
+        "averageMemoryKb": 346.21
+      }
+    ]
+  },
+  "documentationActions": [
+    "Replaced stale GitHub Pages landing page content with a v4.0.9 implementation-indexed overview.",
+    "Added a complete command and live-testing documentation page.",
+    "Aligned optimizer examples with current directory-oriented runtime behavior.",
+    "Rewrote benchmark/comparison copy to require measured, reproducible claims.",
+    "Removed stale published backup content from docs-site."
+  ]
+}
