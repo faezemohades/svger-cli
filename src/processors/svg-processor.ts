@@ -11,9 +11,9 @@ import {
   ProcessingJob,
   NamingConvention,
 } from '../types/index.js';
-import { logger } from '../core/logger.js';
-import { performanceEngine } from '../core/performance-engine.js';
-import { frameworkTemplateEngine } from '../core/framework-templates.js';
+import { logger as defaultLogger } from '../core/logger.js';
+import { performanceEngine as defaultPerformanceEngine } from '../core/performance-engine.js';
+import { frameworkTemplateEngine as defaultFrameworkTemplateEngine } from '../core/framework-templates.js';
 import { OptimizerPipeline } from '../optimizers/optimizer-pipeline.js';
 import { OptLevel, getDefaultOptConfig } from '../optimizers/types.js';
 import { basicCleaningStage } from '../optimizers/basic-cleaner.js';
@@ -29,12 +29,23 @@ import {
 import { pathDeduplicationStage } from '../optimizers/path-deduplicator.js';
 import { shapeConversionStage } from '../optimizers/shape-conversion.js';
 import { getPluginManager } from '../core/enhanced-plugin-manager.js';
+import type { Logger } from '../types/index.js';
+import type { PerformanceEngine } from '../core/performance-engine.js';
+import type { FrameworkTemplateEngine } from '../core/framework-templates.js';
+import type { EnhancedPluginManager } from '../core/enhanced-plugin-manager.js';
 import type { FrameworkType } from '../types/index.js';
 import {
   applySVGInputSafety,
-  resolveOutputArtifactPath,
   type SVGInputSafetyOptions,
 } from '../security/input-safety.js';
+import { writeOutputFileAtomic } from '../io/atomic-write.js';
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (!signal?.aborted) return;
+  const error = new Error('SVG processing was cancelled.');
+  Object.assign(error, { code: 'ABORT_ERR', cause: signal.reason });
+  throw error;
+}
 
 /**
  * SVG content processor and component generator
@@ -46,7 +57,25 @@ export class SVGProcessor {
   private optimizer: OptimizerPipeline | null = null;
   private currentOptimizationLevel: OptLevel = OptLevel.BASIC;
 
-  private constructor() {
+  private readonly logger: Logger;
+  private readonly performanceEngine: PerformanceEngine;
+  private readonly frameworkTemplateEngine: FrameworkTemplateEngine;
+  private readonly pluginManager: EnhancedPluginManager;
+
+  public constructor(
+    dependencies: {
+      logger?: Logger;
+      performanceEngine?: PerformanceEngine;
+      frameworkTemplateEngine?: FrameworkTemplateEngine;
+      pluginManager?: EnhancedPluginManager;
+    } = {}
+  ) {
+    this.logger = dependencies.logger ?? defaultLogger;
+    this.performanceEngine =
+      dependencies.performanceEngine ?? defaultPerformanceEngine;
+    this.frameworkTemplateEngine =
+      dependencies.frameworkTemplateEngine ?? defaultFrameworkTemplateEngine;
+    this.pluginManager = dependencies.pluginManager ?? getPluginManager();
     // Initialize optimizer pipeline with basic cleaning stage
     this.optimizer = new OptimizerPipeline({ level: OptLevel.BASIC });
     this.optimizer.registerStage('basic-cleaning', basicCleaningStage);
@@ -134,17 +163,17 @@ export class SVGProcessor {
     svgContent: string,
     safetyOptions: SVGInputSafetyOptions = {}
   ): Promise<string> {
-    logger.debug('Cleaning SVG content');
+    this.logger.debug('Cleaning SVG content');
 
     try {
       const safeContent = applySVGInputSafety(svgContent, {
         ...safetyOptions,
-        warn: message => logger.warn(message),
+        warn: message => this.logger.warn(message),
       });
 
       if (this.optimizer) {
         const result = await this.optimizer.optimize(safeContent);
-        logger.debug(
+        this.logger.debug(
           `Optimized SVG: ${result.reductionPercent.toFixed(2)}% size reduction`
         );
         return result.optimizedSvg;
@@ -161,7 +190,10 @@ export class SVGProcessor {
       ) {
         throw error;
       }
-      logger.warn('Optimizer failed, falling back to legacy cleaning:', error);
+      this.logger.warn(
+        'Optimizer failed, falling back to legacy cleaning:',
+        error
+      );
       const safeContent = applySVGInputSafety(svgContent, safetyOptions);
       return this.legacyCleanSVGContent(safeContent);
     }
@@ -236,7 +268,7 @@ export class SVGProcessor {
   }
 
   private async applyActivePlugins(svgContent: string): Promise<string> {
-    const pluginManager = getPluginManager();
+    const pluginManager = this.pluginManager;
     if (pluginManager.activePluginCount === 0) {
       return svgContent;
     }
@@ -324,7 +356,11 @@ export class SVGProcessor {
     fileName: string,
     namingConvention?: 'kebab' | 'pascal' | 'camel'
   ): string {
-    const baseName = path.basename(fileName, '.svg');
+    const extension = path.extname(fileName);
+    const baseName = path.basename(
+      fileName,
+      extension.toLowerCase() === '.svg' ? extension : '.svg'
+    );
     const convention = namingConvention || 'pascal';
     return SVGProcessor.NAMING_HANDLERS[convention](baseName);
   }
@@ -338,6 +374,7 @@ export class SVGProcessor {
     options: Partial<ComponentGenerationOptions> = {}
   ): Promise<string> {
     try {
+      throwIfAborted(options.signal);
       // Clean and optimize SVG content (now async)
       const cleanedContent = await this.cleanSVGContent(svgContent, {
         maxInputSizeBytes: options.maxInputSizeBytes,
@@ -346,6 +383,7 @@ export class SVGProcessor {
       });
       const pluginProcessedContent =
         await this.applyActivePlugins(cleanedContent);
+      throwIfAborted(options.signal);
 
       // Create full options object with required fields
       const fullOptions: ComponentGenerationOptions = {
@@ -361,12 +399,16 @@ export class SVGProcessor {
       };
 
       // Use framework template engine directly
-      const component = frameworkTemplateEngine.generateComponent(fullOptions);
+      const component =
+        this.frameworkTemplateEngine.generateComponent(fullOptions);
 
-      logger.debug(`Generated component: ${componentName}`);
+      this.logger.debug(`Generated component: ${componentName}`);
       return component;
     } catch (error) {
-      logger.error(`Failed to generate component ${componentName}:`, error);
+      this.logger.error(
+        `Failed to generate component ${componentName}:`,
+        error
+      );
       throw error;
     }
   }
@@ -380,6 +422,7 @@ export class SVGProcessor {
     options: ComponentGenerationOptions
   ): Promise<string> {
     try {
+      throwIfAborted(options.signal);
       // Optimize SVG content based on framework requirements
       const optimizationLevel =
         options.framework === 'vanilla' ? 'maximum' : 'balanced';
@@ -387,26 +430,27 @@ export class SVGProcessor {
         maxInputSizeBytes: options.maxInputSizeBytes,
         source: componentName,
         unsafeInputPolicy: options.unsafeInputPolicy,
-        warn: message => logger.warn(message),
+        warn: message => this.logger.warn(message),
       });
-      const optimizedContent = performanceEngine.optimizeSVGContent(
+      const optimizedContent = this.performanceEngine.optimizeSVGContent(
         safeContent,
         optimizationLevel
       );
+      throwIfAborted(options.signal);
 
       // Generate framework-specific component
-      const component = frameworkTemplateEngine.generateComponent({
+      const component = this.frameworkTemplateEngine.generateComponent({
         ...options,
         componentName,
         svgContent: optimizedContent,
       });
 
-      logger.debug(
+      this.logger.debug(
         `Generated ${options.framework} component: ${componentName}`
       );
       return component;
     } catch (error) {
-      logger.error(
+      this.logger.error(
         `Failed to generate ${options.framework} component ${componentName}:`,
         error
       );
@@ -427,6 +471,7 @@ export class SVGProcessor {
       batchSize?: number;
       parallel?: boolean;
       maxConcurrency?: number;
+      signal?: AbortSignal;
     } = {}
   ): Promise<
     Array<{
@@ -436,15 +481,17 @@ export class SVGProcessor {
       duration: number;
     }>
   > {
-    logger.info(`Starting batch processing of ${files.length} files`);
+    this.logger.info(`Starting batch processing of ${files.length} files`);
 
     try {
-      const results = await performanceEngine.processBatch(files, config);
+      throwIfAborted(config.signal);
+      const results = await this.performanceEngine.processBatch(files, config);
+      throwIfAborted(config.signal);
 
       // Log performance metrics
-      const metrics = performanceEngine.getPerformanceMetrics();
+      const metrics = this.performanceEngine.getPerformanceMetrics();
       if (metrics.memoryUsage.recommendations.length > 0) {
-        logger.warn(
+        this.logger.warn(
           'Performance recommendations:',
           metrics.memoryUsage.recommendations
         );
@@ -452,7 +499,7 @@ export class SVGProcessor {
 
       return results;
     } catch (error) {
-      logger.error('Batch processing failed:', error);
+      this.logger.error('Batch processing failed:', error);
       throw error;
     }
   }
@@ -481,6 +528,13 @@ export class SVGProcessor {
     return `${fileName}.${extension}`;
   }
 
+  public getFileExtension(
+    framework: FrameworkType,
+    typescript: boolean
+  ): string {
+    return this.frameworkTemplateEngine.getFileExtension(framework, typescript);
+  }
+
   /**
    * Process a single SVG file
    */
@@ -500,9 +554,10 @@ export class SVGProcessor {
     };
 
     this.processingQueue.set(jobId, job);
-    logger.debug(`Processing SVG file: ${svgFilePath}`);
+    this.logger.debug(`Processing SVG file: ${svgFilePath}`);
 
     try {
+      throwIfAborted(options.signal);
       // Read SVG content
       const svgContent = await FileSystem.readFile(svgFilePath, 'utf-8');
 
@@ -519,15 +574,13 @@ export class SVGProcessor {
         svgContent,
         options
       );
-
-      // Ensure output directory exists
-      await FileSystem.ensureDir(outputDir);
+      throwIfAborted(options.signal);
 
       // Get correct file extension based on framework
       const framework = options.framework || 'react';
       const typescript =
         options.typescript !== undefined ? options.typescript : true;
-      const fileExtension = frameworkTemplateEngine.getFileExtension(
+      const fileExtension = this.frameworkTemplateEngine.getFileExtension(
         framework,
         typescript
       );
@@ -540,8 +593,12 @@ export class SVGProcessor {
       );
 
       // Write component file
-      const outputFilePath = resolveOutputArtifactPath(outputDir, fileName);
-      await FileSystem.writeFile(outputFilePath, componentCode, 'utf-8');
+      const outputFilePath = await writeOutputFileAtomic(
+        outputDir,
+        fileName,
+        componentCode,
+        options.signal
+      );
 
       // Update job status
       job.status = 'completed';
@@ -553,7 +610,7 @@ export class SVGProcessor {
         filePath: outputFilePath,
       };
 
-      logger.success(`Generated component: ${fileName}`);
+      this.logger.success(`Generated component: ${fileName}`);
       return result;
     } catch (error) {
       job.status = 'failed';
@@ -567,7 +624,7 @@ export class SVGProcessor {
         error: error as Error,
       };
 
-      logger.error(`Failed to process ${svgFilePath}:`, error);
+      this.logger.error(`Failed to process ${svgFilePath}:`, error);
 
       // Immediately remove failed jobs to prevent memory leaks
       this.processingQueue.delete(jobId);

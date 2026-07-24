@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 2,
+  "phase": 1,
+  "targetVersion": "4.1.0",
+  "date": "2026-07-17",
+  "branch": "phase/1-architectural-stabilization",
+  "phase0BaseCommit": "25310bfabead990b9fdd298be8a12bdf080fde5f",
+  "validatedSourceCommit": "6b00b82d85854bd45baba6fe51c0b751946a2d30",
+  "validatedSourceTree": "22c0bb46187f40781638cbf3dbb0b24bf73c2646",
+  "evidenceCommit": "2d86d82266cd7777090e69427a42d9ed74ddef95",
+  "productionRelevantChangesAfterValidation": false,
+  "priorEvidenceAssertion": {
+    "validatedSourceCommit": "12549ca271175c832e19a0524b9d77a89056a832",
+    "evidenceCommit": "0deb949063cc19aa19bb9881609cd62cc8c3e3db",
+    "productionRelevantChangesAfterValidation": false,
+    "changedPaths": [
+      "reports/phase1-implementation-evidence.json",
+      "reports/phase1-implementation-report.md"
+    ]
+  },
+  "implementationStatus": "conditionally-accepted",
+  "engineeringValidation": "passed",
+  "remoteMatrixValidation": "pending",
+  "mergeAuthorization": "blocked",
+  "phase2Authorization": "denied",
+  "mainChanged": false,
+  "validation": {
+    "phase1Validation": "passed",
+    "packageSmoke": "passed",
+    "immutableBaselineArtifacts": 14,
+    "eslintErrors": 0,
+    "eslintWarnings": 14,
+    "approvedEslintWarnings": 14,
+    "approvedWarningCategories": 1,
+    "jestPassed": 155,
+    "jestTotal": 155,
+    "frameworkPassed": 11,
+    "configurationPassed": 10,
+    "e2ePassed": 8,
+    "integrationPassed": 7,
+    "phase1ContractFilesPassed": 10,
+    "traceabilityItemsPassed": 16,
+    "securityAssertionsPassed": 27,
+    "entrypointSafetyMatrix": "passed",
+    "privacyScan": "passed",
+    "byteReproducibility": "passed-two-distinct-temporary-environments",
+    "typescriptVersions": ["5.6.3", "5.9.3", "7.0.2"],
+    "productionAuditVulnerabilities": 0
+  },
+  "package": {
+    "files": 753,
+    "packedBytes": 613130,
+    "unpackedBytes": 1976384,
+    "sha256": "3e711216e3488cc9e370ca1dd00313952dd36322dad8ce6bdc098c891604727f",
+    "intentionalAssetCount": 606,
+    "approvedFileCeiling": 794,
+    "approvedPackedByteCeiling": 647841,
+    "fileHeadroom": 41,
+    "byteHeadroom": 34711,
+    "fileHeadroomPercent": 5.16,
+    "byteHeadroomPercent": 5.36,
+    "publicDeclarationConsumerCompile": "passed",
+    "physicalExportAliasReuse": "passed"
+  },
+  "supportMatrix": {
+    "production": ["Node 22 LTS", "Node 24 LTS"],
+    "forwardCompatibility": "Node 26 Current",
+    "legacyCompatibility": "Node 18.17.0 EOL; unsupported for production",
+    "remoteExecution": "pending"
+  },
+  "compatibilityLedger": {
+    "rowCount": 12,
+    "deferredRows": 12,
+    "approvedRows": 0,
+    "mergeable": false
+  },
+  "phase0Gate": {
+    "mainContainsApprovedSourceCandidate": true,
+    "npmVersionPublished": false,
+    "remoteTagPresent": false,
+    "independentRegistryVerification": false,
+    "formallyClosed": false
+  },
+  "authorship": {
+    "name": "Navid Rezadoost",
+    "email": "46137155+navidrezadoost@users.noreply.github.com"
+  },
+  "requiredBeforeMerge": [
+    "v4.0.9 publication, independent verification, and formal Phase 0 closure",
+    "named and timestamped row-level compatibility approvals",
+    "branch push and remote Node/OS/TypeScript matrix pass bound to the merge candidate",
+    "formal issue-traceability and package-footprint review",
+    "baseline, security containment, compatibility, release, and engineering approvals",
+    "final clean-checkout validation and merge-candidate identity lock"
+  ]
+}

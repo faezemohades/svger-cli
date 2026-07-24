@@ -18,6 +18,7 @@ const approvedPackageBaseline = {
   packedBytes: 616_992,
   intentionalAssetCount: 606,
   growthTolerance: 0.05,
+  requiredHeadroom: 0.05,
 };
 const maximumEntryCount = Math.floor(
   approvedPackageBaseline.entryCount *
@@ -26,6 +27,12 @@ const maximumEntryCount = Math.floor(
 const maximumPackedBytes = Math.floor(
   approvedPackageBaseline.packedBytes *
     (1 + approvedPackageBaseline.growthTolerance)
+);
+const phase1MaximumEntryCount = Math.floor(
+  maximumEntryCount * (1 - approvedPackageBaseline.requiredHeadroom)
+);
+const phase1MaximumPackedBytes = Math.floor(
+  maximumPackedBytes * (1 - approvedPackageBaseline.requiredHeadroom)
 );
 const workRoot = await mkdtemp(path.join(tmpdir(), 'svger-package-smoke-'));
 const packRoot = path.join(workRoot, 'pack');
@@ -52,6 +59,21 @@ for (const requiredPath of [
     packedPaths.has(requiredPath),
     true,
     `${requiredPath} missing from tarball`
+  );
+}
+for (const excludedPath of [
+  'dist/application/bounded-scheduler.d.ts',
+  'dist/cli.d.ts',
+  'dist/config.d.ts',
+  'dist/optimizers/path-parser.d.ts',
+  'dist/plugins/builtins.d.ts',
+  'dist/utils/package-info.d.ts',
+  'docs/phase0-release-gate.md',
+]) {
+  assert.equal(
+    packedPaths.has(excludedPath),
+    false,
+    `${excludedPath} is development-only and must not be packed`
   );
 }
 assert.equal(
@@ -96,6 +118,29 @@ assert.ok(
   packResult.size <= maximumPackedBytes,
   `tarball compressed-size budget exceeded: ${packResult.size}/${maximumPackedBytes}`
 );
+assert.ok(
+  packResult.entryCount <= phase1MaximumEntryCount,
+  `Phase 1 package lacks 5% file headroom: ${packResult.entryCount}/${phase1MaximumEntryCount}`
+);
+assert.ok(
+  packResult.size <= phase1MaximumPackedBytes,
+  `Phase 1 package lacks 5% compressed-size headroom: ${packResult.size}/${phase1MaximumPackedBytes}`
+);
+
+for (const aliases of [
+  ['./webpack', './webpack-loader'],
+  ['./babel', './babel-plugin'],
+  ['./jest', './jest-transformer', './jest-preset'],
+]) {
+  const [canonical, ...compatibilityAliases] = aliases;
+  for (const alias of compatibilityAliases) {
+    assert.deepEqual(
+      packageJson.exports[alias],
+      packageJson.exports[canonical],
+      `${alias} must reuse ${canonical} without duplicate physical files`
+    );
+  }
+}
 
 const tarballPath = path.join(packRoot, packResult.filename);
 await writeFile(
@@ -155,6 +200,42 @@ assert.match(
   /^#!\/usr\/bin\/env node/
 );
 await readFile(path.join(installedPackageRoot, 'dist', 'index.d.ts'), 'utf8');
+await writeFile(
+  path.join(consumerRoot, 'declaration-smoke.ts'),
+  [
+    "import { createSVGCompiler, type BuildReport } from 'svger-cli';",
+    "import { svgerVitePlugin } from 'svger-cli/vite';",
+    "import { SvgerWebpackPlugin } from 'svger-cli/webpack-loader';",
+    "import svgerRollupPlugin from 'svger-cli/rollup';",
+    "import svgerBabelPlugin from 'svger-cli/babel-plugin';",
+    "import withSvger from 'svger-cli/nextjs';",
+    "import jestPreset from 'svger-cli/jest-preset';",
+    'void createSVGCompiler; void svgerVitePlugin; void SvgerWebpackPlugin;',
+    'void svgerRollupPlugin; void svgerBabelPlugin; void withSvger; void jestPreset;',
+    'const report = undefined as unknown as BuildReport; void report;',
+  ].join('\n')
+);
+const declarationResult = spawnSync(
+  process.execPath,
+  [
+    path.join(repositoryRoot, 'node_modules', 'typescript', 'bin', 'tsc'),
+    '--noEmit',
+    '--strict',
+    '--target',
+    'ES2022',
+    '--module',
+    'ES2022',
+    '--moduleResolution',
+    'Bundler',
+    '--types',
+    'node',
+    '--typeRoots',
+    path.join(repositoryRoot, 'node_modules', '@types'),
+    'declaration-smoke.ts',
+  ],
+  { cwd: consumerRoot, encoding: 'utf8' }
+);
+assert.equal(declarationResult.status, 0, declarationResult.stderr);
 
 const sourceRoot = path.join(consumerRoot, 'icons');
 const outputRoot = path.join(consumerRoot, 'components');

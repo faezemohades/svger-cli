@@ -13,7 +13,7 @@ export class PerformanceEngine {
     new Map();
   private readonly cacheTimeout = 5 * 60 * 1000; // 5 minutes
 
-  private constructor() {}
+  public constructor() {}
 
   public static getInstance(): PerformanceEngine {
     if (!PerformanceEngine.instance) {

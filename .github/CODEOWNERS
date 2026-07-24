@@ -2,3 +2,7 @@
 /baselines/ @faezemohades @navidrezadoost
 /compatibility-ledger-v4.1.md @faezemohades @navidrezadoost
 /src/security/ @faezemohades @navidrezadoost
+/PRIVACY.md @faezemohades @navidrezadoost
+/scripts/check-no-telemetry.mjs @faezemohades @navidrezadoost
+/docs/SUPPORT-MATRIX.md @faezemohades @navidrezadoost
+/.github/workflows/ci.yml @faezemohades @navidrezadoost

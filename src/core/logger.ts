@@ -11,7 +11,7 @@ export class LoggerService implements Logger {
   private logLevel: LogLevel = 'info';
   private enableColors: boolean = true;
 
-  private constructor() {}
+  public constructor() {}
 
   public static getInstance(): LoggerService {
     if (!LoggerService.instance) {
@@ -115,6 +115,15 @@ export class LoggerService implements Logger {
       );
     }
   }
+}
+
+/** Logger for report-driven APIs where stdout/stderr must remain machine-readable. */
+export class NullLogger implements Logger {
+  public debug(_message: string, ..._args: unknown[]): void {}
+  public info(_message: string, ..._args: unknown[]): void {}
+  public warn(_message: string, ..._args: unknown[]): void {}
+  public error(_message: string, ..._args: unknown[]): void {}
+  public success(_message: string, ..._args: unknown[]): void {}
 }
 
 // Export singleton instance

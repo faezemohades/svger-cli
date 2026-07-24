@@ -10,11 +10,21 @@ on:
 
 jobs:
   test:
-    name: Test on Node.js ${{ matrix.node-version }}
-    runs-on: ubuntu-latest
+    name: ${{ matrix.suite }} - ${{ matrix.os }} / Node.js ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        include:
+          - { os: ubuntu-latest, node-version: 22.x, suite: Full, command: validate:phase1 }
+          - { os: windows-latest, node-version: 22.x, suite: Platform, command: test:phase1:platform }
+          - { os: macos-latest, node-version: 22.x, suite: Platform, command: test:phase1:platform }
+          - { os: ubuntu-latest, node-version: 24.x, suite: Full, command: validate:phase1 }
+          - { os: windows-latest, node-version: 24.x, suite: Full, command: validate:phase1 }
+          - { os: macos-latest, node-version: 24.x, suite: Full, command: validate:phase1 }
+          - { os: ubuntu-latest, node-version: 26.x, suite: Current-smoke, command: test:phase1:smoke }
+          - { os: windows-latest, node-version: 26.x, suite: Current-smoke, command: test:phase1:smoke }
+          - { os: macos-latest, node-version: 26.x, suite: Current-smoke, command: test:phase1:smoke }
 
     steps:
       - name: Checkout code
@@ -36,22 +46,67 @@ jobs:
         env:
           BASELINE_UPDATE_APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'baseline-update-approved') }}
 
-      - name: Enforce lint warning budget
-        run: npm run lint:budget
+      - name: Run ${{ matrix.suite }} Phase 1 gate
+        run: npm run ${{ matrix.command }}
 
-      - name: Run type checking
-        run: npm run typecheck
-
-      - name: Run tests
+      - name: Run coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '24.x' && matrix.suite == 'Full'
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
-        if: matrix.node-version == '18.x'
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '24.x' && matrix.suite == 'Full'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/
           fail_ci_if_error: false
+
+  legacy-node-compatibility:
+    name: Legacy compatibility - Ubuntu / Node.js 18.17.0 (EOL)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup legacy Node.js 18.17.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.17.0
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run compatibility smoke
+        run: npm run test:phase1:smoke
+
+  typescript-compatibility:
+    name: TypeScript ${{ matrix.typescript }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript: [5.6.3, 5.9.3, 7.0.2]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install TypeScript ${{ matrix.typescript }}
+        run: npm install --no-save --package-lock=false typescript@${{ matrix.typescript }}
+
+      - name: Type-check
+        run: npx tsc --noEmit -p tsconfig.json
 
   build:
     name: Build Package
@@ -65,7 +120,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 24.x
           cache: 'npm'
 
       - name: Install dependencies
@@ -95,7 +150,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 24.x
           cache: 'npm'
 
       - name: Install dependencies
@@ -128,7 +183,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 24.x
           cache: 'npm'
 
       - name: Install dependencies
@@ -157,7 +212,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 24.x
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 

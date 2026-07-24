@@ -27,7 +27,7 @@ const __packageJson = JSON.parse(
  * Logger Service - Professional logging with configurable levels and color formatting
  * Provides: debug, info, warn, error, success methods with timestamp and context
  */
-export { LoggerService, logger } from './core/logger.js';
+export { LoggerService, NullLogger, logger } from './core/logger.js';
 
 /**
  * Configuration Management Service - Centralized configuration with validation and caching
@@ -135,6 +135,98 @@ export { watchSVGs } from './watch.js';
  * Provides: project scaffolding, dependency resolution, and build automation
  */
 export { buildAll, generateSVG } from './builder.js';
+
+/**
+ * Phase 1 application contracts - stable diagnostics, reports, and commands.
+ */
+export {
+  ExitCode,
+  DiagnosticError,
+  diagnosticFromUnknown,
+  exitCodeFromUnknown,
+} from './contracts/diagnostics.js';
+export type {
+  Diagnostic,
+  DiagnosticSeverity,
+} from './contracts/diagnostics.js';
+export {
+  BUILD_REPORT_SCHEMA_VERSION,
+  createBuildReport,
+  formatBuildReport,
+} from './contracts/reporting.js';
+export type {
+  ArtifactStatus,
+  BuildMode,
+  BuildReport,
+  BuildStatus,
+  BuildSummary,
+  GeneratedArtifact,
+  ReportFormat,
+} from './contracts/reporting.js';
+export { executeCommand } from './application/command.js';
+export type { Command } from './application/command.js';
+export { BuildCommand } from './commands/build-command.js';
+export type { BuildCommandOptions } from './commands/build-command.js';
+export { RecoverCommand } from './commands/recover-command.js';
+export type { RecoverCommandOptions } from './commands/recover-command.js';
+export { MigrateCommand } from './commands/migrate-command.js';
+export { runMigration } from './migration/migration-toolkit.js';
+export type {
+  MigrationChange,
+  MigrationOptions,
+  MigrationReport,
+  MigrationTarget,
+} from './migration/migration-toolkit.js';
+export {
+  CleanCommand,
+  ConfigCommand,
+  ConfigExplainCommand,
+  GenerateCommand,
+  LockCommand,
+  OptimizeCommand,
+  PluginsCommand,
+  UnlockCommand,
+  WatchCommand,
+} from './commands/operational-commands.js';
+export { SVGCompilerApplicationService } from './application/svg-compiler-application-service.js';
+export type {
+  ApplicationServiceContext,
+  BuildRequest,
+} from './application/svg-compiler-application-service.js';
+export {
+  commitOutputTransaction,
+  recoverOutputTransactions,
+} from './application/output-transaction.js';
+export type {
+  OutputContent,
+  RecoveryReport,
+} from './application/output-transaction.js';
+export { createSVGCompiler } from './compiler/create-svg-compiler.js';
+export type {
+  CreateSVGCompilerOptions,
+  SVGCompiler,
+} from './compiler/create-svg-compiler.js';
+export {
+  ContentAddressableCache,
+  createCacheKey,
+  createPipelineFingerprint,
+  stableSerialize,
+} from './cache/content-addressable-cache.js';
+export type {
+  CacheReadResult,
+  PipelineFingerprint,
+} from './cache/content-addressable-cache.js';
+export { writeOutputFileAtomic } from './io/atomic-write.js';
+export {
+  resolveConfiguration,
+  explainConfiguration,
+} from './configuration/resolver.js';
+export type {
+  ConfigurationLayer,
+  ConfigurationOrigin,
+  ConfigurationOrigins,
+  ResolvedConfiguration,
+} from './configuration/resolver.js';
 
 /**
  * Content Cleaner - SVG content optimization and sanitization utilities

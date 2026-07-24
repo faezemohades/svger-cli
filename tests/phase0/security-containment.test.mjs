@@ -105,12 +105,11 @@ await mkdir(unsafeSource);
 await writeFile(path.join(unsafeSource, 'unsafe.svg'), unsafeSamples[0][1]);
 
 const legacyOutput = path.join(workRoot, 'legacy-output');
-await expectCode(
-  () => buildAll({ src: unsafeSource, out: legacyOutput }),
-  'E_UNSAFE_SVG_CONTENT'
-);
-assert.deepEqual(await readdir(legacyOutput), []);
-assertions += 1;
+const legacyReport = await buildAll({ src: unsafeSource, out: legacyOutput });
+assert.equal(legacyReport.exitCode, 5);
+assert.equal(legacyReport.diagnostics[0].code, 'E_UNSAFE_SVG_CONTENT');
+await assert.rejects(() => readdir(legacyOutput), { code: 'ENOENT' });
+assertions += 3;
 console.log('PASS legacy builder rejects without writing an artifact');
 
 const serviceOutput = path.join(workRoot, 'service-output');
@@ -218,7 +217,7 @@ const rejectedCLI = spawnSync(
   ],
   { cwd: repositoryRoot, encoding: 'utf8' }
 );
-assert.equal(rejectedCLI.status, 1);
+assert.equal(rejectedCLI.status, 5);
 assert.match(
   `${rejectedCLI.stdout}${rejectedCLI.stderr}`,
   /E_UNSAFE_SVG_CONTENT/
