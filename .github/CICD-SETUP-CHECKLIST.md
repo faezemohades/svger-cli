@@ -22,10 +22,8 @@ Use this checklist to set up CI/CD for SVGER-CLI in your environment.
 ### Secrets Configuration
 Navigate to: `Repository Settings → Secrets and variables → Actions → New repository secret`
 
-Required:
-- [ ] `NPM_TOKEN` - Your NPM automation token
-  - Get from: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
-  - Select "Automation" token type
+NPM publishing uses npm Trusted Publishing with GitHub Actions OIDC. Do not configure a long-lived
+`NPM_TOKEN` for production publishing.
 
 Optional (but recommended):
 - [ ] `CODECOV_TOKEN` - For code coverage reporting
@@ -45,11 +43,12 @@ Optional (but recommended):
 - [ ] NPM account created
 - [ ] Email verified
 - [ ] Two-factor authentication enabled (recommended)
-- [ ] Automation token created
-  ```bash
-  npm login
-  # Then create token at: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
-  ```
+- [ ] Trusted Publisher configured for this package on npmjs.com:
+  - Provider: GitHub Actions
+  - Organization or user: `faezemohades`
+  - Repository: `svger-cli`
+  - Workflow filename: `release.yml`
+  - Allowed action: `npm publish`
 - [ ] Package name available on NPM
   ```bash
   npm search svger-cli  # Should show your package or be available
