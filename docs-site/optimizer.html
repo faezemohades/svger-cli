@@ -770,11 +770,12 @@
       <h1>Built-in SVG Optimizer</h1>
       
       <p class="hero-description">
-        SVGER-CLI includes a powerful built-in optimizer that achieves <strong>57.77% file size reduction</strong> without requiring SVGO or any external dependencies.
+        SVGER-CLI includes a built-in optimizer with documented local benchmark evidence up to
+        <strong>57.77% file size reduction</strong>, without requiring a separate SVGO installation.
       </p>
       
       <p class="hero-subtext">
-        Faster processing, lighter bundle, and zero configuration needed.
+        Integrated processing, lighter SVG output, and zero extra optimizer configuration for the common path.
       </p>
     </section>
 
@@ -879,15 +880,15 @@
             <li class="feature-item">
               <span class="feature-icon" style="color: #10b981;">✅</span>
               <div class="feature-content">
-                <h4>Zero Dependencies</h4>
-                <p>Nothing to install</p>
+                <h4>No SVGO Runtime Dependency</h4>
+                <p>Bundled with SVGER-CLI</p>
               </div>
             </li>
             <li class="feature-item">
               <span class="feature-icon" style="color: #10b981;">✅</span>
               <div class="feature-content">
-                <h4>50% Faster</h4>
-                <p>Optimized algorithms</p>
+                <h4>Measured Locally</h4>
+                <p>Benchmark scope documented</p>
               </div>
             </li>
             <li class="feature-item">
@@ -1042,7 +1043,7 @@ const optimized = await processor.cleanSVGContent(svgString);
           <pre><code>processor.setOptimizationLevel(OptLevel.MAXIMUM);
 
 const optimized = await processor.cleanSVGContent(svgString);
-// Result: 57.77% reduction (maximum compression!)</code></pre>
+// Result depends on SVG structure; project samples have recorded reductions up to 57.77%.</code></pre>
         </div>
       </div>
     </section>
@@ -1197,11 +1198,11 @@ const optimized = await processor.cleanSVGContent(svgString);
     <!-- CLI Usage -->
     <section style="margin-top: 80px;">
       <h2>CLI Usage</h2>
-      <p class="section-subtitle">The optimizer is automatically applied when processing SVGs. No extra configuration needed!</p>
+      <p class="section-subtitle">Use the current v4 CLI commands: <code>build</code> for component generation and <code>optimize</code> for direct SVG optimization.</p>
 
       <div class="usage-section">
-        <h3 class="usage-title">Default (BALANCED)</h3>
-        <p class="usage-description">Optimizer is enabled by default with BALANCED level for safe, fast optimization.</p>
+        <h3 class="usage-title">Component Build Optimization</h3>
+        <p class="usage-description">Build a directory of SVGs into components and select an explicit optimization level.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">
             <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1211,16 +1212,16 @@ const optimized = await processor.cleanSVGContent(svgString);
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </button>
-          <pre><code># Optimizer is enabled by default with BALANCED level
-svger-cli --src ./icons --out ./components
+          <pre><code># Generate components with explicit optimization
+npx svger build ./icons ./components --optimize balanced
 
-# Output: 43.33% size reduction automatically applied</code></pre>
+# Supported levels: none, basic, balanced, aggressive, maximum</code></pre>
         </div>
       </div>
 
       <div class="usage-section">
-        <h3 class="usage-title">Maximum Compression</h3>
-        <p class="usage-description">Use the optimize plugin for MAXIMUM level (57.77% reduction).</p>
+        <h3 class="usage-title">Direct SVG Optimization</h3>
+        <p class="usage-description">Optimize one SVG file or a directory and write the optimized output separately.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">
             <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1230,17 +1231,17 @@ svger-cli --src ./icons --out ./components
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </button>
-          <pre><code># Use the optimize plugin for MAXIMUM level
-svger-cli --src ./icons --out ./components --plugin optimize
+          <pre><code># Optimize directly with maximum-level settings
+npx svger optimize ./icons ./optimized-icons --level maximum
 
-# Or combine with other plugins
-svger-cli --src ./icons --out ./components --plugins optimize,minify</code></pre>
+# Validate XML before writing directory output
+npx svger optimize ./icons ./optimized-icons --level balanced --validate</code></pre>
         </div>
       </div>
 
       <div class="usage-section">
-        <h3 class="usage-title">Disable Optimization</h3>
-        <p class="usage-description">If you need to disable optimization (not recommended for production).</p>
+        <h3 class="usage-title">Disable Build Optimization</h3>
+        <p class="usage-description">Use <code>none</code> when a migration or characterization test needs byte-level comparison.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">
             <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1250,8 +1251,8 @@ svger-cli --src ./icons --out ./components --plugins optimize,minify</code></pre
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
           </button>
-          <pre><code># If you need to disable optimization (not recommended)
-svger-cli --src ./icons --out ./components --no-optimize</code></pre>
+          <pre><code># Disable optimization during component generation
+npx svger build ./icons ./components --optimize none</code></pre>
         </div>
       </div>
     </section>
@@ -1259,7 +1260,7 @@ svger-cli --src ./icons --out ./components --no-optimize</code></pre>
     <!-- Comparison -->
     <section style="margin-top: 80px;">
       <h2>vs. SVGO Comparison</h2>
-      <p class="section-subtitle">See how SVGER-CLI's built-in optimizer compares to the industry-standard SVGO tool.</p>
+      <p class="section-subtitle">See how SVGER-CLI's built-in optimizer is positioned against a separate SVGO workflow.</p>
       <div class="card" style="padding: 0; overflow: hidden;">
         <table>
           <thead>
@@ -1272,18 +1273,18 @@ svger-cli --src ./icons --out ./components --no-optimize</code></pre>
           <tbody>
             <tr>
               <td><strong>Installation</strong></td>
-              <td style="color: #10b981; font-weight: 700;">✅ Included (0 dependencies)</td>
-              <td>❌ Separate package (~500KB)</td>
+              <td style="color: #10b981; font-weight: 700;">✅ Included in SVGER-CLI</td>
+              <td>Requires a separate package</td>
             </tr>
             <tr>
               <td><strong>Size Reduction</strong></td>
-              <td style="color: #10b981; font-weight: 700;">✅ 57.77% (MAXIMUM)</td>
-              <td>⚠️ ~40-50%</td>
+              <td style="color: #10b981; font-weight: 700;">✅ Up to 57.77% in the documented sample</td>
+              <td>Varies by configuration and SVG input</td>
             </tr>
             <tr>
               <td><strong>Processing Speed</strong></td>
-              <td style="color: #10b981; font-weight: 700;">✅ 50% faster</td>
-              <td>❌ Baseline</td>
+              <td style="color: #10b981; font-weight: 700;">✅ Integrated in the SVGER-CLI pipeline</td>
+              <td>External optimizer step</td>
             </tr>
             <tr>
               <td><strong>Configuration</strong></td>
