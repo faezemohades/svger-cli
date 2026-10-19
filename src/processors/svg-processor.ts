@@ -1,10 +1,5 @@
 import path from 'path';
-import {
-  toPascalCase,
-  toKebabCase,
-  toCamelCase,
-  FileSystem,
-} from '../utils/native.js';
+import { toPascalCase, toKebabCase, toCamelCase } from '../utils/native.js';
 import {
   ComponentGenerationOptions,
   SVGProcessorResult,
@@ -17,17 +12,9 @@ import { frameworkTemplateEngine as defaultFrameworkTemplateEngine } from '../co
 import { OptimizerPipeline } from '../optimizers/optimizer-pipeline.js';
 import { OptLevel, getDefaultOptConfig } from '../optimizers/types.js';
 import { basicCleaningStage } from '../optimizers/basic-cleaner.js';
-import { treeOptimizationStage } from '../optimizers/tree-stages.js';
-import {
-  numericStage,
-  styleStage,
-  transformStage,
-  pathOptimizationStage,
-  pathSimplificationStage,
-  advancedOptimizationStage,
-} from '../optimizers/advanced-stages.js';
-import { pathDeduplicationStage } from '../optimizers/path-deduplicator.js';
-import { shapeConversionStage } from '../optimizers/shape-conversion.js';
+import { numericStage } from '../optimizers/advanced-stages.js';
+import { transformSVGAttributeValues } from '../optimizers/xml-attribute-transform.js';
+import { readSVGInputFile } from '../security/input-safety.js';
 import { getPluginManager } from '../core/enhanced-plugin-manager.js';
 import type { Logger } from '../types/index.js';
 import type { PerformanceEngine } from '../core/performance-engine.js';
@@ -39,6 +26,11 @@ import {
   type SVGInputSafetyOptions,
 } from '../security/input-safety.js';
 import { writeOutputFileAtomic } from '../io/atomic-write.js';
+import {
+  DiagnosticError,
+  ExitCode,
+  sanitizePublicError,
+} from '../contracts/diagnostics.js';
 
 function throwIfAborted(signal?: AbortSignal): void {
   if (!signal?.aborted) return;
@@ -51,6 +43,7 @@ function throwIfAborted(signal?: AbortSignal): void {
  * SVG content processor and component generator
  */
 export class SVGProcessor {
+  private static readonly COMPLETED_JOB_HISTORY_LIMIT = 500;
   private static instance: SVGProcessor;
   private processingQueue: Map<string, ProcessingJob> = new Map();
   private jobCounter = 0;
@@ -76,9 +69,7 @@ export class SVGProcessor {
     this.frameworkTemplateEngine =
       dependencies.frameworkTemplateEngine ?? defaultFrameworkTemplateEngine;
     this.pluginManager = dependencies.pluginManager ?? getPluginManager();
-    // Initialize optimizer pipeline with basic cleaning stage
-    this.optimizer = new OptimizerPipeline({ level: OptLevel.BASIC });
-    this.optimizer.registerStage('basic-cleaning', basicCleaningStage);
+    this.optimizer = this.createOptimizer(OptLevel.BASIC);
   }
 
   public static getInstance(): SVGProcessor {
@@ -93,67 +84,22 @@ export class SVGProcessor {
    */
   public setOptimizationLevel(level: OptLevel): void {
     this.currentOptimizationLevel = level;
-    if (!this.optimizer) {
-      this.optimizer = new OptimizerPipeline({ level });
-      this.registerOptimizationStages(level);
-    } else {
-      this.optimizer.clearStages();
-      // Update config with all properties for the level
-      this.optimizer.updateConfig(getDefaultOptConfig(level));
-      this.registerOptimizationStages(level);
-    }
+    this.optimizer = this.createOptimizer(level);
   }
 
-  /**
-   * Register optimization stages based on level
-   */
-  private registerOptimizationStages(level: OptLevel): void {
-    if (!this.optimizer) return;
-
-    // Always register basic cleaning
-    this.optimizer.registerStage('basic-cleaning', basicCleaningStage);
-
-    // BALANCED: Numeric + Style + Tree optimization (safe and fast)
-    if (level === OptLevel.BALANCED) {
-      this.optimizer.registerStage('numeric', numericStage);
-      this.optimizer.registerStage('style', styleStage);
-      this.optimizer.registerStage('tree-optimization', treeOptimizationStage);
+  private createOptimizer(level: OptLevel): OptimizerPipeline {
+    const optimizer = new OptimizerPipeline(getDefaultOptConfig(level));
+    if (level !== OptLevel.NONE) {
+      optimizer.registerStage('basic-cleaning', basicCleaningStage);
     }
-
-    // AGGRESSIVE: + Simple Transform + Medium precision + Path optimization
-    if (level === OptLevel.AGGRESSIVE) {
-      // CRITICAL: shape-conversion MUST run before numeric optimization
-      // Otherwise coordinates get rounded before conversion (e.g., x="10" → x="1")
-      this.optimizer.registerStage('shape-conversion', shapeConversionStage);
-      this.optimizer.registerStage('numeric', numericStage);
-      this.optimizer.registerStage('style', styleStage);
-      this.optimizer.registerStage('transform', transformStage);
-      this.optimizer.registerStage('path-optimization', pathOptimizationStage);
-      // DISABLED: tree-optimization causes malformed XML at this level
-      // this.optimizer.registerStage('tree-optimization', treeOptimizationStage);
+    if (
+      level === OptLevel.BALANCED ||
+      level === OptLevel.AGGRESSIVE ||
+      level === OptLevel.MAXIMUM
+    ) {
+      optimizer.registerStage('numeric', numericStage);
     }
-
-    // MAXIMUM: Everything enabled + Lower precision + Aggressive transformations
-    if (level === OptLevel.MAXIMUM) {
-      // Use combined advanced stage for maximum efficiency
-      this.optimizer.registerStage(
-        'advanced-optimization',
-        advancedOptimizationStage
-      );
-      // Add shape conversion before path optimization
-      this.optimizer.registerStage('shape-conversion', shapeConversionStage);
-      // Add path simplification after other optimizations
-      this.optimizer.registerStage(
-        'path-simplification',
-        pathSimplificationStage
-      );
-      // Add path deduplication for icon sets
-      this.optimizer.registerStage(
-        'path-deduplication',
-        pathDeduplicationStage
-      );
-      this.optimizer.registerStage('tree-optimization', treeOptimizationStage);
-    }
+    return optimizer;
   }
 
   /**
@@ -161,7 +107,8 @@ export class SVGProcessor {
    */
   public async cleanSVGContent(
     svgContent: string,
-    safetyOptions: SVGInputSafetyOptions = {}
+    safetyOptions: SVGInputSafetyOptions = {},
+    optimizationLevel?: OptLevel
   ): Promise<string> {
     this.logger.debug('Cleaning SVG content');
 
@@ -172,11 +119,19 @@ export class SVGProcessor {
       });
 
       if (this.optimizer) {
-        const result = await this.optimizer.optimize(safeContent);
+        const optimizer = optimizationLevel
+          ? this.createOptimizer(optimizationLevel)
+          : this.optimizer;
+        const result = await optimizer.optimize(safeContent);
+        const verifiedOutput = applySVGInputSafety(result.optimizedSvg, {
+          ...safetyOptions,
+          unsafeInputPolicy: 'reject',
+          warn: () => undefined,
+        });
         this.logger.debug(
           `Optimized SVG: ${result.reductionPercent.toFixed(2)}% size reduction`
         );
-        return result.optimizedSvg;
+        return verifiedOutput;
       }
 
       // Fallback to legacy cleaning if optimizer is not initialized
@@ -190,12 +145,7 @@ export class SVGProcessor {
       ) {
         throw error;
       }
-      this.logger.warn(
-        'Optimizer failed, falling back to legacy cleaning:',
-        error
-      );
-      const safeContent = applySVGInputSafety(svgContent, safetyOptions);
-      return this.legacyCleanSVGContent(safeContent);
+      throw error;
     }
   }
 
@@ -204,21 +154,8 @@ export class SVGProcessor {
    * @deprecated Use cleanSVGContent with optimizer pipeline instead
    */
   private legacyCleanSVGContent(svgContent: string): string {
-    return (
-      svgContent
-        // Remove XML declaration
-        .replace(/<\?xml.*?\?>/g, '')
-        // Remove DOCTYPE declaration
-        .replace(/<!DOCTYPE.*?>/g, '')
-        // Remove comments
-        .replace(/<!--[\s\S]*?-->/g, '')
-        // Normalize whitespace
-        .replace(/\r?\n|\r/g, '')
-        .replace(/\s{2,}/g, ' ')
-        // Keep SVG content valid for downstream optimization and non-JSX frameworks
-        .replace(/\s(width|height)=["'](\d+)px["']/g, ' $1="$2"')
-        .trim()
-    );
+    // If no verified optimizer is available, preserve the authorized source.
+    return svgContent;
   }
 
   private static readonly JSX_FRAMEWORKS = new Set<FrameworkType>([
@@ -250,8 +187,10 @@ export class SVGProcessor {
       'xlink:href': 'xlinkHref',
     };
 
-    const regex = new RegExp(Object.keys(attributeMap).join('|'), 'g');
-    return svgContent.replace(regex, match => attributeMap[match]);
+    return transformSVGAttributeValues(svgContent, (_tag, name) => {
+      const jsxName = attributeMap[name];
+      return jsxName ? { name: jsxName } : undefined;
+    });
   }
 
   private prepareSVGForFramework(
@@ -262,12 +201,15 @@ export class SVGProcessor {
       return svgContent;
     }
 
-    return this.convertAttributesToJSX(
-      this.convertInlineStylesToReact(svgContent)
+    return this.convertInlineStylesToReact(
+      this.convertAttributesToJSX(svgContent)
     );
   }
 
-  private async applyActivePlugins(svgContent: string): Promise<string> {
+  private async applyActivePlugins(
+    svgContent: string,
+    optimizationLevel: OptLevel
+  ): Promise<string> {
     const pluginManager = this.pluginManager;
     if (pluginManager.activePluginCount === 0) {
       return svgContent;
@@ -275,7 +217,7 @@ export class SVGProcessor {
 
     const context = await pluginManager.executeHook('after-parse', {
       content: svgContent,
-      config: getDefaultOptConfig(this.currentOptimizationLevel),
+      config: getDefaultOptConfig(optimizationLevel),
       originalContent: svgContent,
       metadata: new Map<string, unknown>(),
     });
@@ -288,38 +230,38 @@ export class SVGProcessor {
    * Converts style="fill: #000; stroke-width: 2px;" to style={{fill: '#000', strokeWidth: '2px'}}
    */
   private convertInlineStylesToReact(svgContent: string): string {
-    return svgContent.replace(/style="([^"]*)"/g, (_match, styleString) => {
-      // Parse CSS string into object
-      const styles: Record<string, string> = {};
-      const declarations = styleString
-        .split(';')
-        .filter((s: string) => s.trim());
-
-      declarations.forEach((declaration: string) => {
-        const [property, value] = declaration
-          .split(':')
-          .map((s: string) => s.trim());
-        if (property && value) {
-          // Convert CSS property to camelCase (e.g., stroke-width -> strokeWidth)
-          const camelProperty = property.replace(/-([a-z])/g, (g: string) =>
-            g[1].toUpperCase()
+    return transformSVGAttributeValues(
+      svgContent,
+      (_tag, name, styleString) => {
+        if (name !== 'style') return undefined;
+        const declarations = styleString.split(';').filter(item => item.trim());
+        if (declarations.length === 0) return undefined;
+        const styles = new Map<string, string>();
+        for (const declaration of declarations) {
+          const separator = declaration.indexOf(':');
+          if (separator < 1) return undefined;
+          const property = declaration.slice(0, separator).trim();
+          const value = declaration.slice(separator + 1).trim();
+          if (
+            !/^--[\w-]+$|^-?[a-z][a-z\d-]*$/i.test(property) ||
+            !value ||
+            /[;{}"'\\]/.test(value)
+          ) {
+            return undefined;
+          }
+          const jsxProperty = property.replace(
+            /-([a-z])/g,
+            (_match, char: string) => char.toUpperCase()
           );
-          styles[camelProperty] = value;
+          styles.set(jsxProperty, value);
         }
-      });
-
-      // If empty styles, return empty string to remove attribute
-      if (Object.keys(styles).length === 0) {
-        return '';
+        const entries = Array.from(
+          styles,
+          ([property, value]) => `${property}: '${value}'`
+        );
+        return { raw: `style={{${entries.join(', ')}}}` };
       }
-
-      // Convert to React inline style object syntax
-      const styleEntries = Object.entries(styles)
-        .map(([key, value]) => `${key}: '${value}'`)
-        .join(', ');
-
-      return `style={{${styleEntries}}}`;
-    });
+    );
   }
 
   /**
@@ -376,13 +318,31 @@ export class SVGProcessor {
     try {
       throwIfAborted(options.signal);
       // Clean and optimize SVG content (now async)
-      const cleanedContent = await this.cleanSVGContent(svgContent, {
-        maxInputSizeBytes: options.maxInputSizeBytes,
-        source: componentName,
-        unsafeInputPolicy: options.unsafeInputPolicy,
-      });
-      const pluginProcessedContent =
-        await this.applyActivePlugins(cleanedContent);
+      const optimizationLevel = options.optimizationLevel
+        ? OptLevel[
+            options.optimizationLevel.toUpperCase() as keyof typeof OptLevel
+          ]
+        : this.currentOptimizationLevel;
+      if (!optimizationLevel) {
+        throw new DiagnosticError(
+          'E_INVALID_OPTIMIZATION_LEVEL',
+          'Unsupported optimization level.',
+          { exitCode: ExitCode.InvalidConfiguration }
+        );
+      }
+      const cleanedContent = await this.cleanSVGContent(
+        svgContent,
+        {
+          maxInputSizeBytes: options.maxInputSizeBytes,
+          source: componentName,
+          unsafeInputPolicy: options.unsafeInputPolicy,
+        },
+        optimizationLevel
+      );
+      const pluginProcessedContent = await this.applyActivePlugins(
+        cleanedContent,
+        optimizationLevel
+      );
       throwIfAborted(options.signal);
 
       // Create full options object with required fields
@@ -405,11 +365,8 @@ export class SVGProcessor {
       this.logger.debug(`Generated component: ${componentName}`);
       return component;
     } catch (error) {
-      this.logger.error(
-        `Failed to generate component ${componentName}:`,
-        error
-      );
-      throw error;
+      this.logger.error(`Failed to generate component ${componentName}.`);
+      throw sanitizePublicError(error);
     }
   }
 
@@ -436,6 +393,12 @@ export class SVGProcessor {
         safeContent,
         optimizationLevel
       );
+      applySVGInputSafety(optimizedContent, {
+        maxInputSizeBytes: options.maxInputSizeBytes,
+        source: componentName,
+        unsafeInputPolicy: 'reject',
+        warn: () => undefined,
+      });
       throwIfAborted(options.signal);
 
       // Generate framework-specific component
@@ -451,10 +414,9 @@ export class SVGProcessor {
       return component;
     } catch (error) {
       this.logger.error(
-        `Failed to generate ${options.framework} component ${componentName}:`,
-        error
+        `Failed to generate ${options.framework} component ${componentName}.`
       );
-      throw error;
+      throw sanitizePublicError(error);
     }
   }
 
@@ -499,7 +461,7 @@ export class SVGProcessor {
 
       return results;
     } catch (error) {
-      this.logger.error('Batch processing failed:', error);
+      this.logger.error('Batch processing failed.');
       throw error;
     }
   }
@@ -559,13 +521,19 @@ export class SVGProcessor {
     try {
       throwIfAborted(options.signal);
       // Read SVG content
-      const svgContent = await FileSystem.readFile(svgFilePath, 'utf-8');
+      const svgContent = await readSVGInputFile(
+        svgFilePath,
+        options.maxInputSizeBytes,
+        svgFilePath
+      );
 
       // Generate component name using the specified naming convention
       const namingConvention = options.namingConvention || 'pascal';
+      const componentNamingConvention =
+        namingConvention === 'kebab' ? 'pascal' : namingConvention;
       const componentName = this.generateComponentName(
         path.basename(svgFilePath),
-        namingConvention
+        componentNamingConvention
       );
 
       // Generate component code
@@ -624,27 +592,27 @@ export class SVGProcessor {
         error: error as Error,
       };
 
-      this.logger.error(`Failed to process ${svgFilePath}:`, error);
+      this.logger.error(`Failed to process ${path.basename(svgFilePath)}.`);
 
       // Immediately remove failed jobs to prevent memory leaks
       this.processingQueue.delete(jobId);
 
       return result;
     } finally {
-      // Clean up completed jobs after a short delay (allows stats queries)
+      // Keep a bounded recent history for stats without retaining one timer per
+      // completed job. Active jobs remain visible until they settle.
       if (job.status === 'completed') {
-        setTimeout(() => {
-          this.processingQueue.delete(jobId);
-        }, 30000); // 30 seconds
-      }
-
-      // Cap queue size as a safety net to prevent unbounded growth
-      if (this.processingQueue.size > 10000) {
-        const oldestEntries = Array.from(this.processingQueue.entries())
-          .filter(([, j]) => j.status === 'completed' || j.status === 'failed')
-          .slice(0, this.processingQueue.size - 5000);
-        for (const [key] of oldestEntries) {
-          this.processingQueue.delete(key);
+        let completedJobs = 0;
+        for (const queuedJob of this.processingQueue.values()) {
+          if (queuedJob.status === 'completed') completedJobs++;
+        }
+        while (completedJobs > SVGProcessor.COMPLETED_JOB_HISTORY_LIMIT) {
+          const oldestCompleted = Array.from(this.processingQueue).find(
+            ([, queuedJob]) => queuedJob.status === 'completed'
+          );
+          if (!oldestCompleted) break;
+          this.processingQueue.delete(oldestCompleted[0]);
+          completedJobs--;
         }
       }
     }

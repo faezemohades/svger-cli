@@ -16,7 +16,10 @@ import type {
   UnsafeInputPolicy,
 } from '../types/index.js';
 import { FileSystem } from '../utils/native.js';
-import { resolveOutputArtifactPath } from '../security/input-safety.js';
+import {
+  readSVGInputFile,
+  resolveOutputArtifactPath,
+} from '../security/input-safety.js';
 import type { SVGCompiler } from '../compiler/create-svg-compiler.js';
 
 const FRAMEWORKS = new Set<FrameworkType>([
@@ -138,9 +141,7 @@ export class UnlockCommand implements Command<FileLockCommandOptions, void> {
 }
 
 export type ConfigCommandOptions =
-  | { action: 'init' }
-  | { action: 'show' }
-  | { action: 'set'; keyValue: string };
+  { action: 'init' } | { action: 'show' } | { action: 'set'; keyValue: string };
 
 export class ConfigCommand implements Command<ConfigCommandOptions, unknown> {
   public constructor(private readonly service: ConfigService) {}
@@ -177,13 +178,10 @@ export interface ConfigExplainCommandOptions {
   path?: string;
 }
 
-export class ConfigExplainCommand
-  implements
-    Command<
-      ConfigExplainCommandOptions,
-      readonly { path: string; origin: string; value: unknown }[]
-    >
-{
+export class ConfigExplainCommand implements Command<
+  ConfigExplainCommandOptions,
+  readonly { path: string; origin: string; value: unknown }[]
+> {
   public constructor(private readonly compiler: SVGCompiler) {}
 
   public validate(_options: ConfigExplainCommandOptions): void {}
@@ -241,9 +239,10 @@ export interface OptimizeCommandResult {
   exitCode: ExitCode;
 }
 
-export class OptimizeCommand
-  implements Command<OptimizeCommandOptions, OptimizeCommandResult>
-{
+export class OptimizeCommand implements Command<
+  OptimizeCommandOptions,
+  OptimizeCommandResult
+> {
   public constructor(
     private readonly service: SVGService,
     private readonly processor: SVGProcessor,
@@ -301,7 +300,11 @@ export class OptimizeCommand
         }
         const inputPath = path.join(inputDir, file);
         const outputPath = resolveOutputArtifactPath(outputDir, file);
-        const content = await FileSystem.readFile(inputPath, 'utf8');
+        const content = await readSVGInputFile(
+          inputPath,
+          options.maxInputSizeBytes,
+          inputPath
+        );
         const result = await this.processor.cleanSVGContent(content, {
           source: inputPath,
           maxInputSizeBytes: options.maxInputSizeBytes,

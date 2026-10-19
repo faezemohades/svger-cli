@@ -40,6 +40,7 @@ const SVG_DEFAULTS: Record<string, Record<string, string>> = {
     'fill-rule': 'nonzero',
   },
 };
+const STRICT_SVG_NUMBER = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
 
 /**
  * Named CSS colors that can be shortened
@@ -265,12 +266,13 @@ function isDefaultValue(
 /**
  * Optimize a single attribute value
  */
-function optimizeAttributeValue(
+export function optimizeSVGAttributeValue(
   attrName: string,
   attrValue: string,
   config: OptConfig
 ): string {
   const trimmedValue = attrValue.trim();
+  if (trimmedValue !== attrValue) return attrValue;
 
   // Color attributes
   const colorAttrs = new Set([
@@ -282,6 +284,7 @@ function optimizeAttributeValue(
   ]);
 
   if (colorAttrs.has(attrName)) {
+    if (!config.shortenColors) return attrValue;
     return optimizeColor(attrValue);
   }
 
@@ -311,43 +314,44 @@ function optimizeAttributeValue(
   if (numericAttrs.has(attrName)) {
     if (trimmedValue.endsWith('%')) {
       const numericPortion = trimmedValue.slice(0, -1);
+      if (!STRICT_SVG_NUMBER.test(numericPortion)) return attrValue;
       return `${optimizeNumericString(numericPortion, config.floatPrecision)}%`;
     }
 
+    if (!STRICT_SVG_NUMBER.test(attrValue)) return attrValue;
     return optimizeNumericString(attrValue, config.floatPrecision);
   }
 
-  // Path data (d attribute) - special handling
+  // Path commands contain flags and command-dependent coordinate arity. Keep
+  // their source until a parser-backed precision rewrite is available.
   if (attrName === 'd') {
-    return optimizePathData(attrValue, config.floatPrecision);
+    return attrValue;
   }
 
   // Points attribute (for polygon/polyline)
   if (attrName === 'points') {
+    const coordinates = attrValue.split(/[\s,]+/).filter(Boolean);
+    if (
+      coordinates.length < 4 ||
+      coordinates.length % 2 !== 0 ||
+      !coordinates.every(coordinate => STRICT_SVG_NUMBER.test(coordinate))
+    )
+      return attrValue;
     return optimizePointsData(attrValue, config.floatPrecision);
   }
 
   // ViewBox
   if (attrName === 'viewBox') {
+    const values = attrValue.split(/[\s,]+/).filter(Boolean);
+    if (
+      values.length !== 4 ||
+      !values.every(value => STRICT_SVG_NUMBER.test(value))
+    )
+      return attrValue;
     return optimizeViewBox(attrValue, config.floatPrecision);
   }
 
   return attrValue;
-}
-
-/**
- * Optimize path data (d attribute)
- * Rounds numbers, removes unnecessary spaces
- */
-function optimizePathData(pathData: string, precision: number): string {
-  // Replace all numbers with optimized versions
-  return pathData.replace(/-?[\d.]+/g, match => {
-    const num = parseFloat(match);
-    if (isNaN(num)) {
-      return match;
-    }
-    return roundNumber(num, precision);
-  });
 }
 
 /**
@@ -427,7 +431,7 @@ export function optimizeNumericValues(
   const traverse = (node: SVGNode) => {
     // Optimize attribute values
     for (const [name, value] of node.attrs) {
-      const optimized = optimizeAttributeValue(name, value, config);
+      const optimized = optimizeSVGAttributeValue(name, value, config);
       if (optimized !== value) {
         node.attrs.set(name, optimized);
         optimizedAttributes++;

@@ -61,28 +61,28 @@ describe('SVG Processor', () => {
   });
 
   describe('error handling', () => {
-    it('should handle invalid SVG gracefully', async () => {
+    it('should reject non-SVG roots with a validation diagnostic', async () => {
       const invalidSVG = '<invalid>not svg</invalid>';
 
       await expect(
         svgProcessor.cleanSVGContent(invalidSVG)
-      ).resolves.toBeDefined();
+      ).rejects.toMatchObject({ code: 'E_INVALID_SVG_XML' });
     });
 
-    it('should handle empty SVG', async () => {
+    it('should reject empty input with a validation diagnostic', async () => {
       const emptySVG = '';
 
       await expect(
         svgProcessor.cleanSVGContent(emptySVG)
-      ).resolves.toBeDefined();
+      ).rejects.toMatchObject({ code: 'E_INVALID_SVG_XML' });
     });
 
-    it('should handle malformed SVG', async () => {
+    it('should reject malformed XML with a validation diagnostic', async () => {
       const malformedSVG = '<svg><unclosed';
 
       await expect(
         svgProcessor.cleanSVGContent(malformedSVG)
-      ).resolves.toBeDefined();
+      ).rejects.toMatchObject({ code: 'E_INVALID_SVG_XML' });
     });
   });
 

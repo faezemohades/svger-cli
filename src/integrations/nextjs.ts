@@ -47,7 +47,7 @@ export function withSvger(nextConfig: any = {}) {
         const pluginInstance = new SvgerWebpackPlugin({
           source: svgerOptions.source,
           output: svgerOptions.output,
-          framework: svgerOptions.framework || 'react',
+          framework: svgerOptions.framework,
           typescript: svgerOptions.typescript,
           config: svgerOptions.config,
           include: svgerOptions.include,
@@ -75,8 +75,9 @@ export function withSvger(nextConfig: any = {}) {
           {
             loader: 'svger-cli/webpack-loader',
             options: {
-              framework: svgerOptions.framework || 'react',
+              framework: svgerOptions.framework,
               typescript: svgerOptions.typescript,
+              config: svgerOptions.config,
               maxInputSizeBytes: svgerOptions.maxInputSizeBytes,
               unsafeInputPolicy: svgerOptions.unsafeInputPolicy,
             },
@@ -108,7 +109,7 @@ export class SvgerNextJsPlugin extends SvgerWebpackPlugin {
     super({
       source: options.source,
       output: options.output,
-      framework: options.framework || 'react',
+      framework: options.framework,
       typescript: options.typescript,
       config: options.config,
       include: options.include,

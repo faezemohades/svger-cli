@@ -1,0 +1,152 @@
+import path from 'path';
+import type { FrameworkType } from '../types/index.js';
+
+export type ComponentExportStyle = 'default' | 'named';
+
+export interface FrameworkArtifactContract {
+  readonly extension: (typescript: boolean) => string;
+  readonly componentExportStyle: ComponentExportStyle;
+  readonly exportedName: (componentName: string) => string;
+  readonly moduleSpecifier: (componentName: string) => string;
+  readonly barrel: boolean;
+}
+
+export interface BarrelExportPlan {
+  readonly componentName: string;
+  readonly exportStyle?: ComponentExportStyle;
+  readonly exportedName?: string;
+  readonly moduleSpecifier?: string;
+}
+
+const CONTRACTS: Readonly<Record<FrameworkType, FrameworkArtifactContract>> =
+  Object.freeze({
+    react: {
+      extension: typescript => (typescript ? 'tsx' : 'jsx'),
+      componentExportStyle: 'default',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}`,
+      barrel: true,
+    },
+    'react-native': {
+      extension: typescript => (typescript ? 'tsx' : 'jsx'),
+      componentExportStyle: 'default',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}`,
+      barrel: true,
+    },
+    vue: {
+      extension: () => 'vue',
+      componentExportStyle: 'default',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}.vue`,
+      barrel: true,
+    },
+    svelte: {
+      extension: () => 'svelte',
+      componentExportStyle: 'default',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}.svelte`,
+      barrel: true,
+    },
+    angular: {
+      extension: typescript => `component.${typescript ? 'ts' : 'js'}`,
+      componentExportStyle: 'named',
+      exportedName: componentName => `${componentName}Component`,
+      moduleSpecifier: componentName => `./${componentName}.component`,
+      barrel: true,
+    },
+    solid: {
+      extension: typescript => (typescript ? 'tsx' : 'jsx'),
+      componentExportStyle: 'default',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}`,
+      barrel: true,
+    },
+    preact: {
+      extension: typescript => (typescript ? 'tsx' : 'jsx'),
+      componentExportStyle: 'default',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}`,
+      barrel: true,
+    },
+    lit: {
+      extension: typescript => (typescript ? 'ts' : 'js'),
+      componentExportStyle: 'named',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}`,
+      barrel: true,
+    },
+    vanilla: {
+      extension: typescript => (typescript ? 'ts' : 'js'),
+      componentExportStyle: 'named',
+      exportedName: componentName => componentName,
+      moduleSpecifier: componentName => `./${componentName}`,
+      barrel: true,
+    },
+  });
+
+export function getFrameworkArtifactContract(
+  framework: FrameworkType
+): FrameworkArtifactContract {
+  return CONTRACTS[framework];
+}
+
+export function moduleSpecifierForFileName(
+  fileName: string,
+  framework: FrameworkType,
+  typescript: boolean
+): string {
+  const extension = path.extname(fileName);
+  const withoutExtension = extension
+    ? fileName.slice(0, -extension.length)
+    : fileName;
+  const keepExtension =
+    framework === 'vue' ||
+    framework === 'svelte' ||
+    (!typescript && framework === 'lit') ||
+    (!typescript && framework === 'vanilla');
+  const modulePath = keepExtension ? fileName : withoutExtension;
+  return `./${modulePath.split(path.sep).join('/')}`;
+}
+
+export function createBarrelContent(
+  framework: FrameworkType,
+  componentPlans: readonly (string | BarrelExportPlan)[]
+): string {
+  const contract = getFrameworkArtifactContract(framework);
+  const plans = componentPlans
+    .map(component =>
+      typeof component === 'string' ? { componentName: component } : component
+    )
+    .sort((left, right) =>
+      left.componentName.localeCompare(right.componentName, 'en')
+    );
+  const sortedNames = plans.map(plan => plan.componentName);
+  const exports = plans
+    .map(plan => {
+      const componentName = plan.componentName;
+      const exportStyle = plan.exportStyle ?? contract.componentExportStyle;
+      const exportedName =
+        plan.exportedName ?? contract.exportedName(componentName);
+      const modulePath =
+        plan.moduleSpecifier ?? contract.moduleSpecifier(componentName);
+      return exportStyle === 'default'
+        ? `export { default as ${componentName} } from '${modulePath}';`
+        : `export { ${exportedName}${exportedName === componentName ? '' : ` as ${componentName}`} } from '${modulePath}';`;
+    })
+    .join('\n');
+
+  return `/**
+ * SVG Components Index
+ * Generated by svger-cli
+ *
+ * Import individual components:
+ * import { ${sortedNames[0] ?? 'ComponentName'} } from './components';
+ *
+ * Import all components:
+ * import * as Icons from './components';
+ */
+
+${exports}
+`;
+}

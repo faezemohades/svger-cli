@@ -1,5 +1,9 @@
 # CI/CD Quick Reference
 
+> **Superseded:** See [`docs/phase1-quality-governance.md`](../docs/phase1-quality-governance.md).
+> Publishing and public docs deployment workflows are disabled while SEC-INC-001 is open. Do not
+> configure publishing tokens or execute release commands from this legacy reference.
+
 ## 🚀 Quick Start Commands
 
 ### Local Development with Docker

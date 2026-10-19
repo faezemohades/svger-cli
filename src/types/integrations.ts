@@ -2,7 +2,12 @@
  * Type definitions for build tool integrations
  */
 
-import type { FrameworkType, SVGConfig, UnsafeInputPolicy } from './index.js';
+import type {
+  FrameworkOptions,
+  FrameworkType,
+  SVGConfig,
+  UnsafeInputPolicy,
+} from './index.js';
 
 // ============================================================================
 // Common Types
@@ -243,6 +248,11 @@ export interface JestPresetOptions {
    * @default true
    */
   typescript?: boolean;
+
+  /** Partial settings merged through the shared configuration contract. */
+  config?: Partial<SVGConfig>;
+
+  frameworkOptions?: FrameworkOptions;
 
   /**
    * Transform SVG files to components

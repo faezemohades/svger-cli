@@ -63,32 +63,29 @@ describe('SVG Style Conversion', () => {
       expect(component).not.toContain('text-anchor');
     });
 
-    it('should handle empty style attributes', async () => {
+    it('should preserve empty style attributes', async () => {
       const svgWithEmptyStyle = `<svg xmlns="http://www.w3.org/2000/svg">
         <path style="" d="M0 0"/>
       </svg>`;
 
       const component = await generateReactComponent(svgWithEmptyStyle);
 
-      // Should remove empty style attributes
-      expect(component).not.toContain('style=""');
+      // Empty style is observable source syntax and remains preserved.
+      expect(component).toContain('style=""');
     });
   });
 
   describe('width and height attribute handling', () => {
-    it('should remove px units from width and height attributes', async () => {
+    it('should preserve px units from width and height attributes', async () => {
       const svgWithPxUnits = `<svg xmlns="http://www.w3.org/2000/svg">
         <rect width="24px" height="24px" fill="red"/>
       </svg>`;
 
       const component = await generateReactComponent(svgWithPxUnits);
 
-      // Should remove px units from rendered SVG attributes
-      expect(component).toContain('width="24"');
-      expect(component).toContain('height="24"');
-      // Should NOT contain px units in attributes
-      expect(component).not.toContain('width="24px"');
-      expect(component).not.toContain('height="24px"');
+      // Unit conversion can alter viewport behavior, so source values survive.
+      expect(component).toContain('width="24px"');
+      expect(component).toContain('height="24px"');
     });
 
     it('should handle numeric width/height without units', async () => {
@@ -142,8 +139,8 @@ describe('SVG Style Conversion', () => {
       // Should convert attributes to camelCase
       expect(component).toContain('fillRule');
 
-      // Should convert px units
-      expect(component).toMatch(/width=\{24\}|width="24"/);
+      // Unit conversion can alter SVG semantics, so source units survive.
+      expect(component).toContain('width="24px"');
 
       // Should be valid React/JSX (no raw CSS strings)
       expect(component).not.toContain('style="fill:');
@@ -158,12 +155,11 @@ describe('SVG Style Conversion', () => {
       const component = await generateReactComponent(svg);
 
       // The output should be embeddable in a React component without errors
-      // No raw CSS strings, no px in numeric attributes, all camelCase
+      // No raw CSS strings or kebab-case SVG attributes; preserve source units.
       const hasInvalidReactSyntax =
         component.includes('style="') ||
         component.includes('stroke-width=') ||
-        component.includes('fill-rule=') ||
-        (component.includes('width=') && component.includes('px"'));
+        component.includes('fill-rule=');
 
       expect(hasInvalidReactSyntax).toBe(false);
     });

@@ -9,6 +9,7 @@ import type {
   OptimizationResult,
 } from './types.js';
 import { OptLevel, getDefaultOptConfig } from './types.js';
+import { DiagnosticError, ExitCode } from '../contracts/diagnostics.js';
 
 /**
  * SVG Optimizer Pipeline
@@ -49,11 +50,15 @@ export class OptimizerPipeline {
         optimizedSvg = result;
         stagesApplied.push(stage.name);
       } catch (error) {
-        console.warn(
-          `⚠️  Stage "${stage.name}" failed, skipping:`,
-          (error as Error).message
+        throw new DiagnosticError(
+          'E_OPTIMIZER_STAGE_FAILED',
+          `Optimization stage "${stage.name}" failed.`,
+          {
+            exitCode: ExitCode.InternalError,
+            cause: error,
+            metadata: { stage: stage.name },
+          }
         );
-        // Continue with other stages even if one fails
       }
     }
 

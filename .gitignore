@@ -5,6 +5,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.npmrc
 
 DOCS_SITE_SUMMARY.md
 GITHUB_PAGES_SETUP.md

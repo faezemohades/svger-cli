@@ -4,7 +4,10 @@ import { isLocked } from './lock.js';
 import { svgProcessor } from './processors/svg-processor.js';
 import { configService } from './services/config.js';
 import { frameworkTemplateEngine } from './core/framework-templates.js';
-import { resolveOutputArtifactPath } from './security/input-safety.js';
+import {
+  readSVGInputFile,
+  resolveOutputArtifactPath,
+} from './security/input-safety.js';
 import type { BuildOptions, UnsafeInputPolicy } from './types/index.js';
 import { createSVGCompiler } from './compiler/create-svg-compiler.js';
 
@@ -73,11 +76,16 @@ export async function generateSVG({
     framework,
     typescript
   );
+  const naming = svgConfig.outputConfig?.naming || 'pascal';
 
-  const svgContent = await FileSystem.readFile(filePath, 'utf-8');
+  const svgContent = await readSVGInputFile(
+    filePath,
+    maxInputSizeBytes ?? svgConfig.maxInputSizeBytes,
+    filePath
+  );
   const componentName = svgProcessor.generateComponentName(
     path.basename(svgFile),
-    svgConfig.outputConfig?.naming || 'pascal'
+    naming === 'kebab' ? 'pascal' : naming
   );
 
   const componentCode = await svgProcessor.generateComponent(
@@ -100,9 +108,11 @@ export async function generateSVG({
 
   const outFile = resolveOutputArtifactPath(
     outputFolder,
-    `${componentName}.${fileExtension}`
+    svgProcessor.generateFileName(componentName, fileExtension, naming)
   );
   await FileSystem.writeFile(outFile, componentCode, 'utf-8');
 
-  console.log(`✅ Generated: ${componentName}.${fileExtension}`);
+  console.log(
+    `✅ Generated: ${svgProcessor.generateFileName(componentName, fileExtension, naming)}`
+  );
 }

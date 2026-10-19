@@ -10,9 +10,10 @@ export interface RecoverCommandOptions {
   directory: string;
 }
 
-export class RecoverCommand
-  implements Command<RecoverCommandOptions, RecoveryReport>
-{
+export class RecoverCommand implements Command<
+  RecoverCommandOptions,
+  RecoveryReport
+> {
   public validate(options: RecoverCommandOptions): void {
     if (!options.directory) {
       throw new DiagnosticError(

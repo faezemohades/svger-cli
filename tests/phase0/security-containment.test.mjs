@@ -117,7 +117,7 @@ await expectCode(
   () => svgService.buildAll({ src: unsafeSource, out: serviceOutput }),
   'E_UNSAFE_SVG_CONTENT'
 );
-assert.deepEqual(await readdir(serviceOutput), []);
+await assert.rejects(() => readdir(serviceOutput), { code: 'ENOENT' });
 assertions += 1;
 console.log('PASS SVGService rejects without writing an artifact or index');
 
@@ -190,8 +190,11 @@ webpackPlugin.apply({
   },
   options: { watch: false },
 });
-await webpackBuild();
-assert.deepEqual(await readdir(webpackOutput), []);
+await assert.rejects(
+  () => webpackBuild(),
+  error => error?.code === 'E_UNSAFE_SVG_CONTENT'
+);
+await assert.rejects(() => readdir(webpackOutput), { code: 'ENOENT' });
 assertions += 1;
 console.log('PASS Webpack plugin emits no artifact for unsafe input');
 
@@ -201,8 +204,11 @@ const babel = svgerBabelPlugin(undefined, {
   output: babelOutput,
   processOnInit: true,
 });
-await babel.visitor.Program.enter();
-assert.deepEqual(await readdir(babelOutput).catch(() => []), []);
+await assert.rejects(
+  () => babel.visitor.Program.enter(),
+  error => error?.code === 'E_UNSAFE_SVG_CONTENT'
+);
+await assert.rejects(() => readdir(babelOutput), { code: 'ENOENT' });
 assertions += 1;
 console.log('PASS Babel plugin emits no artifact for unsafe input');
 

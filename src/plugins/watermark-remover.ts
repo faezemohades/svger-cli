@@ -25,8 +25,7 @@ export const watermarkRemoverPlugin: EnhancedPlugin = {
       context: PluginHookContext
     ): Promise<PluginHookResult> => {
       const options = context.metadata.get('pluginOptions') as
-        | WatermarkRemoverOptions
-        | undefined;
+        WatermarkRemoverOptions | undefined;
 
       if (!options) {
         return { content: context.content };

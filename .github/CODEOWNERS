@@ -6,3 +6,6 @@
 /scripts/check-no-telemetry.mjs @faezemohades @navidrezadoost
 /docs/SUPPORT-MATRIX.md @faezemohades @navidrezadoost
 /.github/workflows/ci.yml @faezemohades @navidrezadoost
+/governance/release-policy.json @faezemohades @navidrezadoost
+/governance/requirement-traceability.json @faezemohades @navidrezadoost
+/compatibility/public-package-contract.v4.0.9.json @faezemohades @navidrezadoost

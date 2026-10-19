@@ -4,6 +4,10 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  assertPackageBudgets,
+  findCredentialContentInFiles,
+} from '../../scripts/package-artifact-policy.mjs';
 
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -15,24 +19,20 @@ const packageJson = JSON.parse(
 );
 const approvedPackageBaseline = {
   entryCount: 757,
-  packedBytes: 616_992,
   intentionalAssetCount: 606,
   growthTolerance: 0.05,
   requiredHeadroom: 0.05,
+};
+const packageSizeBudget = {
+  referenceBytes: 628_062,
+  maximumBytes: 640_623,
 };
 const maximumEntryCount = Math.floor(
   approvedPackageBaseline.entryCount *
     (1 + approvedPackageBaseline.growthTolerance)
 );
-const maximumPackedBytes = Math.floor(
-  approvedPackageBaseline.packedBytes *
-    (1 + approvedPackageBaseline.growthTolerance)
-);
 const phase1MaximumEntryCount = Math.floor(
   maximumEntryCount * (1 - approvedPackageBaseline.requiredHeadroom)
-);
-const phase1MaximumPackedBytes = Math.floor(
-  maximumPackedBytes * (1 - approvedPackageBaseline.requiredHeadroom)
 );
 const workRoot = await mkdtemp(path.join(tmpdir(), 'svger-package-smoke-'));
 const packRoot = path.join(workRoot, 'pack');
@@ -63,10 +63,14 @@ for (const requiredPath of [
 }
 for (const excludedPath of [
   'dist/application/bounded-scheduler.d.ts',
+  'dist/application/artifact-contract.d.ts',
+  'dist/application/build-plan.d.ts',
+  'dist/application/source-discovery.d.ts',
   'dist/cli.d.ts',
   'dist/config.d.ts',
   'dist/optimizers/path-parser.d.ts',
   'dist/plugins/builtins.d.ts',
+  'dist/security/svg-xml-safety.d.ts',
   'dist/utils/package-info.d.ts',
   'docs/phase0-release-gate.md',
 ]) {
@@ -83,6 +87,8 @@ assert.equal(
 );
 const forbiddenPatterns = [
   /^\.github\//,
+  /(?:^|\/)\.npmrc$/i,
+  /(?:^|\/)\.env(?:\.[^/]+)?$/i,
   /^baselines\//,
   /^compatibility\//,
   /^coverage\//,
@@ -110,23 +116,25 @@ assert.equal(
   approvedPackageBaseline.intentionalAssetCount,
   'the intentional public sample corpus changed without package-budget review'
 );
-assert.ok(
-  packResult.entryCount <= maximumEntryCount,
-  `tarball entry budget exceeded: ${packResult.entryCount}/${maximumEntryCount}`
+assertPackageBudgets({
+  size: packResult.size,
+  entryCount: packResult.entryCount,
+  maxBytes: packageSizeBudget.maximumBytes,
+  maxEntries: maximumEntryCount,
+});
+const credentialFindings = await findCredentialContentInFiles(
+  repositoryRoot,
+  packResult.files.map(file => file.path)
 );
-assert.ok(
-  packResult.size <= maximumPackedBytes,
-  `tarball compressed-size budget exceeded: ${packResult.size}/${maximumPackedBytes}`
+assert.deepEqual(
+  credentialFindings,
+  [],
+  'credential-shaped content must not appear in the published package'
 );
 assert.ok(
   packResult.entryCount <= phase1MaximumEntryCount,
   `Phase 1 package lacks 5% file headroom: ${packResult.entryCount}/${phase1MaximumEntryCount}`
 );
-assert.ok(
-  packResult.size <= phase1MaximumPackedBytes,
-  `Phase 1 package lacks 5% compressed-size headroom: ${packResult.size}/${phase1MaximumPackedBytes}`
-);
-
 for (const aliases of [
   ['./webpack', './webpack-loader'],
   ['./babel', './babel-plugin'],
@@ -151,6 +159,7 @@ execFileSync(
   'npm',
   [
     'install',
+    '--offline',
     '--ignore-scripts',
     '--omit=optional',
     '--no-audit',

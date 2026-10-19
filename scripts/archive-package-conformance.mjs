@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertPackageBudgets } from './package-artifact-policy.mjs';
 
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -21,9 +22,12 @@ const maximumEntryCount = Math.floor(
   approvedPackageBaseline.entryCount *
     (1 + approvedPackageBaseline.growthTolerance)
 );
-const maximumPackedBytes = Math.floor(
-  approvedPackageBaseline.packedBytes *
-    (1 + approvedPackageBaseline.growthTolerance)
+const maximumPackedBytes = Math.min(
+  640_623,
+  Math.floor(
+    approvedPackageBaseline.packedBytes *
+      (1 + approvedPackageBaseline.growthTolerance)
+  )
 );
 const workRoot = await mkdtemp(
   path.join(tmpdir(), 'svger-package-conformance-')
@@ -88,11 +92,12 @@ if ((groups.assets ?? 0) !== approvedPackageBaseline.intentionalAssetCount) {
     `Expected the reviewed ${approvedPackageBaseline.intentionalAssetCount}-file public sample corpus, received ${groups.assets ?? 0} files.`
   );
 }
-if (packed.entryCount > maximumEntryCount || packed.size > maximumPackedBytes) {
-  throw new Error(
-    `Package budget exceeded: ${packed.entryCount}/${maximumEntryCount} files, ${packed.size}/${maximumPackedBytes} bytes.`
-  );
-}
+assertPackageBudgets({
+  size: packed.size,
+  entryCount: packed.entryCount,
+  maxBytes: maximumPackedBytes,
+  maxEntries: maximumEntryCount,
+});
 
 const report = {
   schemaVersion: 1,

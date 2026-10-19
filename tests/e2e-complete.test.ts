@@ -5,6 +5,7 @@
  * Tests the complete workflow with all features and configuration options
  */
 
+import assert from 'node:assert/strict';
 import { svgService } from '../dist/services/svg-service.js';
 import { configService } from '../dist/services/config.js';
 import { FileSystem } from '../dist/utils/native.js';
@@ -324,17 +325,20 @@ async function testErrorHandling() {
     'utf-8'
   );
 
-  // Should not throw, but should handle gracefully
-  await svgService.buildAll({
-    src: srcDir,
-    out: outDir,
-    config: { framework: 'react', typescript: true },
-  });
-
-  // The service should still complete without crashing
-  const outputExists = await FileSystem.exists(outDir);
-  if (!outputExists) {
-    throw new Error('Error handling failed - output directory not created');
+  // Strict SVG validation must propagate the actionable diagnostic and avoid
+  // committing a partial output directory.
+  await assert.rejects(
+    () =>
+      svgService.buildAll({
+        src: srcDir,
+        out: outDir,
+        config: { framework: 'react', typescript: true },
+      }),
+    error =>
+      (error as { code?: string } | null)?.code === 'E_INVALID_SVG_XML'
+  );
+  if (await FileSystem.exists(outDir)) {
+    throw new Error('Invalid SVG input must not create output artifacts');
   }
 }
 

@@ -1,5 +1,6 @@
 import { format } from 'util';
 import { Logger, LogLevel } from '../types/index.js';
+import { redactSensitiveText } from '../contracts/diagnostics.js';
 
 type WritableLogStream = Pick<typeof process.stdout, 'write'>;
 
@@ -51,7 +52,8 @@ export class LoggerService implements Logger {
     message: string,
     args: unknown[]
   ): void {
-    stream.write(`${format(this.formatMessage(level, message), ...args)}\n`);
+    const formatted = format(this.formatMessage(level, message), ...args);
+    stream.write(`${redactSensitiveText(formatted)}\n`);
   }
 
   private getPrefix(level: LogLevel): string {

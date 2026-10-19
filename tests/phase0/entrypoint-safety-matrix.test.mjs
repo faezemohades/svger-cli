@@ -32,7 +32,7 @@ const repositoryRoot = path.resolve(
 const workRoot = await mkdtemp(path.join(tmpdir(), 'svger-entrypoint-matrix-'));
 const safeSVG = '<svg viewBox="0 0 24 24"><path d="M0 0h1v1z"/></svg>';
 const unsafeSVG =
-  '<svg onload="bad()"><script>bad()</script><a href="javascript:bad()"><path/></a></svg>';
+  '<svg onload="bad()"><script>bad()</script><a href="java&#x73;cript:bad()"><path/></a><image href="https://example.invalid/remote.svg"/><style>.x{fill:u\\72l(https://example.invalid/paint)}</style></svg>';
 const matrix = {};
 const reportPath = path.join(
   repositoryRoot,
@@ -48,6 +48,7 @@ const assertSanitized = content => {
   assert.equal(/<\s*script\b/i.test(content), false);
   assert.equal(/\son[a-z][\w:.-]*\s*=/i.test(content), false);
   assert.equal(/javascript\s*:/i.test(content), false);
+  assert.equal(/example\.invalid/i.test(content), false);
 };
 const expectCode = async (operation, code) => {
   await assert.rejects(operation, error => error?.code === code);
@@ -329,10 +330,14 @@ assertSanitized(viteStripResult.code);
 record('Vite', 'strip');
 const viteSafe = await createSource('vite-safe', 'vite.svg', safeSVG);
 const viteSandbox = await createSandbox('vite-sandbox', 'Vite.tsx');
-await svgerVitePlugin({
-  source: viteSafe.directory,
-  output: viteSandbox.output,
-}).buildStart();
+await expectCode(
+  () =>
+    svgerVitePlugin({
+      source: viteSafe.directory,
+      output: viteSandbox.output,
+    }).buildStart(),
+  'E_OUTPUT_PATH_ESCAPE'
+);
 await assertSandboxUnchanged(viteSandbox.outside);
 record('Vite', 'sandbox');
 
@@ -349,10 +354,14 @@ assertSanitized(rollupStripResult.code);
 record('Rollup', 'strip');
 const rollupSafe = await createSource('rollup-safe', 'rollup.svg', safeSVG);
 const rollupSandbox = await createSandbox('rollup-sandbox', 'Rollup.tsx');
-await svgerRollupPlugin({
-  source: rollupSafe.directory,
-  output: rollupSandbox.output,
-}).buildStart();
+await expectCode(
+  () =>
+    svgerRollupPlugin({
+      source: rollupSafe.directory,
+      output: rollupSandbox.output,
+    }).buildStart(),
+  'E_OUTPUT_PATH_ESCAPE'
+);
 await assertSandboxUnchanged(rollupSandbox.outside);
 record('Rollup', 'sandbox');
 
@@ -365,19 +374,27 @@ assertSanitized(
 record('Webpack', 'strip');
 const webpackSafe = await createSource('webpack-safe', 'webpack.svg', safeSVG);
 const webpackSandbox = await createSandbox('webpack-sandbox', 'Webpack.tsx');
-await runWebpackPlugin({
-  source: webpackSafe.directory,
-  output: webpackSandbox.output,
-});
+await expectCode(
+  () =>
+    runWebpackPlugin({
+      source: webpackSafe.directory,
+      output: webpackSandbox.output,
+    }),
+  'E_OUTPUT_PATH_ESCAPE'
+);
 await assertSandboxUnchanged(webpackSandbox.outside);
 record('Webpack', 'sandbox');
 
 // Babel
 const babelRejectOutput = path.join(workRoot, 'babel-reject');
-await svgerBabelPlugin(undefined, {
-  source: cliBuildSource.directory,
-  output: babelRejectOutput,
-}).visitor.Program.enter();
+await expectCode(
+  () =>
+    svgerBabelPlugin(undefined, {
+      source: cliBuildSource.directory,
+      output: babelRejectOutput,
+    }).visitor.Program.enter(),
+  'E_UNSAFE_SVG_CONTENT'
+);
 assert.deepEqual(await readdir(babelRejectOutput).catch(() => []), []);
 record('Babel', 'reject');
 const babelStripOutput = path.join(workRoot, 'babel-strip');
@@ -392,10 +409,14 @@ assertSanitized(
 record('Babel', 'strip');
 const babelSafe = await createSource('babel-safe', 'babel.svg', safeSVG);
 const babelSandbox = await createSandbox('babel-sandbox', 'Babel.tsx');
-await svgerBabelPlugin(undefined, {
-  source: babelSafe.directory,
-  output: babelSandbox.output,
-}).visitor.Program.enter();
+await expectCode(
+  () =>
+    svgerBabelPlugin(undefined, {
+      source: babelSafe.directory,
+      output: babelSandbox.output,
+    }).visitor.Program.enter(),
+  'E_OUTPUT_PATH_ESCAPE'
+);
 await assertSandboxUnchanged(babelSandbox.outside);
 record('Babel', 'sandbox');
 
@@ -420,6 +441,102 @@ matrix['Next.js'] = {
   strip: 'PASS — option propagated to Webpack contract',
   sandbox: 'PASS — delegated to Webpack artifact writer',
 };
+
+// The same configured byte limit is enforced at file-based and in-memory
+// public entrypoints, before generation or any artifact write.
+const oversizedSVG = await createSource(
+  'oversized-input',
+  'oversized.svg',
+  '<svg>too large</svg>'
+);
+for (const command of ['build', 'generate', 'optimize']) {
+  const cliResult = runCLI([
+    command,
+    command === 'generate' ? oversizedSVG.filePath : oversizedSVG.directory,
+    path.join(workRoot, `oversized-cli-${command}`),
+    '--max-input-size',
+    '8',
+  ]);
+  assert.equal(cliResult.status, 4, `${command} CLI byte limit`);
+  assert.match(
+    `${cliResult.stdout}${cliResult.stderr}`,
+    /E_SVG_INPUT_TOO_LARGE/,
+    `${command} CLI byte-limit diagnostic`
+  );
+}
+const oversizedProcessor = await svgProcessor.processSVGFile(
+  oversizedSVG.filePath,
+  path.join(workRoot, 'oversized-processor'),
+  { maxInputSizeBytes: 8 }
+);
+assert.equal(oversizedProcessor.error?.code, 'E_SVG_INPUT_TOO_LARGE');
+const oversizedBuilder = await buildAll({
+  src: oversizedSVG.directory,
+  out: path.join(workRoot, 'oversized-builder'),
+  maxInputSizeBytes: 8,
+});
+assert.equal(oversizedBuilder.exitCode, 4);
+assert.equal(oversizedBuilder.diagnostics[0].code, 'E_SVG_INPUT_TOO_LARGE');
+await expectCode(
+  () =>
+    svgService.buildAll({
+      src: oversizedSVG.directory,
+      out: path.join(workRoot, 'oversized-service'),
+      maxInputSizeBytes: 8,
+    }),
+  'E_SVG_INPUT_TOO_LARGE'
+);
+await assert.rejects(
+  () => svgerRollupPlugin({ maxInputSizeBytes: 8 }).load(oversizedSVG.filePath),
+  error => error?.code === 'E_SVG_INPUT_TOO_LARGE'
+);
+await assert.rejects(
+  () =>
+    svgerVitePlugin({
+      source: oversizedSVG.directory,
+      virtual: true,
+      maxInputSizeBytes: 8,
+    }).load('\0virtual:svger/oversized'),
+  error => error?.code === 'E_SVG_INPUT_TOO_LARGE'
+);
+await assert.rejects(
+  () =>
+    svgerVitePlugin({ maxInputSizeBytes: 8 }).transform(
+      '<svg>too large</svg>',
+      'oversized.svg'
+    ),
+  error => error?.code === 'E_SVG_INPUT_TOO_LARGE'
+);
+await assert.rejects(
+  () =>
+    svgerRollupPlugin({ maxInputSizeBytes: 8 }).transform(
+      '<svg>too large</svg>',
+      'oversized.svg'
+    ),
+  error => error?.code === 'E_SVG_INPUT_TOO_LARGE'
+);
+await assert.rejects(
+  () => runWebpackLoader('<svg>too large</svg>', { maxInputSizeBytes: 8 }),
+  error => error?.code === 'E_SVG_INPUT_TOO_LARGE'
+);
+assert.throws(
+  () =>
+    svgerJestTransformer.process('<svg>too large</svg>', 'oversized.svg', {
+      transformerConfig: { svger: { maxInputSizeBytes: 8 } },
+    }),
+  error => error?.code === 'E_SVG_INPUT_TOO_LARGE'
+);
+const oversizedBabelOutput = path.join(workRoot, 'oversized-babel');
+await expectCode(
+  () =>
+    svgerBabelPlugin(undefined, {
+      source: oversizedSVG.directory,
+      output: oversizedBabelOutput,
+      maxInputSizeBytes: 8,
+    }).visitor.Program.enter(),
+  'E_SVG_INPUT_TOO_LARGE'
+);
+assert.deepEqual(await readdir(oversizedBabelOutput).catch(() => []), []);
 
 const report = { schemaVersion: 1, matrix };
 await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);

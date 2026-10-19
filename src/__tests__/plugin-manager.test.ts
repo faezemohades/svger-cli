@@ -269,7 +269,8 @@ describe('EnhancedPluginManager', () => {
       expect(plugin2Executed).toBe(false);
     });
 
-    it('should handle plugin errors gracefully', async () => {
+    it('should propagate plugin errors and stop the hook chain', async () => {
+      let plugin2Executed = false;
       const plugin1: EnhancedPlugin = {
         name: 'plugin-1',
         version: '1.0.0',
@@ -284,9 +285,10 @@ describe('EnhancedPluginManager', () => {
         name: 'plugin-2',
         version: '1.0.0',
         hooks: {
-          'after-parse': async ctx => ({
-            content: ctx.content + '<!-- plugin2 -->',
-          }),
+          'after-parse': async ctx => {
+            plugin2Executed = true;
+            return { content: ctx.content + '<!-- plugin2 -->' };
+          },
         },
       };
 
@@ -299,9 +301,10 @@ describe('EnhancedPluginManager', () => {
         metadata: new Map(),
       };
 
-      const result = await manager.executeHook('after-parse', context);
-      // Plugin 2 should still execute even if plugin 1 fails
-      expect(result.content).toBe('<svg></svg><!-- plugin2 -->');
+      await expect(
+        manager.executeHook('after-parse', context)
+      ).rejects.toMatchObject({ code: 'E_PLUGIN_HOOK_FAILED' });
+      expect(plugin2Executed).toBe(false);
     });
 
     it('should update metadata through plugin chain', async () => {

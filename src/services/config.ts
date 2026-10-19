@@ -4,6 +4,7 @@ import { SVGConfig } from '../types/index.js';
 import { logger } from '../core/logger.js';
 import { getPackageInfo } from '../utils/package-info.js';
 import { DEFAULT_MAX_SVG_INPUT_SIZE_BYTES } from '../security/input-safety.js';
+import { resolveConfiguration } from '../configuration/resolver.js';
 
 type ConfigValue = string | number | boolean | null | undefined;
 type ConfigTree = Record<string, unknown>;
@@ -14,6 +15,35 @@ type ConfigMigrationInput = Partial<SVGConfig> & {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+function cloneConfigValue<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map(item => cloneConfigValue(item)) as T;
+  }
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, child]) => [
+        key,
+        cloneConfigValue(child),
+      ])
+    ) as T;
+  }
+  return value;
+}
+
+function redactSensitiveConfig(value: unknown): unknown {
+  if (Array.isArray(value))
+    return value.map(item => redactSensitiveConfig(item));
+  if (!isRecord(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, child]) => [
+      key,
+      /token|secret|password|credential|api[-_]?key/i.test(key)
+        ? '[REDACTED]'
+        : redactSensitiveConfig(child),
+    ])
+  );
 }
 
 // Get package version dynamically
@@ -149,6 +179,16 @@ export class ConfigService {
     };
   }
 
+  /** Resolve integration overrides through the shared immutable config contract. */
+  public resolveEffectiveConfig(
+    overrides: Partial<SVGConfig> = {}
+  ): Readonly<SVGConfig> {
+    return resolveConfiguration(this.getDefaultConfig(), [
+      { origin: 'configuration-file', value: this.readConfig() },
+      { origin: 'request', value: overrides },
+    ]).config;
+  }
+
   /**
    * Get configuration file path
    */
@@ -161,7 +201,7 @@ export class ConfigService {
    */
   public readConfig(): SVGConfig {
     if (this.cachedConfig) {
-      return { ...this.cachedConfig };
+      return cloneConfigValue(this.cachedConfig);
     }
 
     try {
@@ -172,7 +212,7 @@ export class ConfigService {
       if (Object.keys(configData).length === 0) {
         logger.debug('No configuration found, using defaults');
         this.cachedConfig = this.getDefaultConfig();
-        return this.cachedConfig;
+        return cloneConfigValue(this.cachedConfig);
       }
 
       // Check if migration is needed
@@ -180,7 +220,7 @@ export class ConfigService {
         logger.info('Detected older configuration version, migrating...');
         const migratedConfig = this.migrateConfig(configData);
         this.cachedConfig = migratedConfig;
-        return this.cachedConfig;
+        return cloneConfigValue(this.cachedConfig);
       }
 
       // Merge with defaults to ensure all required properties exist
@@ -190,11 +230,11 @@ export class ConfigService {
       };
 
       logger.debug('Configuration loaded successfully');
-      return this.cachedConfig!;
+      return cloneConfigValue(this.cachedConfig!);
     } catch (error) {
       logger.warn('Failed to read configuration, using defaults:', error);
       this.cachedConfig = this.getDefaultConfig();
-      return this.cachedConfig;
+      return cloneConfigValue(this.cachedConfig);
     }
   }
 
@@ -204,7 +244,7 @@ export class ConfigService {
   public writeConfig(config: SVGConfig): void {
     try {
       FileSystem.writeJSONSync(this.getConfigPath(), config, { spaces: 2 });
-      this.cachedConfig = config; // Update cache
+      this.cachedConfig = cloneConfigValue(config);
       logger.success('Configuration saved successfully');
     } catch (error) {
       logger.error('Failed to write configuration:', error);
@@ -423,7 +463,7 @@ export class ConfigService {
   public showConfig(): void {
     const config = this.readConfig();
     console.log('📄 Current Configuration:');
-    console.log(JSON.stringify(config, null, 2));
+    console.log(JSON.stringify(redactSensitiveConfig(config), null, 2));
   }
 }
 
