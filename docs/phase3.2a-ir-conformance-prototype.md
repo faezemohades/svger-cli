@@ -1,7 +1,9 @@
 # Phase 03.2A — Isolated Compiler IR v1 Prototype
 
-Status: Directive 014 experimental work package implemented and locally verified. This is evidence
-for the Phase 03.2A review gate, not production compiler work or approval to begin Phase 03.3.
+Status: Phase 03.2A was accepted by Engineering Review 034. This document records the original
+representation-only checkpoint; subsequent parser-contract lowering and ownership qualification is
+recorded in [the Phase 03.2B report](phase3.2b-xml-lowering-qualification.md). Neither report
+authorizes production compiler work or Phase 03.3.
 
 ## Boundary and fixture method
 
@@ -52,8 +54,9 @@ Verified on Node `20.20.2` / npm `10.8.2`:
 
 ```sh
 npm run build
-npx tsc experiments/phase3/ir-v1.ts --outDir dist/phase3-prototype --rootDir experiments/phase3 --module ES2022 --moduleResolution Bundler --target ES2022 --strict --skipLibCheck --types node
+npx tsc experiments/phase3/ir-v1.ts experiments/phase3/lower-xml-to-ir.ts --outDir experiments/phase3/.build --rootDir experiments --module ES2022 --moduleResolution Bundler --target ES2022 --strict --noUnusedLocals --noUnusedParameters --skipLibCheck --types node
 node --expose-gc tests/phase3/ir-v1-conformance.test.mjs
+node --expose-gc tests/phase3/xml-to-ir-lowering.test.mjs
 npm run test:phase2:parser
 npx prettier --check experiments/phase3/ir-v1.ts tests/phase3/ir-v1-conformance.test.mjs
 ```

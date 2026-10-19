@@ -9,7 +9,7 @@ import {
   SVG_NAMESPACE,
   XML_NAMESPACE,
   validateAndFreezeIR,
-} from '../../dist/phase3-prototype/ir-v1.js';
+} from '../../experiments/phase3/.build/phase3/ir-v1.js';
 
 const reject = value => ({ state: 'unresolved', reason: value });
 const resolved = (value, interpreter) => ({
@@ -292,6 +292,8 @@ function buildSemanticFixture(text = sourceText, id = 'semantic-fixture') {
   return {
     version: IR_VERSION,
     source,
+    prolog: [],
+    epilog: [],
     root,
     analysis: {
       rootGeometry: {
@@ -553,6 +555,8 @@ if (typeof global.gc === 'function') {
   const memoryIR = validateAndFreezeIR({
     version: IR_VERSION,
     source: admitted,
+    prolog: [],
+    epilog: [],
     root,
     analysis: {
       rootGeometry: {

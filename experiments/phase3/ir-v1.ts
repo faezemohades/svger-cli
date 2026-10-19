@@ -37,17 +37,24 @@ export type ValueState<T> =
       readonly state: 'resolved';
       readonly value: T;
       readonly interpreter: string;
+      readonly evidence?: 'authored' | 'inferred' | 'not-established';
     }
-  | { readonly state: 'unresolved'; readonly reason: string }
+  | {
+      readonly state: 'unresolved';
+      readonly reason: string;
+      readonly evidence?: 'authored' | 'inferred' | 'not-established';
+    }
   | {
       readonly state: 'opaque';
       readonly reason: string;
       readonly original: string;
+      readonly evidence?: 'authored' | 'inferred' | 'not-established';
     }
   | {
       readonly state: 'invalid';
       readonly code: string;
       readonly original: string;
+      readonly evidence?: 'authored' | 'inferred' | 'not-established';
     };
 
 export interface Attribute {
@@ -73,7 +80,17 @@ export interface TextNode {
   readonly provenance: Provenance;
 }
 
-export type IRNode = ElementNode | TextNode;
+export interface GeneratedNode {
+  readonly kind: 'generated';
+  readonly value: string;
+  readonly provenance: {
+    readonly kind: 'generated';
+    readonly passId: string;
+    readonly anchor?: SourceSpan;
+  };
+}
+
+export type IRNode = ElementNode | TextNode | GeneratedNode;
 
 export type ReferenceResolution =
   | { readonly state: 'resolved'; readonly target: string }
@@ -142,6 +159,8 @@ export interface IRDocument {
     readonly utf8ByteLength: number;
     readonly admissionPolicy: 'svg-input-safety-v1';
   };
+  readonly prolog: readonly TextNode[];
+  readonly epilog: readonly TextNode[];
   readonly root: ElementNode;
   readonly analysis: Analysis;
 }
@@ -161,7 +180,21 @@ function record(value: unknown, label: string): Record<string, unknown> {
   if (proto !== Object.prototype && proto !== null) {
     throw new IRValidationError(`${label} must be a plain object`);
   }
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (typeof key === 'symbol' || !descriptor || !('value' in descriptor)) {
+      throw new IRValidationError(`${label} must contain only data properties`);
+    }
+  }
   return value as Record<string, unknown>;
+}
+
+function assertDenseArray(value: readonly unknown[], label: string): void {
+  for (let index = 0; index < value.length; index++) {
+    if (!Object.hasOwn(value, index)) {
+      throw new IRValidationError(`${label} must not contain sparse entries`);
+    }
+  }
 }
 
 function string(
@@ -225,6 +258,14 @@ function expandedName(value: unknown, label: string): void {
 
 function semanticValue(value: unknown, label: string): void {
   const item = record(value, label);
+  if (
+    item.evidence !== undefined &&
+    !['authored', 'inferred', 'not-established'].includes(String(item.evidence))
+  ) {
+    throw new IRValidationError(
+      `${label} has an invalid evidence classification`
+    );
+  }
   if (item.state === 'resolved') {
     string(item.interpreter, `${label}.interpreter`, false);
     if (!('value' in item))
@@ -241,9 +282,41 @@ function semanticValue(value: unknown, label: string): void {
 }
 
 /** Validate, defensively clone, and deeply freeze an experimental IR publication. */
-export function validateAndFreezeIR(input: unknown): IRDocument {
+export function validateAndFreezeIR(
+  input: unknown,
+  options: { readonly ownership?: 'copy' | 'freeze-owned' } = {}
+): IRDocument {
+  const ownership = options.ownership ?? 'copy';
+  if (ownership !== 'copy' && ownership !== 'freeze-owned') {
+    throw new IRValidationError('unsupported publication ownership mode');
+  }
   const seen = new WeakSet<object>();
   let objectCount = 0;
+  const cloneFrozen = (
+    value: unknown,
+    depth = 0,
+    active = new WeakSet<object>()
+  ): unknown => {
+    if (depth > 300)
+      throw new IRValidationError('IR exceeds maximum nesting depth');
+    if (value === null || typeof value !== 'object') return value;
+    if (active.has(value)) throw new IRValidationError('IR contains a cycle');
+    active.add(value);
+    let result: unknown;
+    if (Array.isArray(value)) {
+      result = Object.freeze(
+        value.map(item => cloneFrozen(item, depth + 1, active))
+      );
+    } else {
+      const item = record(value, 'IR value');
+      const copy: Record<string, unknown> = Object.create(null);
+      for (const key of Object.keys(item))
+        copy[key] = cloneFrozen(item[key], depth + 1, active);
+      result = Object.freeze(copy);
+    }
+    active.delete(value);
+    return result;
+  };
   const clone = (value: unknown, depth = 0): unknown => {
     if (depth > 300)
       throw new IRValidationError('IR exceeds maximum nesting depth');
@@ -260,15 +333,19 @@ export function validateAndFreezeIR(input: unknown): IRDocument {
     }
     if (typeof value !== 'object')
       throw new IRValidationError('IR contains a non-data value');
-    if (seen.has(value))
+    if (seen.has(value)) {
+      if (isDeepFrozen(value)) return cloneFrozen(value, depth);
       throw new IRValidationError(
         'IR contains a cycle or shared mutable object'
       );
+    }
     seen.add(value);
     if (++objectCount > 300_000)
       throw new IRValidationError('IR exceeds maximum object count');
-    if (Array.isArray(value))
+    if (Array.isArray(value)) {
+      assertDenseArray(value, 'IR array');
       return Object.freeze(value.map(item => clone(item, depth + 1)));
+    }
     const item = record(value, 'IR value');
     const copy: Record<string, unknown> = Object.create(null);
     for (const key of Object.keys(item))
@@ -276,7 +353,31 @@ export function validateAndFreezeIR(input: unknown): IRDocument {
     return Object.freeze(copy);
   };
 
-  const copied = clone(input) as unknown;
+  const freezeOwned = (value: unknown, depth = 0): unknown => {
+    if (depth > 300)
+      throw new IRValidationError('IR exceeds maximum nesting depth');
+    if (value === null || typeof value !== 'object') return value;
+    if (seen.has(value)) {
+      if (isDeepFrozen(value)) return value;
+      throw new IRValidationError(
+        'IR contains a cycle or shared mutable object'
+      );
+    }
+    seen.add(value);
+    if (++objectCount > 300_000)
+      throw new IRValidationError('IR exceeds maximum object count');
+    if (Array.isArray(value)) {
+      assertDenseArray(value, 'IR array');
+      for (const item of value) freezeOwned(item, depth + 1);
+    } else {
+      const item = record(value, 'IR value');
+      for (const key of Object.keys(item)) freezeOwned(item[key], depth + 1);
+    }
+    return Object.freeze(value);
+  };
+  const copied = (
+    ownership === 'copy' ? clone(input) : freezeOwned(input)
+  ) as unknown;
   const doc = record(copied, 'document');
   if (doc.version !== IR_VERSION)
     throw new IRValidationError('unsupported IR version');
@@ -315,6 +416,8 @@ export function validateAndFreezeIR(input: unknown): IRDocument {
       }
       if (node.attributes.length > 256)
         throw new IRValidationError(`${label} exceeds attribute limit`);
+      assertDenseArray(node.attributes, `${label}.attributes`);
+      assertDenseArray(node.children, `${label}.children`);
       for (const [index, attrValue] of node.attributes.entries()) {
         const attr = record(attrValue, `${label}.attributes[${index}]`);
         expandedName(attr.name, `${label}.attributes[${index}].name`);
@@ -336,6 +439,13 @@ export function validateAndFreezeIR(input: unknown): IRDocument {
       node.children.forEach((child, index) =>
         walk(child, depth + 1, `${label}.children[${index}]`)
       );
+    } else if (node.kind === 'generated') {
+      if (record(node.provenance, `${label}.provenance`).kind !== 'generated') {
+        throw new IRValidationError(
+          `${label} generated node must have generated provenance`
+        );
+      }
+      string(node.value, `${label}.value`);
     } else if (
       node.kind === 'text' ||
       node.kind === 'cdata' ||
@@ -344,6 +454,25 @@ export function validateAndFreezeIR(input: unknown): IRDocument {
       string(node.value, `${label}.value`);
     } else throw new IRValidationError(`${label} has an invalid node kind`);
   };
+  if (!Array.isArray(doc.prolog) || !Array.isArray(doc.epilog)) {
+    throw new IRValidationError(
+      'document prolog and epilog must be ordered arrays'
+    );
+  }
+  assertDenseArray(doc.prolog, 'document prolog');
+  assertDenseArray(doc.epilog, 'document epilog');
+  doc.prolog.forEach((node, index) => {
+    if (record(node, `prolog[${index}]`).kind !== 'comment') {
+      throw new IRValidationError('document prolog may contain comments only');
+    }
+    walk(node, 0, `prolog[${index}]`);
+  });
+  doc.epilog.forEach((node, index) => {
+    if (record(node, `epilog[${index}]`).kind !== 'comment') {
+      throw new IRValidationError('document epilog may contain comments only');
+    }
+    walk(node, 0, `epilog[${index}]`);
+  });
   walk(doc.root, 0, 'root');
   const root = record(doc.root, 'root');
   const rootName = record(root.name, 'root.name');
@@ -460,4 +589,23 @@ export function validateAndFreezeIR(input: unknown): IRDocument {
     throw new IRValidationError('accessibility analysis is invalid');
   }
   return copied as IRDocument;
+}
+
+function isDeepFrozen(value: object, visited = new WeakSet<object>()): boolean {
+  if (visited.has(value)) return true;
+  visited.add(value);
+  if (!Object.isFrozen(value)) return false;
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || !('value' in descriptor)) return false;
+    if (
+      descriptor.value !== null &&
+      (typeof descriptor.value === 'object' ||
+        typeof descriptor.value === 'function') &&
+      !isDeepFrozen(descriptor.value, visited)
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
