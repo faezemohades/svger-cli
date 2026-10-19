@@ -1,10 +1,12 @@
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getPackageInfo } from '../utils/package-info.js';
 import type { SVGConfig } from '../types/index.js';
 
 const CACHE_SCHEMA_VERSION = '1.0.0' as const;
+const DEFAULT_MAX_CACHE_ENTRIES = 1_000;
+const DEFAULT_MAX_CACHE_BYTES = 256 * 1024 * 1024;
 
 export interface PipelineFingerprint {
   compilerVersion: string;
@@ -65,7 +67,11 @@ export function createPipelineFingerprint(
   const optimizerPasses =
     optimizationLevel === 'none'
       ? []
-      : ['input-safety', 'basic-cleaning', `optimization:${optimizationLevel}`];
+      : [
+          'xml-input-safety-v2',
+          'basic-cleaning',
+          `optimization:${optimizationLevel}`,
+        ];
   const policy = {
     unsafeInputPolicy: config.unsafeInputPolicy ?? 'reject',
     maxInputSizeBytes: config.maxInputSizeBytes,
@@ -77,7 +83,7 @@ export function createPipelineFingerprint(
 
   return Object.freeze({
     compilerVersion: getPackageInfo().version,
-    parser: Object.freeze({ id: 'legacy-raw-svg-gate', version: '1' }),
+    parser: Object.freeze({ id: 'bounded-svg-xml-scanner', version: '2' }),
     optimizer: Object.freeze({
       passIds: Object.freeze(optimizerPasses),
       version: '1',
@@ -118,7 +124,22 @@ export function createCacheKey(
 }
 
 export class ContentAddressableCache {
-  public constructor(private readonly cacheDirectory: string) {}
+  public constructor(
+    private readonly cacheDirectory: string,
+    private readonly limits: {
+      maxEntries?: number;
+      maxBytes?: number;
+    } = {}
+  ) {
+    if (
+      (limits.maxEntries !== undefined &&
+        (!Number.isSafeInteger(limits.maxEntries) || limits.maxEntries < 1)) ||
+      (limits.maxBytes !== undefined &&
+        (!Number.isSafeInteger(limits.maxBytes) || limits.maxBytes < 1))
+    ) {
+      throw new Error('Cache limits must be positive safe integers.');
+    }
+  }
 
   public get directory(): string {
     return this.cacheDirectory;
@@ -165,14 +186,56 @@ export class ContentAddressableCache {
   public async write(key: string, content: string): Promise<void> {
     const entryPath = this.entryPath(key);
     await fs.mkdir(path.dirname(entryPath), { recursive: true });
-    const temporaryPath = `${entryPath}.${process.pid}.tmp`;
+    const temporaryPath = `${entryPath}.${process.pid}.${randomUUID()}.tmp`;
     const entry: CacheEntry = {
       schemaVersion: CACHE_SCHEMA_VERSION,
       key,
       contentSha256: hashValue(content),
       content,
     };
-    await fs.writeFile(temporaryPath, `${JSON.stringify(entry)}\n`, 'utf8');
-    await fs.rename(temporaryPath, entryPath);
+    try {
+      await fs.writeFile(temporaryPath, `${JSON.stringify(entry)}\n`, 'utf8');
+      await fs.rename(temporaryPath, entryPath);
+    } finally {
+      await fs.rm(temporaryPath, { force: true });
+    }
+    await this.enforceLimits(path.dirname(entryPath));
+  }
+
+  private async enforceLimits(directory: string): Promise<void> {
+    const maxEntries = this.limits.maxEntries ?? DEFAULT_MAX_CACHE_ENTRIES;
+    const maxBytes = this.limits.maxBytes ?? DEFAULT_MAX_CACHE_BYTES;
+    const candidates: Array<{ path: string; size: number; modified: number }> =
+      [];
+    for (const name of await fs.readdir(directory)) {
+      if (!/^[a-f0-9]{64}\.json$/u.test(name)) continue;
+      const filePath = path.join(directory, name);
+      try {
+        const stat = await fs.lstat(filePath);
+        if (!stat.isFile()) continue;
+        candidates.push({
+          path: filePath,
+          size: stat.size,
+          modified: stat.mtimeMs,
+        });
+      } catch (error) {
+        if ((error as { code?: string }).code !== 'ENOENT') throw error;
+      }
+    }
+    candidates.sort(
+      (left, right) =>
+        left.modified - right.modified || left.path.localeCompare(right.path)
+    );
+    let totalBytes = candidates.reduce((total, entry) => total + entry.size, 0);
+    while (candidates.length > maxEntries || totalBytes > maxBytes) {
+      const oldest = candidates.shift();
+      if (!oldest) break;
+      try {
+        await fs.rm(oldest.path, { force: true });
+        totalBytes -= oldest.size;
+      } catch (error) {
+        if ((error as { code?: string }).code !== 'ENOENT') throw error;
+      }
+    }
   }
 }

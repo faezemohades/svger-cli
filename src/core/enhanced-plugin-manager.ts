@@ -10,6 +10,7 @@ import type {
   PluginHookResult,
 } from '../types/plugin-system.js';
 import { logger } from './logger.js';
+import { DiagnosticError, ExitCode } from '../contracts/diagnostics.js';
 import { compareVisually } from '../utils/visual-diff.js';
 
 /**
@@ -180,11 +181,15 @@ export class EnhancedPluginManager {
           currentContext.skipRemaining = true;
         }
       } catch (error) {
-        logger.error(
-          `Plugin "${plugin.name}" failed at hook "${hookType}":`,
-          (error as Error).message
+        throw new DiagnosticError(
+          'E_PLUGIN_HOOK_FAILED',
+          `Plugin hook "${hookType}" failed.`,
+          {
+            exitCode: ExitCode.PluginFailure,
+            cause: error,
+            metadata: { hook: hookType },
+          }
         );
-        // Continue with next plugin
       }
     }
 

@@ -139,9 +139,7 @@ export class VisualDiffError extends Error {
   constructor(
     message: string,
     public readonly code:
-      | 'RENDER_FAILED'
-      | 'COMPARISON_FAILED'
-      | 'THRESHOLD_EXCEEDED'
+      'RENDER_FAILED' | 'COMPARISON_FAILED' | 'THRESHOLD_EXCEEDED'
   ) {
     super(message);
     this.name = 'VisualDiffError';
@@ -181,16 +179,19 @@ export async function renderSVG(
       .png()
       .toBuffer();
 
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     const timeoutPromise = new Promise<never>((_resolve, reject) => {
-      setTimeout(
+      timeout = setTimeout(
         () => reject(new Error(`Render timeout after ${RENDER_TIMEOUT_MS}ms`)),
         RENDER_TIMEOUT_MS
       );
     });
 
-    const pngBuffer = await Promise.race([renderPromise, timeoutPromise]);
-
-    return pngBuffer;
+    try {
+      return await Promise.race([renderPromise, timeoutPromise]);
+    } finally {
+      if (timeout) clearTimeout(timeout);
+    }
   } catch (error) {
     throw new VisualDiffError(
       `Failed to render SVG: ${error instanceof Error ? error.message : String(error)}`,

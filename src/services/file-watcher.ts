@@ -109,6 +109,7 @@ export class FileWatcherService {
     eventType: string,
     filePath: string
   ): Promise<void> {
+    if (!this.watchers.has(watchId)) return;
     try {
       const exists = await FileSystem.exists(filePath);
       let actualEventType: FileWatchEvent['type'];
@@ -153,6 +154,7 @@ export class FileWatcherService {
    * Emit event to all registered handlers
    */
   private emitEvent(watchId: string, event: FileWatchEvent): void {
+    if (!this.watchers.has(watchId)) return;
     const handlers = this.eventHandlers.get(watchId) || [];
 
     for (const handler of handlers) {

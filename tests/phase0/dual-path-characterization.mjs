@@ -24,6 +24,7 @@ await mkdir(serviceOutput);
 const normalize = value =>
   value
     .replace(/\u001b\[[0-9;]*m/g, '')
+    .replace(/\(node:\d+\)/g, '(node:[PID])')
     .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, '[TIMESTAMP]')
     .replaceAll(workRoot, '[WORK_ROOT]')
     .replaceAll(repositoryRoot, '[REPOSITORY_ROOT]');
@@ -140,7 +141,13 @@ if (process.argv.includes('--record')) {
 
 assert.equal(report.diff.exitSemanticsEqual, true);
 assert.equal(report.diff.diagnosticsEqual, false);
-assert.deepEqual(report.diff.generatedFileNaming.serviceOnly, ['index.ts']);
+assert.deepEqual(report.diff.generatedFileNaming.legacyOnly, []);
+assert.deepEqual(report.diff.generatedFileNaming.serviceOnly, []);
+assert.deepEqual(
+  report.paths.legacyBuilder.generatedFileNames,
+  report.paths.svgService.generatedFileNames,
+  'both supported build paths must produce the same artifact set'
+);
 assert.equal(
   report.diff.outputContent.every(entry => entry.equal),
   true

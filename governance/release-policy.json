@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "publishingAuthorized": false,
+  "blocker": "SEC-INC-001: revoke exposed npm and GitHub tokens and review account activity before enabling publication."
+}

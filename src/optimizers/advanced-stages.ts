@@ -14,6 +14,8 @@ import { shortenPath } from './path-shortener.js';
 import { parsePath, serializePath } from './path-parser.js';
 import { simplifyPath } from './path-simplifier.js';
 import { OptLevel } from './types.js';
+import { optimizeSVGAttributeValue } from './numeric-optimizer.js';
+import { transformSVGAttributeValues } from './xml-attribute-transform.js';
 
 /**
  * Numeric optimization stage wrapper
@@ -27,21 +29,9 @@ export async function numericStage(
     return svg;
   }
 
-  try {
-    const tree = parseSVG(svg);
-    if (!tree) return svg;
-
-    const result = numericOptimizationStage(tree, config);
-
-    if (result.modified) {
-      return serializeSVGMinified(tree);
-    }
-
-    return svg;
-  } catch (error) {
-    console.warn('Numeric optimization failed:', error);
-    return svg;
-  }
+  return transformSVGAttributeValues(svg, (_tag, name, value) =>
+    optimizeSVGAttributeValue(name, value, config)
+  );
 }
 
 /**

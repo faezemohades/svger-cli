@@ -1,5 +1,10 @@
 # CI/CD Setup Checklist
 
+> **Superseded by Directive 010:** This historical checklist contains obsolete release setup steps.
+> Do not create publishing credentials or execute release steps while SEC-INC-001 is open. Follow
+> [`docs/phase1-quality-governance.md`](../docs/phase1-quality-governance.md) for current gates and
+> permissions.
+
 Use this checklist to set up CI/CD for SVGER-CLI in your environment.
 
 ## ☐ Prerequisites

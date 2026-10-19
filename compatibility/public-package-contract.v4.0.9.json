@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "packageName": "svger-cli",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "svger-cli": "bin/svg-tool.js",
+    "svger": "bin/svg-tool.js",
+    "test-svger": "bin/test-svger.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./webpack": {
+      "types": "./dist/integrations/webpack.d.ts",
+      "import": "./dist/integrations/webpack.js",
+      "default": "./dist/integrations/webpack.js"
+    },
+    "./webpack-loader": {
+      "types": "./dist/integrations/webpack.d.ts",
+      "import": "./dist/integrations/webpack.js",
+      "default": "./dist/integrations/webpack.js"
+    },
+    "./vite": {
+      "types": "./dist/integrations/vite.d.ts",
+      "import": "./dist/integrations/vite.js",
+      "default": "./dist/integrations/vite.js"
+    },
+    "./rollup": {
+      "types": "./dist/integrations/rollup.d.ts",
+      "import": "./dist/integrations/rollup.js",
+      "default": "./dist/integrations/rollup.js"
+    },
+    "./babel": {
+      "types": "./dist/integrations/babel.d.ts",
+      "import": "./dist/integrations/babel.js",
+      "default": "./dist/integrations/babel.js"
+    },
+    "./babel-plugin": {
+      "types": "./dist/integrations/babel.d.ts",
+      "import": "./dist/integrations/babel.js",
+      "default": "./dist/integrations/babel.js"
+    },
+    "./nextjs": {
+      "types": "./dist/integrations/nextjs.d.ts",
+      "import": "./dist/integrations/nextjs.js",
+      "default": "./dist/integrations/nextjs.js"
+    },
+    "./jest": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./jest-transformer": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./jest-preset": {
+      "types": "./dist/integrations/jest-preset.d.ts",
+      "import": "./dist/integrations/jest-preset.js",
+      "default": "./dist/integrations/jest-preset.js"
+    },
+    "./package.json": "./package.json"
+  }
+}

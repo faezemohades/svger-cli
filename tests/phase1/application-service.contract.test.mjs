@@ -113,7 +113,8 @@ const [react, vue] = await Promise.all([
 ]);
 assert.ok(react.artifacts.some(artifact => artifact.output.endsWith('.tsx')));
 assert.ok(vue.artifacts.some(artifact => artifact.output.endsWith('.vue')));
-assert.ok(!vue.artifacts.some(artifact => artifact.componentName === 'index'));
+assert.ok(vue.artifacts.some(artifact => artifact.componentName === 'index'));
+assert.ok(vue.artifacts.some(artifact => artifact.output.endsWith('index.ts')));
 
 const controller = new AbortController();
 controller.abort('contract cancellation');

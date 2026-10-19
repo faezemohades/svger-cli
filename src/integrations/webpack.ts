@@ -26,6 +26,7 @@ import path from 'path';
 import { FileSystem } from '../utils/native.js';
 import { svgProcessor } from '../processors/svg-processor.js';
 import { configService } from '../services/config.js';
+import { runStagedOutputBuild } from '../application/output-transaction.js';
 import { logger } from '../core/logger.js';
 import type {
   WebpackPluginOptions,
@@ -46,38 +47,56 @@ export class SvgerWebpackPlugin {
   private options: Required<WebpackPluginOptions>;
   private processedFiles: Set<string> = new Set();
   private watchDebounceTimer?: ReturnType<typeof setTimeout>;
+  private pendingChangedFiles = new Set<string>();
+  private watchDebounceWaiters: Array<{
+    resolve: () => void;
+    reject: (error: unknown) => void;
+  }> = [];
+  private trackHmrFiles = false;
 
   constructor(options: WebpackPluginOptions = {}) {
-    const config = configService.readConfig();
+    const effectiveConfig = configService.resolveEffectiveConfig({
+      ...(options.config ?? {}),
+      ...(options.framework === undefined
+        ? {}
+        : { framework: options.framework }),
+      ...(options.typescript === undefined
+        ? {}
+        : { typescript: options.typescript }),
+      ...(options.maxInputSizeBytes === undefined
+        ? {}
+        : { maxInputSizeBytes: options.maxInputSizeBytes }),
+      ...(options.unsafeInputPolicy === undefined
+        ? {}
+        : { unsafeInputPolicy: options.unsafeInputPolicy }),
+    });
 
     this.options = {
-      source: options.source || config.source || './src/icons',
-      output: options.output || config.output || './src/components/icons',
-      framework: options.framework || config.framework || 'react',
-      typescript:
-        options.typescript !== undefined
-          ? options.typescript
-          : config.typescript,
-      config: options.config || {},
-      include: options.include || ['**/*.svg'],
-      exclude: options.exclude || ['node_modules/**'],
+      source: options.source ?? effectiveConfig.source ?? './src/icons',
+      output:
+        options.output ?? effectiveConfig.output ?? './src/components/icons',
+      framework: effectiveConfig.framework,
+      typescript: effectiveConfig.typescript,
+      config: effectiveConfig,
+      include: options.include ?? ['**/*.svg'],
+      exclude: options.exclude ?? ['node_modules/**'],
       hmr: options.hmr !== undefined ? options.hmr : true,
       emitFile: options.emitFile !== undefined ? options.emitFile : true,
       generateIndex:
         options.generateIndex !== undefined ? options.generateIndex : true,
       maxInputSizeBytes:
-        options.maxInputSizeBytes ??
-        config.maxInputSizeBytes ??
-        DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
-      unsafeInputPolicy: options.unsafeInputPolicy ?? 'reject',
+        effectiveConfig.maxInputSizeBytes ?? DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+      unsafeInputPolicy: effectiveConfig.unsafeInputPolicy ?? 'reject',
       watch: {
-        debounce: options.watch?.debounce || 300,
-        ignored: options.watch?.ignored || ['node_modules/**'],
+        debounce: options.watch?.debounce ?? 300,
+        ignored: options.watch?.ignored ?? ['node_modules/**'],
       },
     };
   }
 
   apply(compiler: any): void {
+    this.trackHmrFiles =
+      this.options.hmr && Boolean(compiler.options.devServer);
     // Initial build - process all SVG files
     compiler.hooks.beforeCompile.tapPromise(PLUGIN_NAME, async () => {
       logger.info('SVGER Webpack Plugin: Processing SVG files...');
@@ -92,6 +111,7 @@ export class SvgerWebpackPlugin {
           await this.processChangedFiles(changedFiles);
         }
       });
+      compiler.hooks.watchClose?.tap(PLUGIN_NAME, () => this.dispose());
     }
 
     // Add HMR support
@@ -110,6 +130,15 @@ export class SvgerWebpackPlugin {
     }
   }
 
+  /** Release debounce work and HMR bookkeeping when the compiler closes. */
+  dispose(): void {
+    if (this.watchDebounceTimer) clearTimeout(this.watchDebounceTimer);
+    this.watchDebounceTimer = undefined;
+    this.pendingChangedFiles.clear();
+    for (const waiter of this.watchDebounceWaiters.splice(0)) waiter.resolve();
+    this.processedFiles.clear();
+  }
+
   /**
    * Process all SVG files in the source directory
    */
@@ -122,8 +151,6 @@ export class SvgerWebpackPlugin {
       return;
     }
 
-    await FileSystem.ensureDir(outputDir);
-
     const files = await FileSystem.readDir(sourceDir);
     const svgFiles = files.filter((file: string) => file.endsWith('.svg'));
 
@@ -134,19 +161,26 @@ export class SvgerWebpackPlugin {
 
     const results: ProcessingResult[] = [];
 
-    for (const file of svgFiles) {
-      const svgPath = path.join(sourceDir, file);
-      const result = await this.processSVGFile(svgPath, outputDir);
-      results.push(result);
-
-      if (result.success && result.outputPath) {
-        this.processedFiles.add(result.outputPath);
+    await runStagedOutputBuild(outputDir, async stageDir => {
+      await FileSystem.ensureDir(stageDir);
+      for (const file of svgFiles) {
+        const svgPath = path.join(sourceDir, file);
+        results.push(await this.processSVGFile(svgPath, stageDir));
       }
-    }
+      const failed = results.find(result => !result.success);
+      if (failed)
+        throw failed.error ?? new Error('Webpack SVG generation failed.');
+      if (this.options.generateIndex) await this.generateIndexFile(stageDir);
+    });
 
-    // Generate index file
-    if (this.options.generateIndex) {
-      await this.generateIndexFile(outputDir);
+    for (const result of results) {
+      if (result.success && result.outputPath) {
+        if (this.trackHmrFiles) {
+          this.processedFiles.add(
+            path.join(outputDir, path.basename(result.outputPath))
+          );
+        }
+      }
     }
 
     const successful = results.filter(r => r.success).length;
@@ -158,24 +192,36 @@ export class SvgerWebpackPlugin {
    */
   private async processChangedFiles(files: Set<string>): Promise<void> {
     const outputDir = path.resolve(this.options.output);
-
-    // Debounce processing
+    for (const file of files) this.pendingChangedFiles.add(file);
     if (this.watchDebounceTimer) {
       clearTimeout(this.watchDebounceTimer);
     }
 
-    await new Promise<void>(resolve => {
-      this.watchDebounceTimer = setTimeout(async () => {
-        for (const file of files) {
-          if (file.endsWith('.svg')) {
-            const result = await this.processSVGFile(file, outputDir);
-            if (result.success && result.outputPath) {
-              this.processedFiles.add(result.outputPath);
-              logger.info(`SVGER: Updated ${result.componentName}`);
+    await new Promise<void>((resolve, reject) => {
+      this.watchDebounceWaiters.push({ resolve, reject });
+      this.watchDebounceTimer = setTimeout(() => {
+        this.watchDebounceTimer = undefined;
+        const changedFiles = [...this.pendingChangedFiles];
+        this.pendingChangedFiles.clear();
+        const waiters = this.watchDebounceWaiters.splice(0);
+        void (async () => {
+          for (const file of changedFiles) {
+            if (file.endsWith('.svg')) {
+              const result = await this.processSVGFile(file, outputDir);
+              if (!result.success) {
+                throw result.error ?? new Error('Webpack SVG update failed.');
+              }
+              if (result.outputPath) {
+                if (this.trackHmrFiles)
+                  this.processedFiles.add(result.outputPath);
+                logger.info(`SVGER: Updated ${result.componentName}`);
+              }
             }
           }
-        }
-        resolve();
+        })().then(
+          () => waiters.forEach(waiter => waiter.resolve()),
+          error => waiters.forEach(waiter => waiter.reject(error))
+        );
       }, this.options.watch.debounce);
     });
   }
@@ -198,6 +244,7 @@ export class SvgerWebpackPlugin {
       const result = await svgProcessor.processSVGFile(svgPath, outputDir, {
         framework: mergedConfig.framework,
         typescript: mergedConfig.typescript,
+        frameworkOptions: mergedConfig.frameworkOptions,
         defaultWidth: mergedConfig.defaultWidth,
         defaultHeight: mergedConfig.defaultHeight,
         defaultFill: mergedConfig.defaultFill,
@@ -213,7 +260,7 @@ export class SvgerWebpackPlugin {
         error: result.error,
       };
     } catch (error) {
-      logger.error(`Failed to process ${svgPath}:`, error);
+      logger.error(`Failed to process ${path.basename(svgPath)}.`);
       return {
         success: false,
         error: error as Error,
@@ -227,9 +274,20 @@ export class SvgerWebpackPlugin {
    */
   private async generateIndexFile(outputDir: string): Promise<void> {
     try {
+      if (
+        this.options.framework === 'vue' ||
+        this.options.framework === 'svelte' ||
+        this.options.framework === 'angular'
+      ) {
+        return;
+      }
+
       // Scan output directory for all component files
       const files = await FileSystem.readDir(outputDir);
-      const extension = this.options.typescript ? 'tsx' : 'jsx';
+      const extension = svgProcessor.getFileExtension(
+        this.options.framework,
+        this.options.typescript
+      );
 
       // Filter component files (exclude index files)
       const componentFiles = files.filter(
@@ -262,7 +320,8 @@ export class SvgerWebpackPlugin {
       await FileSystem.writeFile(indexPath, exports, 'utf-8');
       logger.debug(`Generated index file: ${indexPath}`);
     } catch (error) {
-      logger.error('Failed to generate index file:', error);
+      logger.error('Failed to generate index file.');
+      throw error;
     }
   }
 
@@ -319,11 +378,23 @@ export class SvgerWebpackPlugin {
 export async function svgerLoader(this: any, content: string): Promise<string> {
   const callback = this.async();
   const options: WebpackLoaderOptions = this.getOptions() || {};
-  const config = configService.readConfig();
-
-  const framework = options.framework || config.framework || 'react';
-  const typescript =
-    options.typescript !== undefined ? options.typescript : config.typescript;
+  const effectiveConfig = configService.resolveEffectiveConfig({
+    ...(options.config ?? {}),
+    ...(options.framework === undefined
+      ? {}
+      : { framework: options.framework }),
+    ...(options.typescript === undefined
+      ? {}
+      : { typescript: options.typescript }),
+    ...(options.maxInputSizeBytes === undefined
+      ? {}
+      : { maxInputSizeBytes: options.maxInputSizeBytes }),
+    ...(options.unsafeInputPolicy === undefined
+      ? {}
+      : { unsafeInputPolicy: options.unsafeInputPolicy }),
+  });
+  const framework = effectiveConfig.framework;
+  const typescript = effectiveConfig.typescript;
 
   const componentName = svgProcessor.generateComponentName(
     this.resourcePath,
@@ -337,13 +408,13 @@ export async function svgerLoader(this: any, content: string): Promise<string> {
       {
         framework,
         typescript,
-        defaultWidth: config.defaultWidth,
-        defaultHeight: config.defaultHeight,
-        defaultFill: config.defaultFill,
-        styleRules: config.styleRules || {},
-        maxInputSizeBytes:
-          options.maxInputSizeBytes ?? config.maxInputSizeBytes,
-        unsafeInputPolicy: options.unsafeInputPolicy,
+        frameworkOptions: effectiveConfig.frameworkOptions,
+        defaultWidth: effectiveConfig.defaultWidth,
+        defaultHeight: effectiveConfig.defaultHeight,
+        defaultFill: effectiveConfig.defaultFill,
+        styleRules: effectiveConfig.styleRules,
+        maxInputSizeBytes: effectiveConfig.maxInputSizeBytes,
+        unsafeInputPolicy: effectiveConfig.unsafeInputPolicy,
       }
     );
 

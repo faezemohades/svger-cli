@@ -35,6 +35,8 @@ import path from 'path';
 import { FileSystem } from '../utils/native.js';
 import { svgProcessor } from '../processors/svg-processor.js';
 import { configService } from '../services/config.js';
+import { runStagedOutputBuild } from '../application/output-transaction.js';
+import { readSVGInputFile } from '../security/input-safety.js';
 import { logger } from '../core/logger.js';
 import type {
   BabelPluginOptions,
@@ -65,65 +67,75 @@ async function processAllSVGs(
   const files = await FileSystem.readDir(sourcePath);
   const svgFiles = files.filter(file => file.endsWith('.svg'));
   const results: ProcessingResult[] = [];
+  const completedSources: string[] = [];
 
-  for (const file of svgFiles) {
-    const filePath = path.join(sourcePath, file);
-
-    if (processedFiles.has(filePath)) continue;
-
-    try {
-      const svgContent = await FileSystem.readFile(filePath, 'utf-8');
-      const componentName = svgProcessor.generateComponentName(file, 'pascal');
-
-      const config = configService.readConfig();
-      const component = await svgProcessor.generateComponent(
-        componentName,
-        svgContent,
-        {
+  await runStagedOutputBuild(outputPath, async stageDir => {
+    for (const file of svgFiles) {
+      const filePath = path.join(sourcePath, file);
+      if (processedFiles.has(filePath)) continue;
+      try {
+        const config = {
+          ...configService.readConfig(),
+          ...options.config,
           framework: options.framework,
           typescript: options.typescript,
-          defaultWidth: config.defaultWidth,
-          defaultHeight: config.defaultHeight,
-          defaultFill: config.defaultFill,
-          styleRules: config.styleRules || {},
-          maxInputSizeBytes: options.maxInputSizeBytes,
-          unsafeInputPolicy: options.unsafeInputPolicy,
-        }
-      );
+        };
+        const svgContent = await readSVGInputFile(
+          filePath,
+          options.maxInputSizeBytes ?? config.maxInputSizeBytes,
+          filePath
+        );
+        const componentName = svgProcessor.generateComponentName(
+          file,
+          'pascal'
+        );
+        const component = await svgProcessor.generateComponent(
+          componentName,
+          svgContent,
+          {
+            framework: options.framework,
+            typescript: options.typescript,
+            frameworkOptions: config.frameworkOptions,
+            defaultWidth: config.defaultWidth,
+            defaultHeight: config.defaultHeight,
+            defaultFill: config.defaultFill,
+            styleRules: config.styleRules,
+            maxInputSizeBytes: options.maxInputSizeBytes,
+            unsafeInputPolicy: options.unsafeInputPolicy,
+          }
+        );
 
-      const ext = options.typescript ? 'tsx' : 'jsx';
-      const outputFile = resolveOutputArtifactPath(
-        outputPath,
-        `${componentName}.${ext}`
-      );
+        const ext = svgProcessor.getFileExtension(
+          options.framework,
+          options.typescript
+        );
+        const outputFile = resolveOutputArtifactPath(
+          stageDir,
+          `${componentName}.${ext}`
+        );
 
-      await FileSystem.ensureDir(path.dirname(outputFile));
-      await FileSystem.writeFile(outputFile, component);
+        await FileSystem.ensureDir(path.dirname(outputFile));
+        await FileSystem.writeFile(outputFile, component);
 
-      processedFiles.add(filePath);
-      results.push({
-        success: true,
-        outputPath: outputFile,
-        componentName,
-      });
-    } catch (error) {
-      logger.error(`Failed to process ${file}:`, error);
-      results.push({
-        success: false,
-        error: error as Error,
-      });
+        results.push({
+          success: true,
+          outputPath: outputFile,
+          componentName,
+        });
+        completedSources.push(filePath);
+      } catch (error) {
+        logger.error(`Failed to process ${file}.`);
+        results.push({
+          success: false,
+          error: error as Error,
+        });
+      }
     }
-  }
-
-  // Generate index file if enabled
-  if (options.generateIndex) {
-    try {
-      await generateIndexFile(outputPath, options);
-    } catch (error) {
-      logger.error('Failed to generate index file:', error);
-    }
-  }
-
+    const failed = results.find(result => !result.success);
+    if (failed) throw failed.error ?? new Error('Babel SVG generation failed.');
+    if (options.generateIndex) await generateIndexFile(stageDir, options);
+  });
+  completedSources.forEach(filePath => processedFiles.add(filePath));
   return results;
 }
 
@@ -136,9 +148,20 @@ async function generateIndexFile(
   options: Required<BabelPluginOptions>
 ): Promise<void> {
   try {
+    if (
+      options.framework === 'vue' ||
+      options.framework === 'svelte' ||
+      options.framework === 'angular'
+    ) {
+      return;
+    }
+
     // Scan output directory for all component files
     const files = await FileSystem.readDir(outputDir);
-    const extension = options.typescript ? 'tsx' : 'jsx';
+    const extension = svgProcessor.getFileExtension(
+      options.framework,
+      options.typescript
+    );
 
     // Filter component files (exclude index files)
     const componentFiles = files.filter(
@@ -171,7 +194,8 @@ async function generateIndexFile(
     await FileSystem.writeFile(indexPath, exports, 'utf-8');
     logger.debug(`Generated index file: ${indexPath}`);
   } catch (error) {
-    logger.error('Failed to generate index file:', error);
+    logger.error('Failed to generate index file.');
+    throw error;
   }
 }
 
@@ -191,7 +215,10 @@ function transformSVGImport(
   const componentName = svgProcessor.generateComponentName(fileName, 'pascal');
 
   // Calculate relative path from output to component
-  const ext = options.typescript ? 'tsx' : 'jsx';
+  const ext = svgProcessor.getFileExtension(
+    options.framework,
+    options.typescript
+  );
   return path.join(absoluteOutput, `${componentName}.${ext}`);
 }
 
@@ -207,17 +234,31 @@ export function svgerBabelPlugin(
   _api: any,
   options: BabelPluginOptions = {}
 ): any {
-  const config = configService.readConfig();
+  const effectiveConfig = configService.resolveEffectiveConfig({
+    ...(options.config ?? {}),
+    ...(options.framework === undefined
+      ? {}
+      : { framework: options.framework }),
+    ...(options.typescript === undefined
+      ? {}
+      : { typescript: options.typescript }),
+    ...(options.maxInputSizeBytes === undefined
+      ? {}
+      : { maxInputSizeBytes: options.maxInputSizeBytes }),
+    ...(options.unsafeInputPolicy === undefined
+      ? {}
+      : { unsafeInputPolicy: options.unsafeInputPolicy }),
+  });
 
   const pluginOptions: Required<BabelPluginOptions> = {
-    source: options.source || config.source || './src/icons',
-    output: options.output || config.output || './src/components/icons',
-    framework: options.framework || config.framework || 'react',
-    typescript:
-      options.typescript !== undefined ? options.typescript : config.typescript,
-    config: options.config || {},
-    include: options.include || ['**/*.svg'],
-    exclude: options.exclude || ['node_modules/**'],
+    source: options.source ?? effectiveConfig.source ?? './src/icons',
+    output:
+      options.output ?? effectiveConfig.output ?? './src/components/icons',
+    framework: effectiveConfig.framework,
+    typescript: effectiveConfig.typescript,
+    config: effectiveConfig,
+    include: options.include ?? ['**/*.svg'],
+    exclude: options.exclude ?? ['node_modules/**'],
     transformImports:
       options.transformImports !== undefined ? options.transformImports : true,
     processOnInit:
@@ -225,10 +266,8 @@ export function svgerBabelPlugin(
     generateIndex:
       options.generateIndex !== undefined ? options.generateIndex : true,
     maxInputSizeBytes:
-      options.maxInputSizeBytes ??
-      config.maxInputSizeBytes ??
-      DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
-    unsafeInputPolicy: options.unsafeInputPolicy ?? 'reject',
+      effectiveConfig.maxInputSizeBytes ?? DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+    unsafeInputPolicy: effectiveConfig.unsafeInputPolicy ?? 'reject',
   };
 
   const processedFiles = new Set<string>();
@@ -252,6 +291,9 @@ export function svgerBabelPlugin(
                 `SVGER Babel Plugin: Processed ${successCount} SVG files`
               );
             }
+            const failed = results.find(result => !result.success);
+            if (failed)
+              throw failed.error ?? new Error('Babel SVG generation failed.');
           }
         },
       },

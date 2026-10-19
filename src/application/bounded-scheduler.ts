@@ -59,17 +59,27 @@ export async function runBounded<TInput, TResult>(
   ) {
     const batchEnd = Math.min(inputs.length, batchStart + batchSize);
     let nextIndex = batchStart;
+    let workerFailed = false;
     const workerCount = Math.min(options.concurrency, batchEnd - batchStart);
     const workers = Array.from({ length: workerCount }, async () => {
-      while (nextIndex < batchEnd) {
+      while (nextIndex < batchEnd && !workerFailed) {
         assertNotAborted(options.signal);
         const index = nextIndex++;
-        const result = await worker(inputs[index], index, options.signal);
-        results[index] = result;
-        completionResults.push(result);
+        try {
+          const result = await worker(inputs[index], index, options.signal);
+          results[index] = result;
+          completionResults.push(result);
+        } catch (error) {
+          workerFailed = true;
+          throw error;
+        }
       }
     });
-    await Promise.all(workers);
+    const settled = await Promise.allSettled(workers);
+    const rejected = settled.find(
+      (result): result is PromiseRejectedResult => result.status === 'rejected'
+    );
+    if (rejected) throw rejected.reason;
   }
 
   return Object.freeze(

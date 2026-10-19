@@ -90,6 +90,7 @@ export interface SVGConfig {
   framework: FrameworkType;
   typescript: boolean;
   componentType?: ComponentType;
+  frameworkOptions?: FrameworkOptions;
 
   // Processing Options
   watch: boolean;
@@ -203,6 +204,7 @@ export interface ComponentGenerationOptions {
   namingConvention?: 'kebab' | 'pascal' | 'camel';
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
+  optimizationLevel?: 'none' | 'basic' | 'balanced' | 'aggressive' | 'maximum';
   signal?: AbortSignal;
 }
 
@@ -272,10 +274,7 @@ export interface Template {
 export type FileSystemEvent = 'change' | 'rename';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type ProcessingStatus =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed';
+  'pending' | 'processing' | 'completed' | 'failed';
 
 export interface ProcessingJob {
   id: string;

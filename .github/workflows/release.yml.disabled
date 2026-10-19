@@ -1,4 +1,4 @@
-name: Release
+name: Release (disabled until SEC-INC-001 closure)
 
 on:
   push:

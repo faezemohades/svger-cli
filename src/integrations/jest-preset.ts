@@ -21,6 +21,7 @@ import { svgProcessor } from '../processors/svg-processor.js';
 import { configService } from '../services/config.js';
 import type { JestPresetOptions } from '../types/integrations.js';
 import { applySVGInputSafety } from '../security/input-safety.js';
+import { DiagnosticError, ExitCode } from '../contracts/diagnostics.js';
 
 /**
  * Jest transformer for SVG files
@@ -31,14 +32,35 @@ export const svgerJestTransformer = {
     sourcePath: string,
     options: any
   ): { code: string } {
-    const config = configService.readConfig();
     const transformOptions: JestPresetOptions =
       options?.transformerConfig?.svger || {};
+    const config = configService.resolveEffectiveConfig({
+      ...(transformOptions.config ?? {}),
+      ...(transformOptions.framework === undefined
+        ? {}
+        : { framework: transformOptions.framework }),
+      ...(transformOptions.typescript === undefined
+        ? {}
+        : { typescript: transformOptions.typescript }),
+      ...(transformOptions.frameworkOptions === undefined
+        ? {}
+        : {
+            frameworkOptions: {
+              ...(transformOptions.config?.frameworkOptions ?? {}),
+              ...transformOptions.frameworkOptions,
+            },
+          }),
+      ...(transformOptions.maxInputSizeBytes === undefined
+        ? {}
+        : { maxInputSizeBytes: transformOptions.maxInputSizeBytes }),
+      ...(transformOptions.unsafeInputPolicy === undefined
+        ? {}
+        : { unsafeInputPolicy: transformOptions.unsafeInputPolicy }),
+    });
     const safeSourceText = applySVGInputSafety(sourceText, {
-      maxInputSizeBytes:
-        transformOptions.maxInputSizeBytes ?? config.maxInputSizeBytes,
+      maxInputSizeBytes: config.maxInputSizeBytes,
       source: sourcePath,
-      unsafeInputPolicy: transformOptions.unsafeInputPolicy,
+      unsafeInputPolicy: config.unsafeInputPolicy,
     });
 
     // Check if we should mock instead of transform
@@ -58,11 +80,8 @@ module.exports.default = ${componentName};
     }
 
     // Transform SVG to component
-    const framework = transformOptions.framework || config.framework || 'react';
-    const typescript =
-      transformOptions.typescript !== undefined
-        ? transformOptions.typescript
-        : config.typescript;
+    const framework = config.framework;
+    const typescript = config.typescript;
 
     const componentName = svgProcessor.generateComponentName(
       sourcePath,
@@ -74,10 +93,11 @@ module.exports.default = ${componentName};
       const component = generateComponentSync(componentName, safeSourceText, {
         framework,
         typescript,
+        frameworkOptions: config.frameworkOptions,
         defaultWidth: config.defaultWidth,
         defaultHeight: config.defaultHeight,
         defaultFill: config.defaultFill,
-        styleRules: config.styleRules || {},
+        styleRules: config.styleRules,
       });
 
       // Convert to CommonJS for Jest
@@ -87,15 +107,11 @@ module.exports.default = ${componentName};
         code: commonJsCode,
       };
     } catch (error) {
-      // Return a simple mock on error
-      return {
-        code: `
-const React = require('react');
-const ${componentName} = (props) => React.createElement('svg', props);
-module.exports = ${componentName};
-module.exports.default = ${componentName};
-        `,
-      };
+      throw new DiagnosticError(
+        'E_GENERATION_FAILED',
+        'Jest SVG component generation failed.',
+        { exitCode: ExitCode.InternalError, cause: error }
+      );
     }
   },
 };

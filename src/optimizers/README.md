@@ -4,12 +4,19 @@ Advanced SVG optimization system with pluggable pipeline architecture for svger-
 
 ## Features
 
-- 🚀 **5 Optimization Levels**: From minimal to maximum compression
+- 🚀 **5 Compatibility Levels**: Numeric precision is configurable by level
 - 🔌 **Pluggable Pipeline**: Register custom optimization stages
 - 📊 **Detailed Metrics**: Track size reduction and applied stages
 - 🛡️ **Error Resilient**: Continues on stage failure, never crashes
 - ⚡ **Zero Dependencies**: Pure Node.js, blazing fast
-- 🔄 **Backward Compatible**: BASIC = v3.x behavior
+- 🔄 **Backward Compatible**: Existing level/configuration names remain accepted
+
+> Phase 00.5 safety note: `SVGProcessor` currently enables only source-preserving formatting
+> whitespace, literal presentation-color shortening, and bounded attribute-only numeric precision.
+> Historical compression figures and pass descriptions below do not represent the active production
+> pipeline. See
+> [`phase0-svg-semantic-preservation.md`](../../docs/phase0-svg-semantic-preservation.md) for the
+> verified boundaries and disabled transformations.
 
 ## Quick Start
 
@@ -37,13 +44,13 @@ console.log(`Size reduced by ${result.reductionPercent.toFixed(2)}%`);
 
 ## Optimization Levels
 
-| Level | Description | Reduction | Use Case |
-|-------|-------------|-----------|----------|
-| `none` | Minimal processing | ~1% | Debugging, inspection |
-| `basic` | Current v3.x behavior | ~74% | Default, safe optimizations |
-| `balanced` | Moderate optimizations | ~74% | Production builds |
-| `aggressive` | Aggressive optimizations | ~75% | Small bundle sizes |
-| `maximum` | Maximum compression | ~75% | Maximum optimization |
+| Level        | Description                   | Reduction      | Use Case                          |
+| ------------ | ----------------------------- | -------------- | --------------------------------- |
+| `none`       | No numeric/color optimization | Not guaranteed | Debugging, inspection             |
+| `basic`      | 3-place precision             | Not guaranteed | Conservative default              |
+| `balanced`   | 3-place precision             | Not guaranteed | Compatibility setting             |
+| `aggressive` | 2-place precision             | Not guaranteed | Explicitly lossy numeric rounding |
+| `maximum`    | 1-place precision             | Not guaranteed | Explicitly lossy numeric rounding |
 
 ## Architecture
 
@@ -69,10 +76,10 @@ Orchestrates optimization stages sequentially.
 
 ```typescript
 class OptimizerPipeline {
-  registerStage(name: string, fn: OptimizationStage): this
-  async optimize(svg: string): Promise<OptimizationResult>
-  updateConfig(config: Partial<OptConfig>): void
-  clearStages(): void
+  registerStage(name: string, fn: OptimizationStage): this;
+  async optimize(svg: string): Promise<OptimizationResult>;
+  updateConfig(config: Partial<OptConfig>): void;
+  clearStages(): void;
 }
 ```
 
@@ -108,21 +115,17 @@ interface OptConfig {
 
 ### Basic Cleaning Stage
 
-13 modular functions combined into one comprehensive stage:
+The compatibility stage keeps its existing function surface, but only verified operations are
+active:
 
-1. **removeXMLDeclaration** - Strip `<?xml ... ?>`
-2. **removeDoctype** - Strip `<!DOCTYPE ...>`
-3. **removeComments** - Strip `<!-- ... -->`
-4. **removeMetadata** - Strip `<metadata>`, `<title>`, `<desc>`
-5. **normalizeWhitespace** - Collapse whitespace
-6. **removeXMLNamespaces** - Strip `xmlns` attributes
-7. **removeInlineStyles** - Strip `style="..."` (optional)
-8. **convertToCamelCase** - Convert attributes for React
-9. **shortenColors** - `#ffffff` → `#fff`
-10. **roundFloats** - Round decimals (1-4 precision)
-11. **removeEmptyContainers** - Strip empty `<g>`, `<defs>`
-12. **removeHiddenElements** - Strip `opacity:0` elements
-13. **sortAttributes** - Alphabetical sorting (optional)
+1. **removeXMLDeclaration** - Remove a leading `<?xml ... ?>` declaration.
+2. **removeComments** - Remove XML comments without scanning inside CDATA.
+3. **normalizeWhitespace** - Collapse only whitespace-only formatting nodes outside text, CDATA,
+   style, and inherited `xml:space="preserve"` contexts.
+4. **shortenColors** - Shorten supported literal presentation-attribute colors.
+5. **roundFloats** - Round eligible numeric attribute values only.
+6. Metadata deletion, namespace/style rewriting, empty/hidden element removal, and attribute sorting
+   are retained as API no-ops until safe eligibility checks are implemented.
 
 ### Custom Stages
 
@@ -216,23 +219,13 @@ interface OptimizationResult {
 #### `OptimizationStage`
 
 ```typescript
-type OptimizationStage = (
-  svgString: string,
-  config: OptConfig
-) => Promise<string> | string;
+type OptimizationStage = (svgString: string, config: OptConfig) => Promise<string> | string;
 ```
 
 ## Performance Benchmarks
 
-**Test SVG: 518 bytes**
-
-| Level | Size After | Reduction | Time |
-|-------|-----------|-----------|------|
-| NONE | 514 bytes | 0.77% | <1ms |
-| BASIC | 133 bytes | 74.32% | <1ms |
-| BALANCED | 133 bytes | 74.32% | <1ms |
-| AGGRESSIVE | 132 bytes | 74.52% | <1ms |
-| MAXIMUM | 132 bytes | 74.52% | <1ms |
+No compression ratio is promised while semantic safety takes precedence over size reduction.
+Geometry and numeric rounding is explicitly controlled by the selected precision level.
 
 ## Testing
 
@@ -243,6 +236,7 @@ node optimizer-pipeline.test.js
 ```
 
 Expected output:
+
 ```
 ✅ All optimizer tests passed successfully!
 📊 5/5 tests passed
@@ -266,35 +260,39 @@ The optimizer is automatically integrated into:
 await svgService.buildAll({ src: './svgs', out: './components' });
 
 // v4.0.3 with optimization
-await svgService.buildAll({ 
-  src: './svgs', 
+await svgService.buildAll({
+  src: './svgs',
   out: './components',
-  optimize: 'balanced' 
+  optimize: 'balanced',
 });
 ```
 
 ## Future Phases
 
 Phase 1 (✅ Complete):
+
 - ✅ Pluggable pipeline architecture
 - ✅ 5 optimization levels
 - ✅ 13 cleaning functions
 - ✅ CLI integration
 
 Phase 2 (Planned):
+
 - Path simplification algorithms
 - Merge duplicate paths
 - Collapse useless groups
 - Transform optimization
 
 Phase 3+ (Planned):
+
 - Virtual DOM tree parsing
 - AST-based transformations
 - SVGO benchmark comparison
 
 ## Contributing
 
-We welcome contributions! Phase 1 establishes the foundation. See `docs/PHASE-1-IMPLEMENTATION.md` for details.
+We welcome contributions! Phase 1 establishes the foundation. See `docs/PHASE-1-IMPLEMENTATION.md`
+for details.
 
 ## License
 

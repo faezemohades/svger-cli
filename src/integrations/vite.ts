@@ -26,6 +26,8 @@ import path from 'path';
 import { FileSystem } from '../utils/native.js';
 import { svgProcessor } from '../processors/svg-processor.js';
 import { configService } from '../services/config.js';
+import { runStagedOutputBuild } from '../application/output-transaction.js';
+import { readSVGInputFile } from '../security/input-safety.js';
 import { logger } from '../core/logger.js';
 import type {
   VitePluginOptions,
@@ -43,17 +45,31 @@ const VIRTUAL_MODULE_PREFIX = 'virtual:svger/';
  * Vite Plugin for SVGER-CLI
  */
 export function svgerVitePlugin(options: VitePluginOptions = {}): any {
-  const config = configService.readConfig();
+  const effectiveConfig = configService.resolveEffectiveConfig({
+    ...(options.config ?? {}),
+    ...(options.framework === undefined
+      ? {}
+      : { framework: options.framework }),
+    ...(options.typescript === undefined
+      ? {}
+      : { typescript: options.typescript }),
+    ...(options.maxInputSizeBytes === undefined
+      ? {}
+      : { maxInputSizeBytes: options.maxInputSizeBytes }),
+    ...(options.unsafeInputPolicy === undefined
+      ? {}
+      : { unsafeInputPolicy: options.unsafeInputPolicy }),
+  });
 
   const pluginOptions: Required<VitePluginOptions> = {
-    source: options.source || config.source || './src/icons',
-    output: options.output || config.output || './src/components/icons',
-    framework: options.framework || config.framework || 'react',
-    typescript:
-      options.typescript !== undefined ? options.typescript : config.typescript,
-    config: options.config || {},
-    include: options.include || ['**/*.svg'],
-    exclude: options.exclude || ['node_modules/**'],
+    source: options.source ?? effectiveConfig.source ?? './src/icons',
+    output:
+      options.output ?? effectiveConfig.output ?? './src/components/icons',
+    framework: effectiveConfig.framework,
+    typescript: effectiveConfig.typescript,
+    config: effectiveConfig,
+    include: options.include ?? ['**/*.svg'],
+    exclude: options.exclude ?? ['node_modules/**'],
     hmr: options.hmr !== undefined ? options.hmr : true,
     virtual: options.virtual !== undefined ? options.virtual : false,
     exportType: options.exportType || 'default',
@@ -61,10 +77,8 @@ export function svgerVitePlugin(options: VitePluginOptions = {}): any {
     generateIndex:
       options.generateIndex !== undefined ? options.generateIndex : true,
     maxInputSizeBytes:
-      options.maxInputSizeBytes ??
-      config.maxInputSizeBytes ??
-      DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
-    unsafeInputPolicy: options.unsafeInputPolicy ?? 'reject',
+      effectiveConfig.maxInputSizeBytes ?? DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+    unsafeInputPolicy: effectiveConfig.unsafeInputPolicy ?? 'reject',
   };
 
   const processedFiles = new Set<string>();
@@ -121,7 +135,12 @@ export function svgerVitePlugin(options: VitePluginOptions = {}): any {
         const svgPath = path.join(sourceDir, svgName + '.svg');
 
         if (await FileSystem.exists(svgPath)) {
-          const svgContent = await FileSystem.readFile(svgPath, 'utf-8');
+          const svgContent = await readSVGInputFile(
+            svgPath,
+            pluginOptions.maxInputSizeBytes ??
+              pluginOptions.config.maxInputSizeBytes,
+            svgPath
+          );
           const componentName = svgProcessor.generateComponentName(
             svgPath,
             'pascal'
@@ -133,10 +152,11 @@ export function svgerVitePlugin(options: VitePluginOptions = {}): any {
             {
               framework: pluginOptions.framework,
               typescript: pluginOptions.typescript,
-              defaultWidth: config.defaultWidth,
-              defaultHeight: config.defaultHeight,
-              defaultFill: config.defaultFill,
-              styleRules: config.styleRules || {},
+              frameworkOptions: pluginOptions.config.frameworkOptions,
+              defaultWidth: pluginOptions.config.defaultWidth,
+              defaultHeight: pluginOptions.config.defaultHeight,
+              defaultFill: pluginOptions.config.defaultFill,
+              styleRules: pluginOptions.config.styleRules,
               maxInputSizeBytes: pluginOptions.maxInputSizeBytes,
               unsafeInputPolicy: pluginOptions.unsafeInputPolicy,
             }
@@ -161,10 +181,11 @@ export function svgerVitePlugin(options: VitePluginOptions = {}): any {
           {
             framework: pluginOptions.framework,
             typescript: pluginOptions.typescript,
-            defaultWidth: config.defaultWidth,
-            defaultHeight: config.defaultHeight,
-            defaultFill: config.defaultFill,
-            styleRules: config.styleRules || {},
+            frameworkOptions: pluginOptions.config.frameworkOptions,
+            defaultWidth: pluginOptions.config.defaultWidth,
+            defaultHeight: pluginOptions.config.defaultHeight,
+            defaultFill: pluginOptions.config.defaultFill,
+            styleRules: pluginOptions.config.styleRules,
             maxInputSizeBytes: pluginOptions.maxInputSizeBytes,
             unsafeInputPolicy: pluginOptions.unsafeInputPolicy,
           }
@@ -201,8 +222,6 @@ async function processAllSVGs(
     return;
   }
 
-  await FileSystem.ensureDir(outputDir);
-
   const files = await FileSystem.readDir(sourceDir);
   const svgFiles = files.filter((file: string) => file.endsWith('.svg'));
 
@@ -213,19 +232,23 @@ async function processAllSVGs(
 
   const results: ProcessingResult[] = [];
 
-  for (const file of svgFiles) {
-    const svgPath = path.join(sourceDir, file);
-    const result = await processSVGFile(svgPath, outputDir, options);
-    results.push(result);
-
-    if (result.success && result.outputPath) {
-      processedFiles.add(result.outputPath);
+  await runStagedOutputBuild(outputDir, async stageDir => {
+    await FileSystem.ensureDir(stageDir);
+    for (const file of svgFiles) {
+      const svgPath = path.join(sourceDir, file);
+      results.push(await processSVGFile(svgPath, stageDir, options));
     }
-  }
+    const failed = results.find(result => !result.success);
+    if (failed) throw failed.error ?? new Error('Vite SVG generation failed.');
+    if (options.generateIndex) await generateIndexFile(stageDir, options);
+  });
 
-  // Generate index file
-  if (options.generateIndex) {
-    await generateIndexFile(outputDir, options);
+  for (const result of results) {
+    if (result.success && result.outputPath) {
+      processedFiles.add(
+        path.join(outputDir, path.basename(result.outputPath))
+      );
+    }
   }
 
   const successful = results.filter(r => r.success).length;
@@ -252,10 +275,11 @@ async function processSVGFile(
     const result = await svgProcessor.processSVGFile(svgPath, outputDir, {
       framework: mergedConfig.framework,
       typescript: mergedConfig.typescript,
+      frameworkOptions: mergedConfig.frameworkOptions,
       defaultWidth: mergedConfig.defaultWidth,
       defaultHeight: mergedConfig.defaultHeight,
       defaultFill: mergedConfig.defaultFill,
-      styleRules: mergedConfig.styleRules || {},
+      styleRules: mergedConfig.styleRules,
       maxInputSizeBytes: options.maxInputSizeBytes,
       unsafeInputPolicy: options.unsafeInputPolicy,
     });
@@ -267,7 +291,7 @@ async function processSVGFile(
       error: result.error,
     };
   } catch (error) {
-    logger.error(`Failed to process ${svgPath}:`, error);
+    logger.error(`Failed to process ${path.basename(svgPath)}.`);
     return {
       success: false,
       error: error as Error,
@@ -284,9 +308,20 @@ async function generateIndexFile(
   options: Required<VitePluginOptions>
 ): Promise<void> {
   try {
+    if (
+      options.framework === 'vue' ||
+      options.framework === 'svelte' ||
+      options.framework === 'angular'
+    ) {
+      return;
+    }
+
     // Scan output directory for all component files
     const files = await FileSystem.readDir(outputDir);
-    const extension = options.typescript ? 'tsx' : 'jsx';
+    const extension = svgProcessor.getFileExtension(
+      options.framework,
+      options.typescript
+    );
 
     // Filter component files (exclude index files)
     const componentFiles = files.filter(
@@ -319,7 +354,8 @@ async function generateIndexFile(
     await FileSystem.writeFile(indexPath, exports, 'utf-8');
     logger.debug(`Generated index file: ${indexPath}`);
   } catch (error) {
-    logger.error('Failed to generate index file:', error);
+    logger.error('Failed to generate index file.');
+    throw error;
   }
 }
 

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { scanSVGSecurityBoundary } from './svg-xml-safety.js';
 
 export const DEFAULT_MAX_SVG_INPUT_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -13,7 +14,8 @@ export interface SVGInputSafetyOptions {
 }
 
 export interface UnsafeSVGFinding {
-  kind: 'event-handler' | 'javascript-uri' | 'script-element';
+  kind:
+    'event-handler' | 'active-element' | 'external-reference' | 'unsafe-css';
   sample: string;
 }
 
@@ -33,55 +35,103 @@ export class SVGContainmentError extends Error {
   }
 }
 
-const SCRIPT_ELEMENT_PATTERN = /<\s*script\b[^>]*>/gi;
-const SCRIPT_BLOCK_PATTERN = /<\s*script\b[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi;
-const SCRIPT_TAG_PATTERN = /<\s*\/?\s*script\b[^>]*\/?\s*>/gi;
-const EVENT_HANDLER_PATTERN =
-  /\s+on[a-z][\w:.-]*\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
-const JAVASCRIPT_URI_PATTERN =
-  /=\s*(?:"\s*javascript\s*:[^"]*"|'\s*javascript\s*:[^']*'|javascript\s*:[^\s>]+)/gi;
-const JAVASCRIPT_URI_ATTRIBUTE_PATTERN =
-  /\s+[a-z_:][\w:.-]*\s*=\s*(?:"\s*javascript\s*:[^"]*"|'\s*javascript\s*:[^']*'|javascript\s*:[^\s>]+)/gi;
-
-function firstMatch(pattern: RegExp, content: string): string | undefined {
-  pattern.lastIndex = 0;
-  const match = pattern.exec(content);
-  pattern.lastIndex = 0;
-  return match?.[0].slice(0, 160);
+export async function readSVGInputFile(
+  filePath: string,
+  maxInputSizeBytes = DEFAULT_MAX_SVG_INPUT_SIZE_BYTES,
+  source = filePath
+): Promise<string> {
+  if (!Number.isSafeInteger(maxInputSizeBytes) || maxInputSizeBytes <= 0) {
+    throw new SVGContainmentError(
+      'E_INVALID_INPUT_SIZE_LIMIT',
+      'maxInputSizeBytes must be a positive safe integer.',
+      { maxInputSizeBytes }
+    );
+  }
+  const handle = await fs.promises.open(filePath, 'r');
+  let bytes: Buffer;
+  try {
+    const metadata = await handle.stat();
+    if (metadata.size > maxInputSizeBytes) {
+      throw new SVGContainmentError(
+        'E_SVG_INPUT_TOO_LARGE',
+        `SVG input exceeds the ${maxInputSizeBytes}-byte limit.`,
+        { actualSizeBytes: metadata.size, maxInputSizeBytes, source }
+      );
+    }
+    const chunks: Buffer[] = [];
+    let totalBytes = 0;
+    while (totalBytes <= maxInputSizeBytes) {
+      const remaining = Math.min(64 * 1024, maxInputSizeBytes + 1 - totalBytes);
+      const chunk = Buffer.allocUnsafe(remaining);
+      const { bytesRead } = await handle.read(chunk, 0, remaining, null);
+      if (bytesRead === 0) break;
+      totalBytes += bytesRead;
+      if (totalBytes > maxInputSizeBytes) {
+        throw new SVGContainmentError(
+          'E_SVG_INPUT_TOO_LARGE',
+          `SVG input exceeds the ${maxInputSizeBytes}-byte limit.`,
+          { actualSizeBytes: totalBytes, maxInputSizeBytes, source }
+        );
+      }
+      chunks.push(chunk.subarray(0, bytesRead));
+    }
+    bytes = Buffer.concat(chunks, totalBytes);
+  } finally {
+    await handle.close();
+  }
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    throw new SVGContainmentError(
+      'E_UNSUPPORTED_SVG_ENCODING',
+      'SVG input must be valid UTF-8.',
+      { source }
+    );
+  }
 }
 
 export function detectUnsafeSVGContent(content: string): UnsafeSVGFinding[] {
-  const findings: UnsafeSVGFinding[] = [];
-  const scriptSample = firstMatch(SCRIPT_ELEMENT_PATTERN, content);
-  if (scriptSample) {
-    findings.push({ kind: 'script-element', sample: scriptSample });
-  }
-
-  const eventHandlerSample = firstMatch(EVENT_HANDLER_PATTERN, content);
-  if (eventHandlerSample) {
-    findings.push({ kind: 'event-handler', sample: eventHandlerSample.trim() });
-  }
-
-  const javascriptURISample = firstMatch(JAVASCRIPT_URI_PATTERN, content);
-  if (javascriptURISample) {
-    findings.push({ kind: 'javascript-uri', sample: javascriptURISample });
-  }
-
-  return findings;
+  return scanSVGSecurityBoundary(content).findings;
 }
 
-function stripUnsafeSVGContent(content: string): string {
-  return content
-    .replace(SCRIPT_BLOCK_PATTERN, '')
-    .replace(SCRIPT_TAG_PATTERN, '')
-    .replace(EVENT_HANDLER_PATTERN, '')
-    .replace(JAVASCRIPT_URI_ATTRIBUTE_PATTERN, '');
+function stripUnsafeSVGContent(
+  content: string,
+  edits: Array<{ start: number; end: number }>
+): string {
+  let output = '';
+  let cursor = 0;
+  for (const edit of edits.sort((a, b) => a.start - b.start || b.end - a.end)) {
+    if (edit.start < cursor) continue;
+    output += content.slice(cursor, edit.start);
+    cursor = edit.end;
+  }
+  return output + content.slice(cursor);
 }
 
 export function applySVGInputSafety(
   content: string,
   options: SVGInputSafetyOptions = {}
 ): string {
+  const policy = options.unsafeInputPolicy ?? 'reject';
+  if (policy !== 'reject' && policy !== 'strip') {
+    throw new SVGContainmentError(
+      'E_INVALID_UNSAFE_INPUT_POLICY',
+      `Unsupported unsafe input policy "${String(policy)}".`,
+      { policy }
+    );
+  }
+  if (options.source !== undefined && typeof options.source !== 'string') {
+    throw new SVGContainmentError(
+      'E_INVALID_INPUT_SAFETY_OPTIONS',
+      'source must be a string when provided.'
+    );
+  }
+  if (options.warn !== undefined && typeof options.warn !== 'function') {
+    throw new SVGContainmentError(
+      'E_INVALID_INPUT_SAFETY_OPTIONS',
+      'warn must be a function when provided.'
+    );
+  }
   const maxInputSizeBytes =
     options.maxInputSizeBytes ?? DEFAULT_MAX_SVG_INPUT_SIZE_BYTES;
   if (!Number.isSafeInteger(maxInputSizeBytes) || maxInputSizeBytes <= 0) {
@@ -105,34 +155,26 @@ export function applySVGInputSafety(
     );
   }
 
-  const findings = detectUnsafeSVGContent(content);
+  const scan = scanSVGSecurityBoundary(content);
+  const findings = scan.findings;
   if (findings.length === 0) {
     return content;
-  }
-
-  const policy = options.unsafeInputPolicy ?? 'reject';
-  if (policy !== 'reject' && policy !== 'strip') {
-    throw new SVGContainmentError(
-      'E_INVALID_UNSAFE_INPUT_POLICY',
-      `Unsupported unsafe input policy "${String(policy)}".`,
-      { policy }
-    );
   }
 
   if (policy === 'reject') {
     throw new SVGContainmentError(
       'E_UNSAFE_SVG_CONTENT',
-      `Unsafe raw SVG content was rejected${options.source ? ` in ${options.source}` : ''}.`,
+      `Unsafe SVG content was rejected${options.source ? ` in ${options.source}` : ''}.`,
       { findings, source: options.source }
     );
   }
 
   const warning =
-    '[SVGER SECURITY WARNING] Unsafe SVG content was stripped by explicit request. ' +
-    'The Phase 0 sanitizer is a temporary, incomplete containment measure.';
+    '[SVGER SECURITY WARNING] Unsafe SVG constructs were removed by explicit request. ' +
+    'External references are not allowed; review source semantics before using strip mode.';
   (options.warn ?? (message => process.stderr.write(`${message}\n`)))(warning);
 
-  const strippedContent = stripUnsafeSVGContent(content);
+  const strippedContent = stripUnsafeSVGContent(content, scan.edits);
   const remainingFindings = detectUnsafeSVGContent(strippedContent);
   if (remainingFindings.length > 0) {
     throw new SVGContainmentError(

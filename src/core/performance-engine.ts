@@ -8,6 +8,7 @@ import { ComponentGenerationOptions } from '../types/index.js';
  * Performance optimization engine for batch processing and parallel execution
  */
 export class PerformanceEngine {
+  private static readonly MAX_CACHE_ENTRIES = 500;
   private static instance: PerformanceEngine;
   private processingCache: Map<string, { result: any; timestamp: number }> =
     new Map();
@@ -301,50 +302,37 @@ export class PerformanceEngine {
       this.processingCache.delete(key);
       return null;
     }
-
+    // Map insertion order provides a small LRU without a second index.
+    this.processingCache.delete(key);
+    this.processingCache.set(key, cached);
     return cached.result;
   }
 
   private setCachedResult(key: string, result: any): void {
+    this.processingCache.delete(key);
     this.processingCache.set(key, {
       result,
       timestamp: Date.now(),
     });
+    while (this.processingCache.size > PerformanceEngine.MAX_CACHE_ENTRIES) {
+      const oldestKey = this.processingCache.keys().next().value;
+      if (oldestKey === undefined) break;
+      this.processingCache.delete(oldestKey);
+    }
   }
 
   private applyFastOptimizations(content: string): string {
-    return content
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/>\s+</g, '><') // Remove spaces between tags
-      .trim();
+    // Global whitespace rewriting corrupts SVG text and xml:space semantics.
+    return content;
   }
 
   private applyBalancedOptimizations(content: string): string {
-    let optimized = this.applyFastOptimizations(content);
-
-    // Remove unnecessary attributes
-    optimized = optimized
-      .replace(/\s+id="[^"]*"/g, '') // Remove IDs (usually not needed in components)
-      .replace(/\s+class="[^"]*"/g, '') // Remove classes
-      .replace(/<!--[\s\S]*?-->/g, '') // Remove comments
-      .replace(/\s+xmlns="[^"]*"/g, ''); // Remove xmlns (React adds it)
-
-    return optimized;
+    return this.applyFastOptimizations(content);
   }
 
   private applyMaximumOptimizations(content: string): string {
-    let optimized = this.applyBalancedOptimizations(content);
-
-    // Advanced optimizations
-    optimized = optimized
-      .replace(/\s+style="[^"]*"/g, '') // Remove inline styles
-      .replace(/\s+data-[^=]*="[^"]*"/g, '') // Remove data attributes
-      .replace(/fill="none"/g, '') // Remove default fill
-      .replace(/stroke="none"/g, '') // Remove default stroke
-      .replace(/\s+version="[^"]*"/g, '') // Remove version
-      .replace(/\s+baseProfile="[^"]*"/g, ''); // Remove baseProfile
-
-    return optimized;
+    // Style, class, data, IDs, and inherited defaults can be observable.
+    return this.applyBalancedOptimizations(content);
   }
 }
 

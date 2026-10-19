@@ -1,4 +1,5 @@
 import path from 'path';
+import { promises as fs } from 'fs';
 import { FileSystem } from '../utils/native.js';
 import {
   BuildOptions,
@@ -16,6 +17,21 @@ import { fileWatcher } from './file-watcher.js';
 import { OptLevel } from '../optimizers/types.js';
 import { resolveOutputArtifactPath } from '../security/input-safety.js';
 import type { UnsafeInputPolicy } from '../types/index.js';
+import { resolveConfiguration } from '../configuration/resolver.js';
+import { DiagnosticError, ExitCode } from '../contracts/diagnostics.js';
+import {
+  createBuildPlan,
+  type BuildPlanItem,
+} from '../application/build-plan.js';
+import {
+  commitOutputTransaction,
+  type OutputContent,
+} from '../application/output-transaction.js';
+import {
+  createBarrelContent,
+  getFrameworkArtifactContract,
+  moduleSpecifierForFileName,
+} from '../application/artifact-contract.js';
 
 type RuntimeProcessingOverrides = {
   framework?: SVGConfig['framework'];
@@ -30,6 +46,29 @@ type BuildRequestOptions = BuildOptions & RuntimeProcessingOverrides;
 type GenerateRequestOptions = GenerateOptions & RuntimeProcessingOverrides;
 type ResolvedRuntimeConfig = SVGConfig & RuntimeProcessingOverrides;
 
+const OPTIMIZATION_LEVELS = new Set([
+  'none',
+  'basic',
+  'balanced',
+  'aggressive',
+  'maximum',
+]);
+
+function validateOptimizationLevel(level: string | undefined): void {
+  if (level !== undefined && !OPTIMIZATION_LEVELS.has(level.toLowerCase())) {
+    throw new DiagnosticError(
+      'E_INVALID_OPTIMIZATION_LEVEL',
+      'Optimization level must be none, basic, balanced, aggressive, or maximum.',
+      { exitCode: ExitCode.InvalidConfiguration }
+    );
+  }
+}
+
+function optimizationLevel(level: string | undefined): OptLevel | undefined {
+  validateOptimizationLevel(level);
+  return level === undefined ? undefined : (level.toLowerCase() as OptLevel);
+}
+
 /**
  * Main SVG service that orchestrates all SVG processing operations
  */
@@ -37,6 +76,11 @@ export class SVGService {
   private static instance: SVGService;
   private activeWatchers: Set<string> = new Set();
   private activeWatchJobs = new Map<string, AbortController>();
+  private watchJobControllers = new Map<string, Set<AbortController>>();
+  private watchAbortListeners = new Map<
+    string,
+    { signal: AbortSignal; listener: () => void }
+  >();
   public lockService: LockService;
 
   private constructor() {
@@ -54,60 +98,43 @@ export class SVGService {
    * Set optimizer level for SVG processing
    */
   public setOptimizerLevel(level: string): void {
-    // O(1) Set lookup instead of O(n) Array.includes()
-    const validLevels = new Set([
-      'none',
-      'basic',
-      'balanced',
-      'aggressive',
-      'maximum',
-    ]);
-    if (!validLevels.has(level.toLowerCase())) {
-      logger.warn(
-        `Invalid optimization level "${level}". Using "basic" instead.`
-      );
-      svgProcessor.setOptimizationLevel(OptLevel.BASIC);
-      return;
-    }
-
-    const optLevel = level.toLowerCase() as
-      | 'none'
-      | 'basic'
-      | 'balanced'
-      | 'aggressive'
-      | 'maximum';
-    svgProcessor.setOptimizationLevel(
-      OptLevel[optLevel.toUpperCase() as keyof typeof OptLevel]
-    );
+    validateOptimizationLevel(level);
+    svgProcessor.setOptimizationLevel(level.toLowerCase() as OptLevel);
   }
 
   private mergeRuntimeConfig(
     configOverrides: Partial<SVGConfig> | undefined,
     runtimeOverrides: RuntimeProcessingOverrides
   ): ResolvedRuntimeConfig {
-    const config = configService.readConfig();
-
+    const resolved = resolveConfiguration(configService.getDefaultConfig(), [
+      { origin: 'configuration-file', value: configService.readConfig() },
+      {
+        origin: 'request',
+        value: {
+          ...(configOverrides ?? {}),
+          ...(runtimeOverrides.framework === undefined
+            ? {}
+            : { framework: runtimeOverrides.framework }),
+          ...(runtimeOverrides.typescript === undefined
+            ? {}
+            : { typescript: runtimeOverrides.typescript }),
+          ...(runtimeOverrides.frameworkOptions === undefined
+            ? {}
+            : { frameworkOptions: runtimeOverrides.frameworkOptions }),
+          ...(runtimeOverrides.maxInputSizeBytes === undefined
+            ? {}
+            : { maxInputSizeBytes: runtimeOverrides.maxInputSizeBytes }),
+          ...(runtimeOverrides.unsafeInputPolicy === undefined
+            ? {}
+            : { unsafeInputPolicy: runtimeOverrides.unsafeInputPolicy }),
+        },
+      },
+    ]);
     return {
-      ...config,
-      ...(configOverrides || {}),
-      ...(runtimeOverrides.framework && {
-        framework: runtimeOverrides.framework,
-      }),
-      ...(runtimeOverrides.typescript !== undefined && {
-        typescript: runtimeOverrides.typescript,
-      }),
-      ...(runtimeOverrides.frameworkOptions && {
-        frameworkOptions: runtimeOverrides.frameworkOptions,
-      }),
-      ...(runtimeOverrides.optimize && {
-        optimize: runtimeOverrides.optimize,
-      }),
-      ...(runtimeOverrides.maxInputSizeBytes !== undefined && {
-        maxInputSizeBytes: runtimeOverrides.maxInputSizeBytes,
-      }),
-      ...(runtimeOverrides.unsafeInputPolicy && {
-        unsafeInputPolicy: runtimeOverrides.unsafeInputPolicy,
-      }),
+      ...resolved.config,
+      ...(runtimeOverrides.optimize === undefined
+        ? {}
+        : { optimize: runtimeOverrides.optimize }),
     };
   }
 
@@ -127,17 +154,12 @@ export class SVGService {
       throw new Error(`Source folder not found: ${srcDir}`);
     }
 
-    // Ensure output directory exists
-    await FileSystem.ensureDir(outDir);
-
     // Get configuration - merge config file with options
     const mergedConfig = this.mergeRuntimeConfig(options.config, options);
 
-    // Set optimizer level if specified
-    if (options.optimize) {
-      const optimizeLevel = options.optimize;
-      logger.info(`Using optimization level: ${optimizeLevel}`);
-      this.setOptimizerLevel(optimizeLevel);
+    const optimizeLevel = optimizationLevel(mergedConfig.optimize);
+    if (mergedConfig.optimize !== undefined) {
+      logger.info(`Using optimization level: ${mergedConfig.optimize}`);
     }
 
     // Read all SVG files
@@ -151,90 +173,149 @@ export class SVGService {
 
     logger.info(`Found ${svgFiles.length} SVG files to process`);
 
-    const results: Array<{ success: boolean; file: string; error?: Error }> =
-      [];
-
-    // Process each SVG file
-    for (const file of svgFiles) {
-      const svgPath = path.join(srcDir, file);
-
-      // Check if file is locked
-      if (this.lockService.isLocked(svgPath)) {
-        logger.warn(`Skipped locked file: ${file}`);
-        continue;
+    const extension = frameworkTemplateEngine.getFileExtension(
+      mergedConfig.framework,
+      mergedConfig.typescript
+    );
+    const artifactContract = getFrameworkArtifactContract(
+      mergedConfig.framework
+    );
+    const naming = mergedConfig.outputConfig?.naming || 'pascal';
+    const componentNaming = naming === 'kebab' ? 'pascal' : naming;
+    const plan = createBuildPlan(
+      svgFiles.map(file => ({
+        absolutePath: path.join(srcDir, file),
+        relativePath: file,
+      })),
+      outDir,
+      {
+        componentName: fileName =>
+          svgProcessor.generateComponentName(fileName, componentNaming),
+        outputFileName: componentName =>
+          svgProcessor.generateFileName(componentName, extension, naming),
+        exportStyle: () => artifactContract.componentExportStyle,
+        exportedName: componentName =>
+          artifactContract.exportedName(componentName),
+        moduleSpecifier: (_componentName, outputFileName) =>
+          moduleSpecifierForFileName(
+            outputFileName,
+            mergedConfig.framework,
+            mergedConfig.typescript
+          ),
+      },
+      'error',
+      {
+        framework: mergedConfig.framework,
+        typescript: mergedConfig.typescript,
+        ...(artifactContract.barrel && {
+          barrelFileName: `index.${mergedConfig.typescript ? 'ts' : 'js'}`,
+        }),
       }
-
-      try {
-        const processingResult = await svgProcessor.processSVGFile(
-          svgPath,
-          outDir,
-          {
-            framework: mergedConfig.framework,
-            typescript: mergedConfig.typescript,
-            frameworkOptions: mergedConfig.frameworkOptions,
-            defaultWidth: mergedConfig.defaultWidth,
-            defaultHeight: mergedConfig.defaultHeight,
-            defaultFill: mergedConfig.defaultFill,
-            namingConvention: mergedConfig.outputConfig?.naming || 'pascal',
-            styleRules: Object.fromEntries(
-              Object.entries(mergedConfig.styleRules || {}).filter(
-                ([, v]) => v !== undefined
-              )
-            ) as Record<string, string>,
-            maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
-            unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
-          }
-        );
-
-        results.push({
-          success: processingResult.success,
-          file,
-          error: processingResult.error,
-        });
-      } catch (error) {
-        logger.error(`Failed to process ${file}:`, error);
-        results.push({
-          success: false,
-          file,
-          error: error as Error,
-        });
-      }
-    }
-
-    // Log summary - single pass through results
-    const successfulResults: typeof results = [];
-    const failedResults: typeof results = [];
-
-    for (const result of results) {
-      if (result.success) {
-        successfulResults.push(result);
-      } else {
-        failedResults.push(result);
-      }
-    }
-
-    logger.info(
-      `Build complete: ${successfulResults.length} successful, ${failedResults.length} failed`
     );
 
-    if (failedResults.length > 0) {
-      logger.warn('Some files failed to process:');
-      failedResults.forEach(r => {
-        logger.warn(`  - ${r.file}: ${r.error?.message}`);
-      });
-    }
+    // Complete planning and collision validation before creating or modifying
+    // the output directory.
+    await fs.mkdir(path.dirname(outDir), { recursive: true });
+    const stageDir = await fs.mkdtemp(
+      path.join(path.dirname(outDir), '.svger-service-stage-')
+    );
+    try {
+      const results: Array<{ success: boolean; file: string; error?: Error }> =
+        [];
+      const barrelItems: BuildPlanItem[] = [];
 
-    const containmentFailure = failedResults.find(result => {
-      const code = (result.error as { code?: unknown } | undefined)?.code;
-      return typeof code === 'string' && code.startsWith('E_');
-    });
-    if (containmentFailure?.error) {
-      throw containmentFailure.error;
-    }
+      // Process each SVG file
+      for (const item of plan.items) {
+        const file = item.relativePath;
+        const svgPath = item.absolutePath;
 
-    // Generate index.ts file with all component exports
-    // This includes both newly generated components and existing locked components
-    await this.generateIndexFile(outDir, mergedConfig);
+        // Check if file is locked
+        if (this.lockService.isLocked(svgPath)) {
+          logger.warn(`Skipped locked file: ${file}`);
+          if (await FileSystem.exists(item.outputPath)) barrelItems.push(item);
+          continue;
+        }
+
+        try {
+          const processingResult = await svgProcessor.processSVGFile(
+            svgPath,
+            stageDir,
+            {
+              framework: mergedConfig.framework,
+              typescript: mergedConfig.typescript,
+              frameworkOptions: mergedConfig.frameworkOptions,
+              defaultWidth: mergedConfig.defaultWidth,
+              defaultHeight: mergedConfig.defaultHeight,
+              defaultFill: mergedConfig.defaultFill,
+              namingConvention: naming,
+              styleRules: Object.fromEntries(
+                Object.entries(mergedConfig.styleRules || {}).filter(
+                  ([, v]) => v !== undefined
+                )
+              ) as Record<string, string>,
+              maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
+              unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
+              optimizationLevel: optimizeLevel,
+            }
+          );
+
+          results.push({
+            success: processingResult.success,
+            file,
+            error: processingResult.error,
+          });
+          if (processingResult.success) barrelItems.push(item);
+        } catch (error) {
+          logger.error(`Failed to process ${file}.`);
+          results.push({
+            success: false,
+            file,
+            error: error as Error,
+          });
+        }
+      }
+
+      // Log summary - single pass through results
+      const successfulResults: typeof results = [];
+      const failedResults: typeof results = [];
+
+      for (const result of results) {
+        if (result.success) {
+          successfulResults.push(result);
+        } else {
+          failedResults.push(result);
+        }
+      }
+
+      logger.info(
+        `Build complete: ${successfulResults.length} successful, ${failedResults.length} failed`
+      );
+
+      if (failedResults.length > 0) {
+        logger.warn('Some files failed to process:');
+        failedResults.forEach(r => {
+          logger.warn(`  - ${r.file}: generation failed`);
+        });
+        throw failedResults[0].error ?? new Error('SVG build failed.');
+      }
+
+      // Generate index.ts file with all component exports
+      // This includes both newly generated components and existing locked components
+      await this.generateIndexFile(stageDir, mergedConfig, barrelItems);
+      const stagedFiles = await fs.readdir(stageDir);
+      const outputContents: OutputContent[] = await Promise.all(
+        stagedFiles.map(async outputFileName => ({
+          outputFileName,
+          content: await fs.readFile(
+            path.join(stageDir, outputFileName),
+            'utf8'
+          ),
+        }))
+      );
+      await commitOutputTransaction(outDir, outputContents);
+    } finally {
+      await fs.rm(stageDir, { recursive: true, force: true });
+    }
   }
 
   /**
@@ -257,15 +338,12 @@ export class SVGService {
       return;
     }
 
-    // Set optimizer level if specified
-    if (options.optimize) {
-      const optimizeLevel = options.optimize;
-      logger.info(`Using optimization level: ${optimizeLevel}`);
-      this.setOptimizerLevel(optimizeLevel);
-    }
-
     // Get configuration
     const mergedConfig = this.mergeRuntimeConfig(options.config, options);
+    const optimizeLevel = optimizationLevel(mergedConfig.optimize);
+    if (mergedConfig.optimize !== undefined) {
+      logger.info(`Using optimization level: ${mergedConfig.optimize}`);
+    }
 
     // Process the file
     const result = await svgProcessor.processSVGFile(filePath, outDir, {
@@ -283,6 +361,7 @@ export class SVGService {
       ) as Record<string, string>,
       maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
       unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
+      optimizationLevel: optimizeLevel,
     });
 
     if (!result.success) {
@@ -309,16 +388,16 @@ export class SVGService {
     }
 
     // Start watching
-    const watchId = await fileWatcher.watchDirectory(srcDir, options);
+    const mergedConfig = this.mergeRuntimeConfig(options.config, options);
+    const watchId = await fileWatcher.watchDirectory(srcDir, {
+      ...options,
+      config: mergedConfig,
+    });
     this.activeWatchers.add(watchId);
 
     // Register event handler
     fileWatcher.onFileEvent(watchId, async (event: FileWatchEvent) => {
-      await this.handleWatchEvent(event, outDir, {
-        ...options.config,
-        maxInputSizeBytes: options.maxInputSizeBytes,
-        unsafeInputPolicy: options.unsafeInputPolicy,
-      });
+      await this.handleWatchEvent(watchId, event, outDir, mergedConfig);
     });
 
     if (options.signal) {
@@ -329,11 +408,12 @@ export class SVGService {
           cause: options.signal.reason,
         });
       }
-      options.signal.addEventListener(
-        'abort',
-        () => this.stopWatching(watchId),
-        { once: true }
-      );
+      const listener = () => this.stopWatching(watchId);
+      this.watchAbortListeners.set(watchId, {
+        signal: options.signal,
+        listener,
+      });
+      options.signal.addEventListener('abort', listener, { once: true });
     }
 
     logger.success(`Watch mode active - waiting for file changes...`);
@@ -344,6 +424,7 @@ export class SVGService {
    * Handle file watch events
    */
   private async handleWatchEvent(
+    watchId: string,
     event: FileWatchEvent,
     outDir: string,
     config?: Partial<SVGConfig>
@@ -354,11 +435,11 @@ export class SVGService {
     const eventHandlers: Record<string, () => Promise<void>> = {
       add: async () => {
         logger.info(`New SVG detected: ${fileName}`);
-        await this.processWatchedFile(event.filePath, outDir, config);
+        await this.processWatchedFile(event.filePath, outDir, config, watchId);
       },
       change: async () => {
         logger.info(`SVG updated: ${fileName}`);
-        await this.processWatchedFile(event.filePath, outDir, config);
+        await this.processWatchedFile(event.filePath, outDir, config, watchId);
       },
       unlink: async () => {
         logger.info(`SVG removed: ${fileName}`);
@@ -378,12 +459,21 @@ export class SVGService {
   private async processWatchedFile(
     filePath: string,
     outDir: string,
-    config?: Partial<SVGConfig>
+    config?: Partial<SVGConfig>,
+    watchId?: string
   ): Promise<void> {
-    const previousController = this.activeWatchJobs.get(filePath);
+    // Supersede work only within the same watcher registration. Two watchers
+    // may intentionally observe the same source path with independent lifetimes.
+    const jobKey = watchId ? `${watchId}\0${filePath}` : filePath;
+    const previousController = this.activeWatchJobs.get(jobKey);
     previousController?.abort('Superseded by a newer watch event.');
     const controller = new AbortController();
-    this.activeWatchJobs.set(filePath, controller);
+    this.activeWatchJobs.set(jobKey, controller);
+    if (watchId) {
+      const controllers = this.watchJobControllers.get(watchId) ?? new Set();
+      controllers.add(controller);
+      this.watchJobControllers.set(watchId, controllers);
+    }
     try {
       // Check if file is locked
       if (this.lockService.isLocked(filePath)) {
@@ -391,12 +481,13 @@ export class SVGService {
         return;
       }
 
-      // Get configuration
-      const fullConfig = configService.readConfig();
-      const mergedConfig = { ...fullConfig, ...config };
+      const mergedConfig = this.mergeRuntimeConfig(config, {});
 
       // Process the file
       const result = await svgProcessor.processSVGFile(filePath, outDir, {
+        framework: mergedConfig.framework,
+        typescript: mergedConfig.typescript,
+        frameworkOptions: mergedConfig.frameworkOptions,
         defaultWidth: mergedConfig.defaultWidth,
         defaultHeight: mergedConfig.defaultHeight,
         defaultFill: mergedConfig.defaultFill,
@@ -407,6 +498,7 @@ export class SVGService {
         ) as Record<string, string>,
         maxInputSizeBytes: mergedConfig.maxInputSizeBytes,
         unsafeInputPolicy: mergedConfig.unsafeInputPolicy,
+        optimizationLevel: optimizationLevel(mergedConfig.optimize),
         signal: controller.signal,
       });
       if (!result.success && result.error) {
@@ -416,12 +508,16 @@ export class SVGService {
     } catch (error) {
       if ((error as { code?: string }).code === 'ABORT_ERR') return;
       logger.error(
-        `Failed to process watched file ${path.basename(filePath)}:`,
-        error
+        `Failed to process watched file ${path.basename(filePath)}.`
       );
     } finally {
-      if (this.activeWatchJobs.get(filePath) === controller) {
-        this.activeWatchJobs.delete(filePath);
+      if (this.activeWatchJobs.get(jobKey) === controller) {
+        this.activeWatchJobs.delete(jobKey);
+      }
+      if (watchId) {
+        const controllers = this.watchJobControllers.get(watchId);
+        controllers?.delete(controller);
+        if (controllers?.size === 0) this.watchJobControllers.delete(watchId);
       }
     }
   }
@@ -435,9 +531,7 @@ export class SVGService {
     config?: Partial<SVGConfig>
   ): Promise<void> {
     try {
-      // Get configuration
-      const fullConfig = configService.readConfig();
-      const mergedConfig = { ...fullConfig, ...config };
+      const mergedConfig = this.mergeRuntimeConfig(config, {});
 
       const namingConvention = mergedConfig.outputConfig?.naming || 'pascal';
       const framework = mergedConfig.framework || 'react';
@@ -449,21 +543,26 @@ export class SVGService {
 
       const componentName = svgProcessor.generateComponentName(
         path.basename(filePath),
-        namingConvention
+        namingConvention === 'kebab' ? 'pascal' : namingConvention
       );
       const componentPath = resolveOutputArtifactPath(
         outDir,
-        `${componentName}.${extension}`
+        svgProcessor.generateFileName(
+          componentName,
+          extension,
+          namingConvention
+        )
       );
 
       if (await FileSystem.exists(componentPath)) {
         await FileSystem.unlink(componentPath);
-        logger.success(`Removed component: ${componentName}.${extension}`);
+        logger.success(
+          `Removed component: ${svgProcessor.generateFileName(componentName, extension, namingConvention)}`
+        );
       }
     } catch (error) {
       logger.error(
-        `Failed to remove component for ${path.basename(filePath)}:`,
-        error
+        `Failed to remove component for ${path.basename(filePath)}.`
       );
     }
   }
@@ -475,12 +574,19 @@ export class SVGService {
     if (watchId) {
       fileWatcher.stopWatching(watchId);
       this.activeWatchers.delete(watchId);
+      for (const controller of this.watchJobControllers.get(watchId) ?? []) {
+        controller.abort('Watcher stopped.');
+      }
+      this.watchJobControllers.delete(watchId);
+      const abortRegistration = this.watchAbortListeners.get(watchId);
+      abortRegistration?.signal.removeEventListener(
+        'abort',
+        abortRegistration.listener
+      );
+      this.watchAbortListeners.delete(watchId);
     } else {
       // Stop all watchers
-      for (const id of this.activeWatchers) {
-        fileWatcher.stopWatching(id);
-      }
-      this.activeWatchers.clear();
+      for (const id of [...this.activeWatchers]) this.stopWatching(id);
     }
   }
 
@@ -506,83 +612,46 @@ export class SVGService {
    */
   private async generateIndexFile(
     outDir: string,
-    config?: Partial<SVGConfig>
+    config?: Partial<SVGConfig>,
+    plannedComponents: readonly BuildPlanItem[] = []
   ): Promise<void> {
     try {
-      // Skip index generation for frameworks that use non-standard extensions
       const framework = config?.framework;
-      const frameworksWithoutIndexSupport = new Set(['vue', 'svelte']);
-
-      if (framework && frameworksWithoutIndexSupport.has(framework)) {
-        logger.debug(
-          `Skipping index generation for ${framework} framework (components use .${framework} extension)`
-        );
-        return;
-      }
-
-      // Scan output directory for all component files
-      const files = await FileSystem.readDir(outDir);
-
-      // Get the file extension based on typescript setting
-      const typescript = config?.typescript !== false;
-      const ext = typescript ? '.tsx' : '.jsx';
-
-      // Filter component files (exclude index.ts/index.js)
-      const componentFiles = files.filter(
-        file =>
-          (file.endsWith(ext) ||
-            file.endsWith('.ts') ||
-            file.endsWith('.js')) &&
-          !file.startsWith('index.')
-      );
-
-      if (componentFiles.length === 0) {
+      if (!framework || plannedComponents.length === 0) {
         logger.warn(
           'No component files found in output directory for index generation'
         );
         return;
       }
-
-      // Extract component names from filenames
-      const componentNames = componentFiles.map(file => {
-        // Remove extension to get component name
-        const baseName = path.basename(file, path.extname(file));
-        return baseName;
-      });
-
-      const indexContent = this.generateIndexContent(componentNames);
-      const indexPath = resolveOutputArtifactPath(outDir, 'index.ts');
+      const componentNames = plannedComponents.map(item => item.componentName);
+      const indexContent = this.generateIndexContent(
+        framework,
+        plannedComponents
+      );
+      const indexExtension = config.typescript === false ? 'js' : 'ts';
+      const indexPath = resolveOutputArtifactPath(
+        outDir,
+        `index.${indexExtension}`
+      );
 
       await FileSystem.writeFile(indexPath, indexContent, 'utf-8');
       logger.success(
-        `Generated index.ts with ${componentNames.length} component exports`
+        `Generated index.${indexExtension} with ${componentNames.length} component exports`
       );
     } catch (error) {
-      logger.error('Failed to generate index.ts:', error);
+      logger.error('Failed to generate component index.');
+      throw error;
     }
   }
 
   /**
    * Generate the content for index.ts file
    */
-  private generateIndexContent(componentNames: string[]): string {
-    const imports = componentNames
-      .map(name => `export { default as ${name} } from './${name}';`)
-      .join('\n');
-
-    return `/**
- * SVG Components Index
- * Generated by svger-cli
- * 
- * Import individual components:
- * import { ${componentNames[0] || 'ComponentName'} } from './components';
- * 
- * Import all components:
- * import * as Icons from './components';
- */
-
-${imports}
-`;
+  private generateIndexContent(
+    framework: NonNullable<SVGConfig['framework']>,
+    components: readonly BuildPlanItem[]
+  ): string {
+    return createBarrelContent(framework, components);
   }
 
   /**

@@ -4,28 +4,39 @@
  */
 
 import type { OptConfig } from './types.js';
+import {
+  optimizeColor,
+  optimizeSVGAttributeValue,
+} from './numeric-optimizer.js';
+import {
+  normalizeSVGFormattingWhitespace,
+  removeSVGXMLComments,
+  transformSVGAttributeValues,
+} from './xml-attribute-transform.js';
 
 /**
  * Remove XML declarations from SVG content
  */
 export function removeXMLDeclaration(svg: string, config: OptConfig): string {
   if (!config.removeXMLProcInst) return svg;
-  return svg.replace(/<\?xml.*?\?>/g, '');
+  return svg.replace(/^\uFEFF?<\?xml\s[^?]*\?>\s*/i, '');
 }
 
 /**
  * Remove px units from width and height attributes for React compatibility
  */
 export function removePxUnits(svg: string): string {
-  return svg.replace(/\s(width|height)=["'](\d+)px["']/g, ' $1="$2"');
+  // Unit conversion may affect viewport sizing and is intentionally disabled.
+  return svg;
 }
 
 /**
  * Remove DOCTYPE declarations from SVG content
  */
 export function removeDoctype(svg: string, config: OptConfig): string {
-  if (!config.removeDoctype) return svg;
-  return svg.replace(/<!DOCTYPE.*?>/g, '');
+  // The security boundary rejects DTDs. Do not regex-remove document syntax.
+  void config;
+  return svg;
 }
 
 /**
@@ -33,7 +44,8 @@ export function removeDoctype(svg: string, config: OptConfig): string {
  */
 export function removeComments(svg: string, config: OptConfig): string {
   if (!config.removeComments) return svg;
-  return svg.replace(/<!--[\s\S]*?-->/g, '');
+  // This walker recognizes comments only in XML markup, not CDATA.
+  return removeSVGXMLComments(svg);
 }
 
 /**
@@ -41,23 +53,16 @@ export function removeComments(svg: string, config: OptConfig): string {
  */
 export function normalizeWhitespace(svg: string, config: OptConfig): string {
   if (!config.normalizeWhitespace) return svg;
-
-  return svg
-    .replace(/\r?\n|\r/g, '') // Remove line breaks
-    .replace(/\s{2,}/g, ' ') // Collapse multiple spaces
-    .trim();
+  return normalizeSVGFormattingWhitespace(svg);
 }
 
 /**
  * Remove metadata elements from SVG content
  */
 export function removeMetadata(svg: string, config: OptConfig): string {
-  if (!config.removeMetadata) return svg;
-
-  return svg
-    .replace(/<metadata[\s\S]*?<\/metadata>/gi, '')
-    .replace(/<title[\s\S]*?<\/title>/gi, '')
-    .replace(/<desc[\s\S]*?<\/desc>/gi, '');
+  // Titles, descriptions, and metadata are observable document semantics.
+  void config;
+  return svg;
 }
 
 /**
@@ -85,13 +90,8 @@ export function removeXMLNamespaces(svg: string, config: OptConfig): string {
  * Note: This can be aggressive - use with caution
  */
 export function removeInlineStyles(svg: string, config: OptConfig): string {
-  // When inlineStyles is true, remove them completely
-  // When false (default), convert to React style objects for React compatibility
-  if (config.inlineStyles) {
-    // Remove style attributes completely
-    return svg.replace(/\s+style="[^"]*"/g, '');
-  }
-
+  // Style deletion/conversion can alter cascade and precedence.
+  void config;
   return svg;
 }
 
@@ -100,31 +100,26 @@ export function removeInlineStyles(svg: string, config: OptConfig): string {
  */
 export function shortenColors(svg: string, config: OptConfig): string {
   if (!config.shortenColors) return svg;
-
-  // Match 6-digit hex colors that can be shortened
-  return svg.replace(/#([0-9a-f])\1([0-9a-f])\2([0-9a-f])\3/gi, '#$1$2$3');
+  const colorAttributes = new Set([
+    'fill',
+    'stroke',
+    'stop-color',
+    'flood-color',
+    'lighting-color',
+  ]);
+  return transformSVGAttributeValues(svg, (_tag, name, value) => {
+    if (!colorAttributes.has(name) || value.trim() !== value) return value;
+    return optimizeColor(value);
+  });
 }
 
 /**
  * Remove empty containers (g, defs without children or with only whitespace)
  */
 export function removeEmptyContainers(svg: string, config: OptConfig): string {
-  if (!config.removeEmptyContainers) return svg;
-
-  let result = svg;
-  let previousResult = '';
-
-  // Iteratively remove empty containers until no more are found
-  while (result !== previousResult) {
-    previousResult = result;
-    result = result
-      .replace(/<g\s*><\/g>/gi, '') // Empty g tags
-      .replace(/<g\s*>\s*<\/g>/gi, '') // g tags with only whitespace
-      .replace(/<defs\s*><\/defs>/gi, '') // Empty defs tags
-      .replace(/<defs\s*>\s*<\/defs>/gi, ''); // defs with only whitespace
-  }
-
-  return result;
+  // Whitespace-only children may be significant in text or preserve contexts.
+  void config;
+  return svg;
 }
 
 /**
@@ -145,48 +140,45 @@ export function removeHiddenElements(svg: string): string {
  * Round float numbers to specified precision
  */
 export function roundFloats(svg: string, config: OptConfig): string {
-  const precision = config.floatPrecision;
-
-  // Match floating point numbers
-  return svg.replace(/(\d+\.\d+)/g, match => {
-    const num = parseFloat(match);
-    return num.toFixed(precision).replace(/\.?0+$/, ''); // Remove trailing zeros
-  });
+  if (!config.enableNumericOptimization) return svg;
+  const numericAttributes = new Set([
+    'x',
+    'y',
+    'cx',
+    'cy',
+    'r',
+    'rx',
+    'ry',
+    'width',
+    'height',
+    'x1',
+    'y1',
+    'x2',
+    'y2',
+    'stroke-width',
+    'font-size',
+    'opacity',
+    'fill-opacity',
+    'stroke-opacity',
+    'offset',
+    'd',
+    'points',
+    'viewBox',
+  ]);
+  return transformSVGAttributeValues(svg, (_tag, name, value) =>
+    numericAttributes.has(name)
+      ? optimizeSVGAttributeValue(name, value, config)
+      : value
+  );
 }
 
 /**
  * Sort attributes alphabetically
  */
 export function sortAttributes(svg: string, config: OptConfig): string {
-  if (!config.sortAttrs) return svg;
-
-  // Match SVG tags with attributes (both self-closing and regular)
-  return svg.replace(
-    /<([a-z][a-z0-9]*)\s+([^>]+?)(\/?)>/gi,
-    (_match, tagName, attrs, selfClosing) => {
-      // Parse attributes
-      const attrPairs: Array<[string, string]> = [];
-      const attrRegex = /([a-zA-Z][a-zA-Z0-9-]*)="([^"]*)"/g;
-      let attrMatch;
-
-      while ((attrMatch = attrRegex.exec(attrs)) !== null) {
-        // Prevent infinite loop if regex doesn't advance
-        if (attrMatch.index === attrRegex.lastIndex) {
-          attrRegex.lastIndex++;
-        }
-        attrPairs.push([attrMatch[1], attrMatch[2]]);
-      }
-
-      // Sort alphabetically
-      attrPairs.sort((a, b) => a[0].localeCompare(b[0]));
-
-      // Reconstruct tag, preserving self-closing status
-      const sortedAttrs = attrPairs
-        .map(([key, val]) => `${key}="${val}"`)
-        .join(' ');
-      return `<${tagName} ${sortedAttrs}${selfClosing}>`;
-    }
-  );
+  // Attribute sorting is not worth reparsing/re-serializing this source.
+  void config;
+  return svg;
 }
 
 /**
@@ -208,7 +200,7 @@ export async function basicCleaningStage(
   result = removeXMLNamespaces(result, config);
   result = removeInlineStyles(result, config);
   result = convertToCamelCase(result, config);
-  result = removePxUnits(result); // Remove px units for React compatibility
+  // Unit removal is deferred because it can change viewport sizing semantics.
   result = shortenColors(result, config);
   result = roundFloats(result, config);
   result = removeEmptyContainers(result, config);

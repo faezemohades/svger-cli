@@ -1,16 +1,12 @@
 import type { Diagnostic } from './diagnostics.js';
-import { ExitCode } from './diagnostics.js';
+import { ExitCode, redactDiagnostic } from './diagnostics.js';
 
 export const BUILD_REPORT_SCHEMA_VERSION = '1.0.0' as const;
 
 export type BuildMode = 'write' | 'dry-run' | 'check' | 'diff';
 export type BuildStatus = 'success' | 'failed' | 'cancelled';
 export type ArtifactStatus =
-  | 'created'
-  | 'updated'
-  | 'unchanged'
-  | 'planned'
-  | 'skipped';
+  'created' | 'updated' | 'unchanged' | 'planned' | 'skipped';
 export type ReportFormat = 'pretty' | 'json' | 'ndjson';
 
 /** A generated or planned output described without embedding its content. */
@@ -68,7 +64,9 @@ export function createBuildReport(
   options: CreateBuildReportOptions = {}
 ): BuildReport {
   const artifacts = Object.freeze([...(options.artifacts ?? [])]);
-  const diagnostics = Object.freeze([...(options.diagnostics ?? [])]);
+  const diagnostics = Object.freeze(
+    (options.diagnostics ?? []).map(redactDiagnostic)
+  );
   const exitCode = options.exitCode ?? ExitCode.Success;
   const status =
     options.status ??
@@ -103,40 +101,51 @@ function stableJSONStringify(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
+function publicReport(report: BuildReport): BuildReport {
+  return {
+    ...report,
+    diagnostics: report.diagnostics.map(redactDiagnostic),
+  };
+}
+
 export function formatBuildReport(
   report: BuildReport,
   format: ReportFormat
 ): string {
+  const safeReport = publicReport(report);
   if (format === 'json') {
-    return stableJSONStringify(report);
+    return stableJSONStringify(safeReport);
   }
 
   if (format === 'ndjson') {
     const records: unknown[] = [
       {
         type: 'report',
-        schemaVersion: report.schemaVersion,
-        operation: report.operation,
-        mode: report.mode,
-        status: report.status,
-        exitCode: report.exitCode,
+        schemaVersion: safeReport.schemaVersion,
+        operation: safeReport.operation,
+        mode: safeReport.mode,
+        status: safeReport.status,
+        exitCode: safeReport.exitCode,
       },
-      ...report.artifacts.map(artifact => ({ type: 'artifact', ...artifact })),
-      ...report.diagnostics.map(diagnostic => ({
+      ...safeReport.artifacts.map(artifact => ({
+        type: 'artifact',
+        ...artifact,
+      })),
+      ...safeReport.diagnostics.map(diagnostic => ({
         type: 'diagnostic',
         ...diagnostic,
       })),
-      { type: 'summary', ...report.summary },
+      { type: 'summary', ...safeReport.summary },
     ];
     return records.map(record => JSON.stringify(record)).join('\n');
   }
 
   const headline =
-    report.status === 'success'
-      ? `Build ${report.mode} completed successfully.`
-      : `Build ${report.mode} ${report.status}.`;
-  const summary = `${report.summary.planned} planned, ${report.summary.created} created, ${report.summary.updated} updated, ${report.summary.unchanged} unchanged, ${report.summary.skipped} skipped, ${report.summary.failed} failed.`;
-  const diagnostics = report.diagnostics.map(
+    safeReport.status === 'success'
+      ? `Build ${safeReport.mode} completed successfully.`
+      : `Build ${safeReport.mode} ${safeReport.status}.`;
+  const summary = `${safeReport.summary.planned} planned, ${safeReport.summary.created} created, ${safeReport.summary.updated} updated, ${safeReport.summary.unchanged} unchanged, ${safeReport.summary.skipped} skipped, ${safeReport.summary.failed} failed.`;
+  const diagnostics = safeReport.diagnostics.map(
     diagnostic =>
       `${diagnostic.severity.toUpperCase()} ${diagnostic.code}: ${diagnostic.message}`
   );

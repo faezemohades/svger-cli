@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "requirements": [
+    {
+      "id": "security",
+      "verification": [
+        "tests/phase0/svg-security-corpus.test.mjs",
+        "tests/phase0/entrypoint-safety-matrix.test.mjs",
+        "tests/phase0/security-containment.test.mjs"
+      ]
+    },
+    {
+      "id": "semantic-correctness",
+      "verification": [
+        "tests/phase0/svg-semantic-preservation.test.mjs",
+        "tests/phase0/svg-visual-equivalence.test.mjs"
+      ]
+    },
+    {
+      "id": "framework-generation",
+      "verification": [
+        "tests/phase0/generator-language-contracts.test.mjs",
+        "tests/phase0/artifact-export-contracts.test.mjs",
+        "tests/phase0/integrated-workflow-certification.test.mjs"
+      ]
+    },
+    {
+      "id": "configuration",
+      "verification": ["tests/phase0/configuration-pipeline-consistency.test.mjs"]
+    },
+    {
+      "id": "recovery",
+      "verification": [
+        "tests/phase0/recovery-transaction-hardening.test.mjs",
+        "tests/phase1/recovery.contract.test.mjs"
+      ]
+    },
+    {
+      "id": "concurrency-resource-lifecycle",
+      "verification": ["tests/phase0/concurrency-resource-lifecycle.test.mjs"]
+    },
+    {
+      "id": "packaging",
+      "verification": ["tests/phase0/package-smoke.test.mjs"]
+    },
+    {
+      "id": "public-compatibility",
+      "verification": [
+        "tests/phase1/governance-policy.contract.test.mjs",
+        "tests/phase1/unified-entrypoints.contract.test.mjs"
+      ]
+    }
+  ]
+}

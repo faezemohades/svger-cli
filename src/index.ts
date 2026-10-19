@@ -88,6 +88,7 @@ export { TemplateManager, templateManager } from './core/template-manager.js';
 export {
   FrameworkTemplateEngine,
   frameworkTemplateEngine,
+  UnsupportedLanguageError,
   type FrameworkOptions,
 } from './core/framework-templates.js';
 
@@ -144,6 +145,7 @@ export {
   DiagnosticError,
   diagnosticFromUnknown,
   exitCodeFromUnknown,
+  sanitizePublicError,
 } from './contracts/diagnostics.js';
 export type {
   Diagnostic,

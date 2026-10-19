@@ -6,10 +6,7 @@ import { ConfigService } from '../services/config.js';
 import { SVGProcessor } from '../processors/svg-processor.js';
 import type { Logger, SVGConfig } from '../types/index.js';
 import type { ConfigurationLayer } from '../configuration/resolver.js';
-import {
-  explainConfiguration,
-  resolveConfiguration,
-} from '../configuration/resolver.js';
+import { explainConfiguration } from '../configuration/resolver.js';
 import {
   SVGCompilerApplicationService,
   type BuildRequest,
@@ -100,12 +97,8 @@ export async function createSVGCompiler(
     build: (request: BuildRequest) => service.build(request),
     config: Object.freeze({
       explain: (request: Partial<BuildRequest> = {}) => {
-        const requestLayer: ConfigurationLayer = {
-          origin: 'request',
-          value: request.config ?? {},
-        };
         return explainConfiguration(
-          resolveConfiguration(defaultConfig, [...layers, requestLayer])
+          service.resolveConfig(request as BuildRequest)
         );
       },
     }),

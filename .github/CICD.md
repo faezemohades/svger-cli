@@ -1,5 +1,12 @@
 # CI/CD Documentation
 
+> **Governance notice (Directive 010):** This document is a legacy reference and is not an
+> executable policy. The active workflow inventory is `.github/workflows/ci.yml` and
+> `.github/workflows/visual-regression.yml`. Release and public documentation deployment workflows
+> are disabled while SEC-INC-001 is open. Do not configure NPM_TOKEN or follow release instructions
+> below. Use [`docs/phase1-quality-governance.md`](../docs/phase1-quality-governance.md) and the
+> canonical `quality:fast`, `quality:full`, and `quality:release` gates instead.
+
 This directory contains comprehensive CI/CD workflows and configurations for automated building, testing, and deployment of SVGER-CLI.
 
 ## 📁 Available Workflows
