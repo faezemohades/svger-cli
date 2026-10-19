@@ -274,7 +274,10 @@ export interface Template {
 export type FileSystemEvent = 'change' | 'rename';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type ProcessingStatus =
-  'pending' | 'processing' | 'completed' | 'failed';
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
 
 export interface ProcessingJob {
   id: string;

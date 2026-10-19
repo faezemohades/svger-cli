@@ -25,7 +25,8 @@ export const colorReplacerPlugin: EnhancedPlugin = {
       context: PluginHookContext
     ): Promise<PluginHookResult> => {
       const options = context.metadata.get('pluginOptions') as
-        ColorReplacerOptions | undefined;
+        | ColorReplacerOptions
+        | undefined;
 
       if (!options || !options.colors) {
         return { content: context.content };

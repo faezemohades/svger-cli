@@ -3,8 +3,8 @@
   "package": "svger-cli@4.0.9",
   "summary": {
     "filename": "svger-cli-4.0.9.tgz",
-    "packedBytes": 634226,
-    "unpackedBytes": 2079505,
+    "packedBytes": 634254,
+    "unpackedBytes": 2079669,
     "entryCount": 754,
     "groups": {
       ".svgerconfig.example.json": 1,
@@ -53,10 +53,10 @@
     "id": "svger-cli@4.0.9",
     "name": "svger-cli",
     "version": "4.0.9",
-    "size": 634226,
-    "unpackedSize": 2079505,
-    "shasum": "43b7230b030a9a21713d8730d71d87cb5063d2b8",
-    "integrity": "sha512-bfEoodybQ8HzL9eQ/C/alaiuoSNJOyqjNMnh6mMxuxQ4Rso+EEs0UryAr8xBuFeBqmnjF3kVi3xWMzKX0j9a2A==",
+    "size": 634254,
+    "unpackedSize": 2079669,
+    "shasum": "02f96fdc79135664e2a204cb4d263d1b2b6d8526",
+    "integrity": "sha512-6/ito1n4ocXB8oxivWTEJS/SpW4MOfnmxqiJU28KtbsxUjdj6kPNkBVatiudbldOX+flmvP25wyDZh9FuCIGzA==",
     "filename": "svger-cli-4.0.9.tgz",
     "files": [
       {
@@ -3826,7 +3826,7 @@
       },
       {
         "path": "package.json",
-        "size": 14400,
+        "size": 14564,
         "mode": 420
       }
     ],

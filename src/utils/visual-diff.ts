@@ -139,7 +139,9 @@ export class VisualDiffError extends Error {
   constructor(
     message: string,
     public readonly code:
-      'RENDER_FAILED' | 'COMPARISON_FAILED' | 'THRESHOLD_EXCEEDED'
+      | 'RENDER_FAILED'
+      | 'COMPARISON_FAILED'
+      | 'THRESHOLD_EXCEEDED'
   ) {
     super(message);
     this.name = 'VisualDiffError';

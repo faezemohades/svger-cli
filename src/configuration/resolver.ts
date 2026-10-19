@@ -2,7 +2,10 @@ import type { SVGConfig } from '../types/index.js';
 import { DiagnosticError, ExitCode } from '../contracts/diagnostics.js';
 
 export type ConfigurationOrigin =
-  'default' | 'configuration-file' | 'compiler' | 'request';
+  | 'default'
+  | 'configuration-file'
+  | 'compiler'
+  | 'request';
 
 export type ConfigurationOrigins = Readonly<
   Record<string, ConfigurationOrigin>

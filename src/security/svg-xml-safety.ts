@@ -4,7 +4,10 @@
  */
 export interface SVGXMLFinding {
   kind:
-    'event-handler' | 'active-element' | 'external-reference' | 'unsafe-css';
+    | 'event-handler'
+    | 'active-element'
+    | 'external-reference'
+    | 'unsafe-css';
   sample: string;
 }
 
