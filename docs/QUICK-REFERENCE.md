@@ -1,176 +1,139 @@
-# Quick Reference: Optimization Pipeline
+# Configuration and Optimization Guide
 
-## 🎯 Achievement: 57.77% Reduction at MAXIMUM Level
+This is a practical reference for project configuration and SVG processing choices. For every CLI
+command and flag, see the [CLI reference](CLI-REFERENCE.md). Version 4.1.0 on this branch is planned
+and unpublished; verify the installed binary with `svger --help`.
 
----
+## Configuration file
 
-## Usage Examples
+Create a `.svgconfig.json` file in the project working directory:
 
-### Basic Usage (Recommended)
-```typescript
-import { SVGProcessor, OptLevel } from 'svger-cli';
-
-const processor = SVGProcessor.getInstance();
-processor.setOptimizationLevel(OptLevel.BALANCED);
-
-const optimized = await processor.cleanSVGContent(svgString);
-// Result: 43.33% reduction (safe + fast)
+```sh
+svger config --init
+svger config --show
 ```
 
-### Maximum Compression
-```typescript
-processor.setOptimizationLevel(OptLevel.MAXIMUM);
-const optimized = await processor.cleanSVGContent(svgString);
-// Result: 57.77% reduction (everything enabled)
-```
+A small, reviewable example:
 
-### Custom Configuration
-```typescript
-import { svgProcessor } from 'svger-cli';
-
-const result = await svgProcessor.cleanSVGContent(svgString, {
-  optimizationLevel: OptLevel.AGGRESSIVE,
-  precision: 1,
-  enablePathOptimization: true,
-  enableTransformCollapsing: true,
-  curveTolerance: 0.5,
-});
-```
-
----
-
-## Optimization Levels
-
-| Level | Reduction | Speed | Safety | Use Case |
-|-------|-----------|-------|--------|----------|
-| **BALANCED** | 43.33% | Fast | High | Development (recommended) |
-| **AGGRESSIVE** | 48.91% | Medium | Medium | CI/CD builds |
-| **MAXIMUM** | 57.77% | Slower | Lower | Production bundles |
-
----
-
-## Optimizer Breakdown
-
-### Phase 3: Attributes (BALANCED+)
-- ✅ Numeric: Decimal precision, coordinates
-- ✅ Style: Colors, units, defaults
-- ✅ Transform: Matrix simplification (AGGRESSIVE+)
-
-### Phase 4: Paths (AGGRESSIVE+)
-- ✅ Parser: Tokenization, abs/rel conversion
-- ✅ Shortener: Command merging, H/V
-- ✅ **Commands: C→S, C→Q, Q→T, C/Q→L** 🆕
-- ⏳ Simplifier: Douglas-Peucker (Phase 4.4)
-- ⏳ Merger: Repeated shapes (Phase 4.5)
-
-### Phase 5: Transforms (MAXIMUM only)
-- ✅ **Collapsing: Propagate, bake, unwrap** 🆕
-
----
-
-## Test Results
-
-### Command Optimizer (Phase 4.3)
-```
-C→S: 25.68% | C→Q: 29.23% | Q→T: 32.76%
-C→L: 27.54% | Q→L: 31.67% | Overall: 23.44%
-```
-
-### Transform Collapsing (Phase 5.1)
-```
-Nested Groups: 50.75% | Illustrator: 49.76%
-Average: 42.42% across 8 tests
-```
-
-### Complete Pipeline
-```
-824 bytes → 348 bytes (57.77% reduction)
-```
-
----
-
-## Config Options
-
-```typescript
-interface OptConfig {
-  // Level
-  optimizationLevel: 'BALANCED' | 'AGGRESSIVE' | 'MAXIMUM';
-  
-  // Precision (0=aggressive, 3=conservative)
-  precision: number;
-  
-  // Phase 3 (BALANCED+)
-  enableNumericOptimization: boolean;
-  enableStyleOptimization: boolean;
-  enableTransformOptimization: boolean; // AGGRESSIVE+
-  
-  // Phase 4 (AGGRESSIVE+)
-  enablePathOptimization: boolean;
-  curveTolerance: number; // 0.5 recommended
-  
-  // Phase 5 (MAXIMUM only)
-  enableTransformCollapsing: boolean;
+```json
+{
+  "source": "./src/assets/icons",
+  "output": "./src/components/icons",
+  "framework": "react",
+  "typescript": true,
+  "defaultWidth": 24,
+  "defaultHeight": 24,
+  "defaultFill": "currentColor",
+  "unsafeInputPolicy": "reject",
+  "maxInputSizeBytes": 10485760,
+  "include": ["**/*.svg"],
+  "exclude": ["**/draft/**"],
+  "outputConfig": {
+    "naming": "pascal"
+  }
 }
 ```
 
----
+The defaults include React, TypeScript, `./src/assets/svg` as source, `./src/components/icons` as
+output, Pascal-style naming, a bounded input size, and unsafe-input rejection. Use only options
+recognized by the current schema; obsolete example keys are rejected instead of silently ignored.
 
-## File Structure
+## Configuration precedence
 
+Compiler/service configuration resolves from low to high priority:
+
+1. Built-in defaults.
+2. `.svgconfig.json` in the working directory.
+3. Compiler creation options.
+4. Per-build `config` overrides.
+5. Explicit per-build fields such as `framework`, `typescript`, and input-safety policy.
+
+Objects merge recursively, arrays replace, and omitted values do not override. Explicit `false` is
+preserved. Inspect values and their origin with:
+
+```sh
+svger config --explain
+svger config --explain framework --format json
 ```
-src/optimizers/
-├── types.ts                    # OptLevel enum, OptConfig
-├── optimizer-pipeline.ts       # Pipeline architecture
-├── advanced-stages.ts          # Phase 3-5 wrappers
-│
-├── numeric-optimizer.ts        # Phase 3.1
-├── style-optimizer.ts          # Phase 3.2
-├── transform-optimizer.ts      # Phase 3.3
-│
-├── path-parser.ts              # Phase 4.1 (480 lines)
-├── path-shortener.ts           # Phase 4.2 (320 lines)
-├── command-optimizer.ts        # Phase 4.3 (434 lines) 🆕
-│
-└── transform-collapsing.ts     # Phase 5.1 (540 lines) 🆕
+
+Change simple values from the CLI with `svger config --set key=value`. Dot notation selects a nested
+property, such as `outputConfig.naming=camel`. The command parses `true`, `false`, and numeric
+values; all other values are strings. Use JSON for arrays and nested structures rather than relying
+on the scalar setter.
+
+## Common options
+
+| Setting | Purpose |
+| --- | --- |
+| `source`, `output` | Default source and output paths used by configured workflows. CLI `build` paths are positional. |
+| `framework` | `react`, `react-native`, `vue`, `svelte`, `angular`, `solid`, `preact`, `lit`, or `vanilla`. |
+| `typescript` | Select TypeScript where target supports it. Angular requires TypeScript. |
+| `frameworkOptions` | Framework-specific output options, subject to schema validation. |
+| `svelteCompiler` | `legacy` (default) or opt-in `ir-v1` for the bounded static Svelte subset. |
+| `unsafeInputPolicy` | `reject` by default, or explicit `strip` policy for selected blocked constructs. `strip` is not a full sanitizer. |
+| `maxInputSizeBytes` | Bound input size in bytes. |
+| `include`, `exclude` | Source-discovery path globs. CLI can override them with comma-separated lists. |
+| `outputConfig.naming` | Component/output naming: `pascal`, `camel`, or `kebab`. |
+| `batchSize`, `maxConcurrency` | Scheduling limits for applicable configured workflows. |
+
+Use the [framework guide](FRAMEWORK-GUIDE.md) for examples and the [support matrix](SUPPORT-MATRIX.md)
+for compatibility qualification.
+
+## Optimization levels
+
+Select an optimization level for component generation with `build --optimize <level>` or for
+standalone SVG optimization with `optimize --level <level>`:
+
+```sh
+svger build ./icons ./components --framework react --optimize basic
+svger optimize ./icon.svg ./optimized.svg --level balanced
 ```
 
----
+The CLI defaults differ by command: `build` uses `basic`, while standalone `optimize` uses
+`balanced`. `none`, `basic`, `balanced`, `aggressive`, and `maximum` are accepted for build
+generation. The values configure optimization behavior, but not every optional optimizer module is
+registered in the normal compiler pipeline. In the current application pipeline, cleaning runs for
+non-`none` levels and numeric formatting runs at balanced and higher. Do not infer that choosing
+`aggressive` or `maximum` automatically activates every historical experimental path optimizer.
 
-## Performance
+Optimization may change source spelling, attributes, numeric precision, or other SVG details. It
+does not guarantee byte preservation, full SVG semantic preservation, accessibility equivalence, or
+pixel identity. Retain the source asset and validate output in the real consuming application.
+Historical percentage reductions in older engineering records are not current performance promises.
 
-### Time Complexity: O(n)
-- Small (<10KB): <10ms
-- Medium (10-100KB): 10-50ms
-- Large (100KB-1MB): 50-200ms
+## Build modes and collisions
 
-### Real-World Impact
-- Material Icons: 15-25%
-- Illustrator exports: **40-50%** 🎯
-- Hand-drawn: 20-30%
-- Icon libraries: 30-40%
+For `build`, exactly one mode may be selected:
 
----
+```sh
+svger build ./icons ./components --framework react --dry-run
+svger build ./icons ./components --framework react --check
+svger build ./icons ./components --framework react --diff
+```
 
-## Next Steps
+- `--dry-run` plans/generates without committing files.
+- `--check` returns failure when the generated outputs are stale.
+- `--diff` reports differences without writing outputs.
 
-### Phase 4.4: Path Simplification
-- Douglas-Peucker algorithm
-- Visvalingam-Whyatt algorithm
-- Expected: +5-10% on complex paths
+If multiple SVG paths produce one output filename, the default collision policy `error` fails the
+build. Prefer renaming inputs; `--collision first|last` is available only when deterministic
+selection is intended. Build reports support `pretty` (default), `json`, and `ndjson` formats.
 
-### Phase 4.5: Path Merging
-- Repeated shape detection
-- `<defs>` + `<use>` extraction
-- Expected: +30-60% on icon sets
+## Security and visual validation
 
----
+Input admission is independent of optimization. DTD/entity declarations, malformed XML, active
+content, prohibited external references, CSS cases covered by policy, and resource-limit violations
+are rejected before generation. `unsafeInputPolicy: "strip"` changes how selected constructs are
+handled and emits a warning; it is not a general-purpose sanitizer. Read the
+[SVG input security policy](phase0-svg-input-security.md).
 
-## Status: ✅ Production Ready
+Visual rasterization is a separate optional feature. It requires Node.js `>=20.9.0` and separately
+installed `sharp >=0.35.5`, `pixelmatch`, and `pngjs`; it is intentionally unavailable on Node 18.
+See [Optional Dependencies](OPTIONAL-DEPENDENCIES.md).
 
-All tests passing: **32/32 (100%)**
-- Framework: 11/11
-- Config: 6/6
-- E2E: 8/8
-- Integration: 7/7
+## More detail
 
-**Latest Achievement**: Phase 4.3 complete (23.44% reduction) 🎉
+- [Full CLI command and option reference](CLI-REFERENCE.md)
+- [Framework output examples](FRAMEWORK-GUIDE.md)
+- [Configuration pipeline contract](phase0-configuration-pipeline.md)
+- [Artifact and export behavior](phase0-artifact-contracts.md)
