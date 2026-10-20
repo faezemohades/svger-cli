@@ -66,7 +66,7 @@ console.log(
       benchmark: 'phase4-production-svelte-generator-v1',
       node: process.version,
       sourceBytes: Buffer.byteLength(source),
-      elementCount: groups * 2 + 1,
+      elementCount: groups * 3 + 1,
       warmupsPerMode: warmups,
       samplesPerMode: samples,
       threshold: 'informational-only',

@@ -1,31 +1,20 @@
-# SVGER-CLI v4.0.0 Performance Report
+# Current Performance Results
 
-**Date:** 2026-01-02T13:32:58.911Z
-**Node.js:** v24.4.1
-**Platform:** linux x64
+No universal throughput or memory guarantee is published. The checked-in detailed result is the
+fixture-specific Svelte benchmark in
+[Phase 04.4 stabilization](../phase4.4-production-stabilization.md): Node.js 20.20.2, 70,877-byte
+input, 2,251 SVG elements, eight warm-ups, and 40 alternating samples. Its medians were 10.768 ms
+for legacy and 77.829 ms for IR after a previous IR median of 123.395 ms. The IR median reduction
+was approximately 36.9% relative to the earlier IR run; IR was still slower than legacy.
 
-## Test Results
+The later opt-in local evaluator run on 2026-10-20 used Node.js 22.22.2 / npm 10.9.7, the same
+2,251-element fixture (750 groups), eight warm-ups, and 40 samples. Legacy measured 10.086 ms median
+and 12.426 ms p95; IR measured 75.562 ms median and 85.575 ms p95, or about 7.5× the legacy median.
+This confirms that the IR route was slower in both recorded environments. These measurements are not
+directly interchangeable benchmark guarantees: runtime, host load, fixture shape and build identity
+matter, and the result does not imply cross-platform behavior.
 
-**Input:** 606 SVG files (1.01MB)
-
-| Test | Time | Files | Speed/File | Memory | Throughput |
-|------|------|-------|------------|--------|-----------|
-| React Components (TypeScript) | 30.28s | 607 | 49.88ms | 0.21MB | 20.05 files/sec |
-| React (Parallel Processing) | 30.34s | 607 | 49.98ms | -0.78MB | 20.01 files/sec |
-| Vue 3 (Composition API) | 30.32s | 606 | 50.04ms | 0.16MB | 19.99 files/sec |
-| Angular (Standalone) | 30.29s | 607 | 49.89ms | 0.16MB | 20.04 files/sec |
-
-## Summary
-
-- **Average Time:** 30.31s
-- **Average Per File:** 50.01ms
-- **Average Memory:** -0.06MB
-- **Throughput:** 20.00 files/sec
-
-## vs Competitors
-
-| Tool | Time | Memory | Improvement |
-|------|------|--------|-------------|
-| **SVGER v4.0.0** | **30.31s** | **-0.06MB** | **Baseline** |
-| SVGR (estimated) | 63.64s | -0.21MB | 52% slower |
-| SVGO (estimated) | 45.46s | -0.14MB | 33% slower |
+To reproduce or evaluate other fixtures, use `npm run evaluate:local` as documented in
+[the evaluation guide](../EVALUATION.md). Preserve the JSON output and environment metadata when
+sharing results. Do not treat the interactive site demo or a single host's measurements as a
+cross-platform guarantee.

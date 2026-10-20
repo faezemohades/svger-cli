@@ -40,7 +40,7 @@ async function compileTo(destination) {
   await fs.mkdir(destination, { recursive: true });
   await fs.writeFile(
     path.join(destination, 'package.json'),
-    JSON.stringify({ name: 'svger-cli', version: '4.0.9', type: 'module' })
+    JSON.stringify({ name: 'svger-cli', version: '4.1.0', type: 'module' })
   );
   execFileSync(
     process.execPath,

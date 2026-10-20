@@ -7,7 +7,7 @@ interface PackageInfo {
 }
 
 const PACKAGE_NAME = 'svger-cli';
-const PACKAGE_VERSION = '4.0.9';
+const PACKAGE_VERSION = '4.1.0';
 
 let cachedPackageRoot: string | null = null;
 let cachedPackageInfo: PackageInfo | null = null;

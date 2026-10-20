@@ -85,10 +85,12 @@ passing clean-checkout workflow results for the declared runtime/platform matrix
   explicitly skips when safe optional rasterization is unavailable; the separate visual test command
   remains available when compatible dependencies are installed.
 - Verified exact Node `18.17.0` / npm `9.6.7` locally using the official Linux x64 release archive
-  and published SHA-256 (`f36facda28c4d5ce76b3a1b4344e688d29d9254943a47f2f1909b1a10acb1959`; [Node.js release archive](https://nodejs.org/dist/v18.17.0/)). `npm run test:phase1:smoke` and `npm run test:package` passed. The minimum
-  runtime package smoke measured 639,982 bytes. `npm run quality:release` on Node `20.20.2` / npm
-  `10.8.2` passed and measured 635,977 bytes (753 files) in package smoke and archive conformance.
-  Both results remain below the existing 640,623-byte cap.
+  and published SHA-256 (`f36facda28c4d5ce76b3a1b4344e688d29d9254943a47f2f1909b1a10acb1959`;
+  [Node.js release archive](https://nodejs.org/dist/v18.17.0/)). `npm run test:phase1:smoke` and
+  `npm run test:package` passed. The minimum runtime package smoke measured 639,982 bytes.
+  `npm run quality:release` on Node `20.20.2` / npm `10.8.2` passed and measured 635,977 bytes (753
+  files) in package smoke and archive conformance. Both results remain below the existing
+  640,623-byte cap.
 - The exact-minimum test used the existing workspace dependency installation, not a clean `npm ci`.
   The aggregate `npm audit --omit=dev --audit-level high` timed out after 25 seconds, and installing
   patched sharp in a disposable directory stalled at the proxy. The positive render path with sharp
@@ -97,6 +99,20 @@ passing clean-checkout workflow results for the declared runtime/platform matrix
 Directive 038's code and local verification work is prepared, but release remains **No-Go** pending
 clean installation/CI, positive safe-renderer verification, account-owner closure of SEC-INC-001,
 and authorized GOV-001/GOV-002 review and repository controls.
+
+## Directive 040 parallel documentation and evaluation workstream — 2026-10-20
+
+Directive 040 authorizes a separate development branch based on frozen release candidate
+`98ac8c8c43a51475907b5e67790e61a567cce45c`. The active workstream is `feat/phase040-docs-benchmark`;
+it does not modify or replace the release-candidate branch. Package version `4.1.0` is a proposed,
+unpublished version label for this workstream, not a release authorization. The 4.0.9 public package
+contract and release policy remain unchanged.
+
+The branch updates user documentation, replaces unsupported browser benchmark claims with a
+reproducible opt-in local evaluator, and corrects the recorded Phase 04.4 Svelte fixture element
+count to 2,251 (750 groups × three child elements, plus the SVG root). Evaluation runs only on
+explicit invocation; documentation pages do not trigger tests or benchmarks. This workstream does
+not close the release blockers above, alter the publishing gate, publish, or authorize Phase 05.
 
 ## Security references
 

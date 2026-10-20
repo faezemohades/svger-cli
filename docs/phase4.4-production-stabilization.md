@@ -25,7 +25,7 @@ package export, or runtime dependency was added by this stabilization change.
 ## Measured optimization
 
 The production-path benchmark compares `SVGProcessor.generateComponent()` in legacy and IR modes
-using the same deterministic 70,877-byte SVG (750 groups, 1,501 elements), no optimizer stages,
+using the same deterministic 70,877-byte SVG (750 groups, 2,251 elements), no optimizer stages,
 eight warm-ups per mode, and 40 alternating samples per mode. It reports median, p95, min/max and
 output bytes; timings are informational and are not CI thresholds. Re-run after `npm run build`:
 
