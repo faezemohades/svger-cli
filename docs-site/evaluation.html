@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Run and inspect an opt-in local SVGER compiler evaluation."
+    />
+    <title>Local evaluation · SVGER-CLI</title>
+    <link rel="icon" type="image/png" href="svger-cli-logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Overview</a><a href="commands.html">Commands</a
+        ><a href="optimizer.html">Compiler modes</a
+        ><a href="evaluation.html">Local evaluation</a>
+      </nav>
+    </header>
+    <main>
+      <p class="eyebrow">Opt-in · local only</p>
+      <h1>Evaluate a local build</h1>
+      <p>
+        This static page does not execute a compiler, run a benchmark, or fetch
+        a report. Evaluation runs only when you explicitly invoke the command in
+        a trusted local checkout.
+      </p>
+      <pre><code>npm run build
+npm run evaluate:local -- --groups 50,750 --warmups 8 --samples 40 --output ./evaluation.json</code></pre>
+      <p>
+        The tool compares Svelte legacy and opt-in IR generation, validates
+        generated Svelte, checks repeatability and semantic projections, runs
+        the Phase 04 compatibility suite and non-destructive security
+        regressions, and records fixture/build/runtime metadata. Security
+        results cover only those listed regression suites; they are not
+        comprehensive security certification and produce no security score.
+        Semantic coverage is shown separately from quality checks. Timing and
+        memory values are informational.
+      </p>
+      <p>
+        For two local builds, pass
+        <code>--before-build DIR --after-build DIR</code>. Those package roots
+        need <code>package.json</code> and <code>dist/index.js</code>; the
+        evaluator imports and executes them directly, without sandboxing. Use
+        only builds you trust; do not benchmark untrusted code.
+      </p>
+      <h2>View a report</h2>
+      <p>
+        Reports are unsigned, self-reported local evidence. Schema validation
+        does not authenticate who or what produced a report. Performance
+        comparisons across reports are descriptive only because host load,
+        hardware, runtime, build identity, and fixture settings may differ.
+      </p>
+      <label for="report-file"
+        >Choose a local <code>svger-local-evaluation-v2</code> JSON report
+        (maximum 5 MiB):</label
+      >
+      <p>
+        <input id="report-file" type="file" accept="application/json,.json" />
+      </p>
+      <p id="report-status" role="status" aria-live="polite">
+        No file selected. The report remains in your browser and is never
+        uploaded.
+      </p>
+      <section id="report" hidden>
+        <h2>Report summary</h2>
+        <dl id="summary"></dl>
+        <h3>Build and fixture results</h3>
+        <pre id="details"></pre>
+      </section>
+      <p>
+        See the full
+        <a
+          href="https://github.com/faezemohades/svger-cli/blob/main/docs/EVALUATION.md"
+          >evaluation guide</a
+        >
+        for the schema, interpretation, and limitations.
+      </p>
+    </main>
+    <script type="module">
+      import {
+        isEvaluationReportSizeAllowed,
+        parseEvaluationReport,
+      } from './evaluation-report-schema.js';
+
+      const input = document.querySelector('#report-file');
+      const status = document.querySelector('#report-status');
+      const section = document.querySelector('#report');
+      const summary = document.querySelector('#summary');
+      const details = document.querySelector('#details');
+      const text = (element, value) => {
+        element.textContent = String(value ?? 'n/a');
+      };
+      input.addEventListener('change', async () => {
+        section.hidden = true;
+        summary.replaceChildren();
+        details.textContent = '';
+        const file = input.files?.[0];
+        if (!file) return;
+        if (!isEvaluationReportSizeAllowed(file.size)) {
+          text(status, 'File exceeds the 5 MiB limit.');
+          return;
+        }
+        try {
+          const report = parseEvaluationReport(await file.text(), file.size);
+          if (!report) throw new Error('Unsupported report schema.');
+          const fields = [
+            ['Overall', report.overallStatus],
+            ['Package', `${report.package.name} ${report.package.version}`],
+            ['Created', report.createdAt],
+            [
+              'Runtime',
+              `${report.environment.node} / npm ${report.environment.npm ?? 'unknown'}`,
+            ],
+            [
+              'Platform',
+              `${report.environment.platform} ${report.environment.release} (${report.environment.architecture})`,
+            ],
+            ['Quality checks', report.quality.status],
+            ['Semantic coverage', report.quality.semanticStatus],
+            ['Performance measurements', report.performanceStatus.status],
+            ['Listed security regressions', report.security.status],
+          ];
+          for (const [label, value] of fields) {
+            const term = document.createElement('dt');
+            text(term, label);
+            const description = document.createElement('dd');
+            text(description, value);
+            summary.append(term, description);
+          }
+          text(
+            details,
+            JSON.stringify(
+              {
+                performance: report.performance,
+                comparisons: report.comparisons,
+                limitations: report.limitations,
+              },
+              null,
+              2
+            )
+          );
+          section.hidden = false;
+          text(status, 'Report loaded locally. No data was uploaded.');
+        } catch {
+          text(
+            status,
+            'Unable to read report: invalid JSON or unsupported schema.'
+          );
+        }
+      });
+    </script>
+  </body>
+</html>

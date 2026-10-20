@@ -6,7 +6,11 @@ export const BUILD_REPORT_SCHEMA_VERSION = '1.0.0' as const;
 export type BuildMode = 'write' | 'dry-run' | 'check' | 'diff';
 export type BuildStatus = 'success' | 'failed' | 'cancelled';
 export type ArtifactStatus =
-  'created' | 'updated' | 'unchanged' | 'planned' | 'skipped';
+  | 'created'
+  | 'updated'
+  | 'unchanged'
+  | 'planned'
+  | 'skipped';
 export type ReportFormat = 'pretty' | 'json' | 'ndjson';
 
 /** A generated or planned output described without embedding its content. */

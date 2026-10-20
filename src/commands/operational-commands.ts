@@ -141,7 +141,9 @@ export class UnlockCommand implements Command<FileLockCommandOptions, void> {
 }
 
 export type ConfigCommandOptions =
-  { action: 'init' } | { action: 'show' } | { action: 'set'; keyValue: string };
+  | { action: 'init' }
+  | { action: 'show' }
+  | { action: 'set'; keyValue: string };
 
 export class ConfigCommand implements Command<ConfigCommandOptions, unknown> {
   public constructor(private readonly service: ConfigService) {}
@@ -178,10 +180,13 @@ export interface ConfigExplainCommandOptions {
   path?: string;
 }
 
-export class ConfigExplainCommand implements Command<
-  ConfigExplainCommandOptions,
-  readonly { path: string; origin: string; value: unknown }[]
-> {
+export class ConfigExplainCommand
+  implements
+    Command<
+      ConfigExplainCommandOptions,
+      readonly { path: string; origin: string; value: unknown }[]
+    >
+{
   public constructor(private readonly compiler: SVGCompiler) {}
 
   public validate(_options: ConfigExplainCommandOptions): void {}
@@ -239,10 +244,9 @@ export interface OptimizeCommandResult {
   exitCode: ExitCode;
 }
 
-export class OptimizeCommand implements Command<
-  OptimizeCommandOptions,
-  OptimizeCommandResult
-> {
+export class OptimizeCommand
+  implements Command<OptimizeCommandOptions, OptimizeCommandResult>
+{
   public constructor(
     private readonly service: SVGService,
     private readonly processor: SVGProcessor,

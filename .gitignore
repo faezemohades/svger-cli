@@ -102,6 +102,8 @@ test-output/
 test-config-output/
 test-e2e-complete/
 dist-tests/
+experiments/phase3/.build/
+experiments/phase4/.build/
 
 # CI/CD
 workspace/input/*

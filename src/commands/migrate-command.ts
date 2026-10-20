@@ -8,10 +8,9 @@ import {
 
 const TARGETS = new Set(['config', 'imports', 'plugins']);
 
-export class MigrateCommand implements Command<
-  MigrationOptions,
-  MigrationReport
-> {
+export class MigrateCommand
+  implements Command<MigrationOptions, MigrationReport>
+{
   public validate(options: MigrationOptions): void {
     if (!TARGETS.has(options.target)) {
       throw new DiagnosticError(

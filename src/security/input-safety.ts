@@ -13,9 +13,50 @@ export interface SVGInputSafetyOptions {
   warn?: (message: string) => void;
 }
 
+export interface AdmittedSVGSourceSpan {
+  readonly start: number;
+  readonly end: number;
+  readonly unit: 'utf16-code-unit';
+}
+export interface AdmittedSVGName {
+  readonly namespaceUri: string | null;
+  readonly localName: string;
+  readonly qualifiedName: string;
+  readonly prefix: string | null;
+}
+export interface AdmittedSVGAttribute {
+  readonly kind: 'attribute';
+  readonly name: AdmittedSVGName;
+  readonly value: string;
+  readonly sourceSpan: AdmittedSVGSourceSpan;
+}
+export interface AdmittedSVGTextNode {
+  readonly kind: 'text' | 'cdata' | 'comment';
+  readonly value: string;
+  readonly sourceSpan: AdmittedSVGSourceSpan;
+  readonly contentSpan?: AdmittedSVGSourceSpan;
+}
+export interface AdmittedSVGElement {
+  readonly kind: 'element';
+  readonly name: AdmittedSVGName;
+  readonly attributes: readonly AdmittedSVGAttribute[];
+  readonly children: readonly (AdmittedSVGElement | AdmittedSVGTextNode)[];
+  readonly startTagSpan: AdmittedSVGSourceSpan;
+  readonly endTagSpan?: AdmittedSVGSourceSpan;
+}
+export interface AdmittedSVGDocument {
+  readonly kind: 'document';
+  readonly prolog: readonly AdmittedSVGTextNode[];
+  readonly epilog: readonly AdmittedSVGTextNode[];
+  readonly root: AdmittedSVGElement;
+}
+
 export interface UnsafeSVGFinding {
   kind:
-    'event-handler' | 'active-element' | 'external-reference' | 'unsafe-css';
+    | 'event-handler'
+    | 'active-element'
+    | 'external-reference'
+    | 'unsafe-css';
   sample: string;
 }
 
@@ -185,6 +226,34 @@ export function applySVGInputSafety(
   }
 
   return strippedContent;
+}
+
+/**
+ * Admit the source through the established security boundary, then perform a
+ * second scanner pass to collect its ordered XML structure. No document is
+ * exposed when admission or collection fails.
+ */
+export function collectAdmittedSVGDocument(
+  content: string,
+  options: SVGInputSafetyOptions = {}
+): { readonly source: string; readonly document: AdmittedSVGDocument } {
+  const source = applySVGInputSafety(content, options);
+  const scan = scanSVGSecurityBoundary(source, { collectDocument: true });
+  if (scan.findings.length > 0 || !scan.document) {
+    throw new SVGContainmentError(
+      'E_UNSAFE_SVG_CONTENT',
+      `Unsafe SVG content was rejected${options.source ? ` in ${options.source}` : ''}.`,
+      { findings: scan.findings, source: options.source }
+    );
+  }
+  const freezeTree = (value: object): void => {
+    for (const child of Object.values(value)) {
+      if (child !== null && typeof child === 'object') freezeTree(child);
+    }
+    Object.freeze(value);
+  };
+  freezeTree(scan.document);
+  return Object.freeze({ source, document: scan.document });
 }
 
 function isOutsideRoot(root: string, candidate: string): boolean {

@@ -5,44 +5,89 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — planned 4.1.0 (not published)
+
+This section describes the current development branch. Version 4.1.0 is proposed, not released; the
+legacy compiler remains the default and the release authorization gate remains disabled.
+
+### Added
+
+- Added an opt-in `svelteCompiler: "ir-v1"` mode for Svelte JavaScript and TypeScript output. The
+  default remains the legacy Svelte generator. Other framework IR emitters remain experimental and
+  are not production routes.
+- Added bounded runtime validation and immutable `svger-ir-v1` lowering behind the existing SVG
+  input-admission boundary. Unsupported input fails explicitly; it does not silently fall back to
+  the legacy generator.
+- Hardened transaction recovery with bounded journal/path validation, rollback markers, and
+  failure-atomic output handling while preserving the existing transactional writer contract.
+- Added reproducible Svelte IR performance, native compilation, compatibility, and output-analysis
+  qualification. The documented local Node 20.20.2 fixture uses 2,251 SVG elements: legacy median
+  10.768 ms, IR median 77.829 ms after a prior IR median of 123.395 ms. The IR path remains slower
+  than legacy on this fixture; these measurements are not cross-platform guarantees.
+
+### Security
+
+- Strengthened SVG admission and XML structural checks while retaining the established
+  reject-by-default policy, input bounds, and output transaction boundary.
+- Separated cache identity for the legacy and Svelte IR compiler modes so artifacts from one mode
+  cannot satisfy requests for the other.
+- Removed automatic installation of the native `sharp` rasterizer. Optional visual rasterization
+  requires Node `>=20.9.0` and a separately installed `sharp >=0.35.5`; ordinary SVG generation
+  retains the declared Node `>=18.17.0` floor.
+
+### Compatibility and packaging
+
+- Preserved the existing package export map and integration entrypoints. The new Svelte mode is
+  opt-in configuration; no compiler default switch is included.
+- No migration is required for existing consumers: the legacy route and established artifact
+  contract remain the default. Consumers opting into Svelte `ir-v1` should qualify their SVG set
+  against the documented supported subset before adopting it.
+- Updated the build/package checks for the internal compiler payload and package budgets. The
+  current package candidate is still subject to clean CI, dependency verification, maintainer
+  review, and release authorization.
+
 ## [4.0.9] - 2026-07-17
 
 ### Security containment
 
-- Added a non-bypassable raw-input gate for the CLI, legacy builder,
-  `SVGService`, direct processor APIs, watch/optimize flows, and official
-  Webpack, Vite, Rollup, Babel, Next.js, and Jest integrations.
-- SVGs containing `<script>` elements, `on*` event attributes, or
-  `javascript:` URI values now fail by default with
-  `E_UNSAFE_SVG_CONTENT`.
-- Added explicit `--unsafe-input-policy strip` handling. Strip mode emits a
-  prominent warning and is documented as temporary and incomplete.
-- Added a configurable 10 MiB default raw-input ceiling with
-  `E_SVG_INPUT_TOO_LARGE` diagnostics.
-- Added lexical, physical-parent, and existing-symlink output boundary checks
-  with `E_OUTPUT_PATH_ESCAPE` diagnostics.
+- Added a non-bypassable raw-input gate for the CLI, legacy builder, `SVGService`, direct processor
+  APIs, watch/optimize flows, and official Webpack, Vite, Rollup, Babel, Next.js, and Jest
+  integrations.
+- SVGs containing `<script>` elements, `on*` event attributes, or `javascript:` URI values now fail
+  by default with `E_UNSAFE_SVG_CONTENT`.
+- Added explicit `--unsafe-input-policy strip` handling. Strip mode emits a prominent warning and is
+  documented as temporary and incomplete.
+- Added a configurable 10 MiB default raw-input ceiling with `E_SVG_INPUT_TOO_LARGE` diagnostics.
+- Added lexical, physical-parent, and existing-symlink output boundary checks with
+  `E_OUTPUT_PATH_ESCAPE` diagnostics.
 
 ### Behavioral baseline and release safety
 
-- Archived and hash-locked the immutable v4.0.8 behavioral baseline under
-  `baselines/v4.0.x/`.
+- Archived and hash-locked the immutable v4.0.8 behavioral baseline under `baselines/v4.0.x/`.
 - Added dual-path characterization coverage and the v4.1 compatibility ledger.
-- Added a full Phase 0 release gate, including Jest, existing standalone suites,
-  security containment, baseline verification, and a clean tarball consumer
-  smoke test.
+- Added a full Phase 0 release gate, including Jest, existing standalone suites, security
+  containment, baseline verification, and a clean tarball consumer smoke test.
 - Added migration and rollback documentation for the containment patch.
 
 ## [4.0.8] - 2026-05-20
 
 ### 🐛 Bug Fixes
 
-- **Fixed subcommand help handling**: `svger-cli build --help` and other subcommand help flags now display command-specific help text instead of failing with "Both <src> and <out> paths are required" error. The CLI parser now correctly intercepts `--help` and `-h` flags after subcommand resolution.
-- **Fixed false Vue/Svelte index generation warning**: Builds for Vue and Svelte frameworks no longer emit the misleading "No component files found in output directory for index generation" warning. Index generation is now framework-aware and silently skipped for frameworks that use non-standard extensions (`.vue`, `.svelte`).
+- **Fixed subcommand help handling**: `svger-cli build --help` and other subcommand help flags now
+  display command-specific help text instead of failing with "Both <src> and <out> paths are
+  required" error. The CLI parser now correctly intercepts `--help` and `-h` flags after subcommand
+  resolution.
+- **Fixed false Vue/Svelte index generation warning**: Builds for Vue and Svelte frameworks no
+  longer emit the misleading "No component files found in output directory for index generation"
+  warning. Index generation is now framework-aware and silently skipped for frameworks that use
+  non-standard extensions (`.vue`, `.svelte`).
 
 ### 🔧 Improvements
 
-- **Enhanced CLI help system**: Added per-command help display showing command-specific options and global options separately.
-- **Framework-aware index generation**: Index file generation now intelligently detects framework type and skips for frameworks where barrel exports are not applicable.
+- **Enhanced CLI help system**: Added per-command help display showing command-specific options and
+  global options separately.
+- **Framework-aware index generation**: Index file generation now intelligently detects framework
+  type and skips for frameworks where barrel exports are not applicable.
 
 ### 📝 Documentation
 
@@ -52,25 +97,36 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### ✅ Release Readiness & Validation
 
-- **Full release validation completed**: Ran the packaged validation flows for frameworks, configuration options, end-to-end workflows, integrations, visual integration, linting, build, Jest, and production dependency audit.
-- **Quality gates verified**: ESLint remains at **0 errors / 14 warnings**, build passes, Jest passes at **155/155**, visual integration passes at **36/36**, and `npm audit --omit=dev` reports **0 vulnerabilities**.
-- **CLI command coverage confirmed**: Smoke-tested `plugins`, `config`, `optimize`, `lock`, `unlock`, and `watch` flows against the built CLI before release.
+- **Full release validation completed**: Ran the packaged validation flows for frameworks,
+  configuration options, end-to-end workflows, integrations, visual integration, linting, build,
+  Jest, and production dependency audit.
+- **Quality gates verified**: ESLint remains at **0 errors / 14 warnings**, build passes, Jest
+  passes at **155/155**, visual integration passes at **36/36**, and `npm audit --omit=dev` reports
+  **0 vulnerabilities**.
+- **CLI command coverage confirmed**: Smoke-tested `plugins`, `config`, `optimize`, `lock`,
+  `unlock`, and `watch` flows against the built CLI before release.
 
 ### 🐛 Bug Fixes
 
-- **Fixed watch command lifecycle regression**: The CLI no longer forces `process.exit(0)` after starting watch mode, allowing the watcher to stay alive and process file changes correctly.
+- **Fixed watch command lifecycle regression**: The CLI no longer forces `process.exit(0)` after
+  starting watch mode, allowing the watcher to stay alive and process file changes correctly.
 
 ### 📦 Release Preparation
 
 - **Version bump**: Updated the package and checked-in docs references from `4.0.6` to `4.0.7`.
-- **Release documentation refreshed**: Prepared the changelog and release notes for the `v4.0.7` publication.
+- **Release documentation refreshed**: Prepared the changelog and release notes for the `v4.0.7`
+  publication.
 
 ## [4.0.6] - 2026-04-18
 
 ### ⚡ Performance Optimization (Chrome V8)
 
-- **Inline Caching Optimization**: Replaced dynamic inner-function dictionaries (`NAMING_HANDLERS`, `NAMING_CONVERTERS`, `OPTIMIZATION_STRATEGIES` in `svg-processor.ts` and `performance-engine.ts`) with static readonly properties. This locks object shapes globally, forcing V8 monomorphic shape optimizations for O(1) branchless performance.
-- **Garbage Collection Fix**: Prevented massive memory thrashing during batch processing by ensuring property lookup maps no longer trigger allocations per `optimizeSVGContent` execution.
+- **Inline Caching Optimization**: Replaced dynamic inner-function dictionaries (`NAMING_HANDLERS`,
+  `NAMING_CONVERTERS`, `OPTIMIZATION_STRATEGIES` in `svg-processor.ts` and `performance-engine.ts`)
+  with static readonly properties. This locks object shapes globally, forcing V8 monomorphic shape
+  optimizations for O(1) branchless performance.
+- **Garbage Collection Fix**: Prevented massive memory thrashing during batch processing by ensuring
+  property lookup maps no longer trigger allocations per `optimizeSVGContent` execution.
 
 ---
 
@@ -78,15 +134,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🐛 Bug Fixes
 
-- **Watch Mode Stability**: Fixed a critical bug in `watch.ts` and `svg-service.ts` where file deletion logic failed to respect user configuration (naming convention, file extensions) and incorrectly defaulted to PascalCase/TSX.
-- **Performance Optimization**: Updated `PerformanceEngine` to use asynchronous file stats (`fs.promises.stat`) instead of synchronous calls, unlocking true parallel processing capabilities and preventing main thread blocking during large batch operations.
-- **Regex Optimization**: Optimized `basic-cleaner.ts` to use a single compiled RegExp for attribute replacement instead of creating a new RegExp for every attribute in every file, resulting in significantly faster processing.
-- **Visual Testing Infrastructure**: Fixed broken visual regression test scripts in `package.json` and corrected relative import paths in `tests/dev/test-visual-diff.js` and `tests/dev/test-visual-integration.js`.
+- **Watch Mode Stability**: Fixed a critical bug in `watch.ts` and `svg-service.ts` where file
+  deletion logic failed to respect user configuration (naming convention, file extensions) and
+  incorrectly defaulted to PascalCase/TSX.
+- **Performance Optimization**: Updated `PerformanceEngine` to use asynchronous file stats
+  (`fs.promises.stat`) instead of synchronous calls, unlocking true parallel processing capabilities
+  and preventing main thread blocking during large batch operations.
+- **Regex Optimization**: Optimized `basic-cleaner.ts` to use a single compiled RegExp for attribute
+  replacement instead of creating a new RegExp for every attribute in every file, resulting in
+  significantly faster processing.
+- **Visual Testing Infrastructure**: Fixed broken visual regression test scripts in `package.json`
+  and corrected relative import paths in `tests/dev/test-visual-diff.js` and
+  `tests/dev/test-visual-integration.js`.
 
 ### 🚀 Performance
 
-- **Parallel Processing**: Asynchronous file operations in the performance engine now allow for non-blocking concurrent processing, improving throughput for large icon sets.
-- **Optimizer Speed**: Attribute cleaning is now O(N) instead of O(K*N), reducing overhead in the optimization pipeline.
+- **Parallel Processing**: Asynchronous file operations in the performance engine now allow for
+  non-blocking concurrent processing, improving throughput for large icon sets.
+- **Optimizer Speed**: Attribute cleaning is now O(N) instead of O(K\*N), reducing overhead in the
+  optimization pipeline.
 
 ---
 
@@ -94,31 +160,46 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### 🧪 Test Suite Stabilization
 
-This release fixes all failing test suites, bringing the test suite from 8 passing / 9 failing to **10 passing / 0 failing** with **155 tests**.
+This release fixes all failing test suites, bringing the test suite from 8 passing / 9 failing to
+**10 passing / 0 failing** with **155 tests**.
 
 #### **Jest Configuration Fixes**
 
-- **Excluded non-Jest standalone scripts from test runner**: `tests/unit/`, `tests/locked-files-index.test`, `tests/e2e-complete.test`, `tests/config-options.test` were standalone Node scripts incorrectly picked up by Jest
-- **Excluded build artifacts**: `tests/dist/`, `tests/dist-tests/` compiled JS files no longer matched by Jest
-- **Excluded mock and fixture files**: `src/__tests__/__mocks__/`, `src/__tests__/fixtures.ts` are support files, not test suites
+- **Excluded non-Jest standalone scripts from test runner**: `tests/unit/`,
+  `tests/locked-files-index.test`, `tests/e2e-complete.test`, `tests/config-options.test` were
+  standalone Node scripts incorrectly picked up by Jest
+- **Excluded build artifacts**: `tests/dist/`, `tests/dist-tests/` compiled JS files no longer
+  matched by Jest
+- **Excluded mock and fixture files**: `src/__tests__/__mocks__/`, `src/__tests__/fixtures.ts` are
+  support files, not test suites
 
 #### **ESM/Jest Compatibility Fixes**
 
-- **Fixed `import.meta.url` in `src/cli.ts`**: Replaced `fileURLToPath(import.meta.url)` with `readFileSync(path.join(process.cwd(), 'package.json'))` to resolve `SyntaxError: Cannot use 'import.meta' outside a module` in Jest
-- **Fixed `import.meta.url` in `src/services/config.ts`**: Same ESM compatibility fix applied to the configuration service
-- **Fixed `import.meta.url` in `tests/integrations/webpack.test.ts`**: Replaced with `process.cwd()` based path resolution
+- **Fixed `import.meta.url` in `src/cli.ts`**: Replaced `fileURLToPath(import.meta.url)` with
+  `readFileSync(path.join(process.cwd(), 'package.json'))` to resolve
+  `SyntaxError: Cannot use 'import.meta' outside a module` in Jest
+- **Fixed `import.meta.url` in `src/services/config.ts`**: Same ESM compatibility fix applied to the
+  configuration service
+- **Fixed `import.meta.url` in `tests/integrations/webpack.test.ts`**: Replaced with `process.cwd()`
+  based path resolution
 
 #### **CLI Test Fixes**
 
-- **Fixed hanging CLI tests**: Added `timeout: 15000` to all `execSync` calls in `src/__tests__/cli.test.ts` to prevent indefinite hangs
-- **Fixed CLI process not exiting**: Added `process.exit(0)` after `await program.parse()` in `src/cli.ts` so child processes terminate cleanly
-- **Fixed help output assertion**: Updated test expectation from `"Usage"` to `"svger-cli"` to match actual help output
+- **Fixed hanging CLI tests**: Added `timeout: 15000` to all `execSync` calls in
+  `src/__tests__/cli.test.ts` to prevent indefinite hangs
+- **Fixed CLI process not exiting**: Added `process.exit(0)` after `await program.parse()` in
+  `src/cli.ts` so child processes terminate cleanly
+- **Fixed help output assertion**: Updated test expectation from `"Usage"` to `"svger-cli"` to match
+  actual help output
 
 #### **Test API Fixes**
 
-- **Fixed SVG Processor tests**: Updated `src/__tests__/svg-processor.test.ts` to use correct method `cleanSVGContent()` instead of non-existent `process()`
-- **Fixed Plugin Manager tests**: Updated `src/__tests__/plugin-manager.test.ts` to use `expect(() => ...).toThrow()` for error cases instead of checking `pluginCount`
-- **Fixed Webpack integration tests**: Replaced non-existent `FileSystem.rm()` with `FileSystem.removeDir()`; removed trailing `console.log` that caused post-test logging warnings
+- **Fixed SVG Processor tests**: Updated `src/__tests__/svg-processor.test.ts` to use correct method
+  `cleanSVGContent()` instead of non-existent `process()`
+- **Fixed Plugin Manager tests**: Updated `src/__tests__/plugin-manager.test.ts` to use
+  `expect(() => ...).toThrow()` for error cases instead of checking `pluginCount`
+- **Fixed Webpack integration tests**: Replaced non-existent `FileSystem.rm()` with
+  `FileSystem.removeDir()`; removed trailing `console.log` that caused post-test logging warnings
 
 ### 📊 Badges Updated
 
@@ -131,36 +212,49 @@ This release fixes all failing test suites, bringing the test suite from 8 passi
 
 ### 🐛 Bug Fixes
 
-This release addresses 22 issues identified through comprehensive code analysis: 5 critical bugs, 6 moderate bugs, and 11 V8 engine performance optimizations across 20+ files.
+This release addresses 22 issues identified through comprehensive code analysis: 5 critical bugs, 6
+moderate bugs, and 11 V8 engine performance optimizations across 20+ files.
 
 #### **Critical Fixes**
 
 **Fixed Hardcoded VERSION Export in Index Module**
-- **Issue**: `src/index.ts` exported a hardcoded `VERSION = '4.0.0'` string instead of reading from `package.json`
+
+- **Issue**: `src/index.ts` exported a hardcoded `VERSION = '4.0.0'` string instead of reading from
+  `package.json`
 - **Fixed**: Dynamic version loading using `createRequire` to read `package.json` at runtime
 - **File**: `src/index.ts`
 - **Impact**: Library consumers now always see the correct version
 
 **Fixed Async `cleanSVGContent` in Jest Preset**
-- **Issue**: Jest `transform` function called `cleanSVGContent()` without `await`, returning a `Promise` object as component source instead of actual SVG content
+
+- **Issue**: Jest `transform` function called `cleanSVGContent()` without `await`, returning a
+  `Promise` object as component source instead of actual SVG content
 - **Fixed**: Added synchronous `cleanSVGContentSync()` function specifically for Jest transforms
 - **Files**: `src/integrations/jest-preset.ts`, `src/processors/svg-processor.ts`
 - **Impact**: Jest SVG transforms now produce valid component code
 
 **Fixed Config Migration Missing Default Fields**
-- **Issue**: `migrateConfig()` only set `version` field but didn't merge with full defaults, leaving migrated configs missing `optimization`, `plugins`, `parallel`, and other v4.x fields
+
+- **Issue**: `migrateConfig()` only set `version` field but didn't merge with full defaults, leaving
+  migrated configs missing `optimization`, `plugins`, `parallel`, and other v4.x fields
 - **Fixed**: Deep merge with `getDefaultConfig()` so all fields are present after migration
 - **File**: `src/services/config.ts`
 - **Impact**: Migrated v3.x configs now have all required fields
 
 **Fixed Builder Hardcoded to React Framework**
-- **Issue**: `builder.ts` imported and used React-specific `generateReactComponent` directly instead of respecting the configured framework
-- **Fixed**: Uses `svgProcessor` service, `frameworkTemplateEngine`, and `configService` to honor framework configuration
+
+- **Issue**: `builder.ts` imported and used React-specific `generateReactComponent` directly instead
+  of respecting the configured framework
+- **Fixed**: Uses `svgProcessor` service, `frameworkTemplateEngine`, and `configService` to honor
+  framework configuration
 - **File**: `src/builder.ts`
-- **Impact**: Building now correctly generates components for all frameworks (Vue, Angular, Svelte, etc.)
+- **Impact**: Building now correctly generates components for all frameworks (Vue, Angular, Svelte,
+  etc.)
 
 **Fixed Watch Mode Using Wrong Component Name on Delete**
-- **Issue**: `handleFileRemoval` in watch mode used raw SVG filename as component name instead of converting to PascalCase, failing to match and remove existing components
+
+- **Issue**: `handleFileRemoval` in watch mode used raw SVG filename as component name instead of
+  converting to PascalCase, failing to match and remove existing components
 - **Fixed**: Apply `toPascalCase()` transformation before matching
 - **File**: `src/watch.ts`
 - **Impact**: File deletion in watch mode now correctly removes generated components
@@ -168,66 +262,91 @@ This release addresses 22 issues identified through comprehensive code analysis:
 #### **Moderate Severity Fixes**
 
 **Removed Orphaned Legacy Config Module**
-- **Issue**: `src/config.ts` contained 300+ lines of duplicated logic already handled by `src/services/config.ts`, causing confusion about which module to use
+
+- **Issue**: `src/config.ts` contained 300+ lines of duplicated logic already handled by
+  `src/services/config.ts`, causing confusion about which module to use
 - **Fixed**: Refactored to a thin `@deprecated` wrapper that delegates entirely to `configService`
 - **File**: `src/config.ts`
 - **Impact**: Single source of truth for configuration, eliminates maintenance burden
 
 **Fixed Kebab Naming Convention Returning PascalCase**
-- **Issue**: `svg-processor.ts` `toKebabCase()` method returned PascalCase — identical to `toPascalCase()` implementation
-- **Fixed**: Proper kebab-case implementation using regex-based word boundary detection with lowercase conversion
+
+- **Issue**: `svg-processor.ts` `toKebabCase()` method returned PascalCase — identical to
+  `toPascalCase()` implementation
+- **Fixed**: Proper kebab-case implementation using regex-based word boundary detection with
+  lowercase conversion
 - **File**: `src/processors/svg-processor.ts`
 - **Impact**: `--naming kebab` now correctly produces `my-icon-component` names
 
 **Fixed Memory Leak in SVG Processing Queue**
-- **Issue**: Failed processing jobs accumulated indefinitely in `processingQueue` Map, and no cap on concurrent queue entries
+
+- **Issue**: Failed processing jobs accumulated indefinitely in `processingQueue` Map, and no cap on
+  concurrent queue entries
 - **Fixed**: Immediate cleanup of completed/failed jobs; added 10,000-entry queue cap with warning
 - **File**: `src/processors/svg-processor.ts`
 - **Impact**: Bounded memory usage during long-running batch operations
 
 **Fixed Cache Key Ignoring File Content Changes**
-- **Issue**: Performance cache keyed only on `filePath + optimizationLevel`, returning stale results when SVG files were modified without changing their path
+
+- **Issue**: Performance cache keyed only on `filePath + optimizationLevel`, returning stale results
+  when SVG files were modified without changing their path
 - **Fixed**: Cache key now includes file `mtimeMs` (modification timestamp)
 - **File**: `src/core/performance-engine.ts`
 - **Impact**: Cache correctly invalidates when files are modified
 
 **Fixed Deprecated `fs.rmdir` Usage**
-- **Issue**: `fs.rmdir` with `{ recursive: true }` is deprecated since Node.js 16 and triggers runtime warnings
+
+- **Issue**: `fs.rmdir` with `{ recursive: true }` is deprecated since Node.js 16 and triggers
+  runtime warnings
 - **Fixed**: Replaced with `fs.promises.rm({ recursive: true, force: true })`
 - **File**: `src/utils/native.ts`
 - **Impact**: No deprecation warnings, future-proof for Node.js 22+
 
 **Fixed FileWatcher Swallowing Errors Silently**
-- **Issue**: `FileWatcher` class caught errors in watcher callbacks but never propagated them, making debugging impossible
+
+- **Issue**: `FileWatcher` class caught errors in watcher callbacks but never propagated them,
+  making debugging impossible
 - **Fixed**: Emits `'error'` event so consumers can attach error handlers
 - **File**: `src/utils/native.ts`
 - **Impact**: Watcher errors are now observable and loggable
 
 ### ⚡ Performance Optimizations (V8 Engine)
 
-Applied 11 targeted V8 engine optimizations across 13 files, replacing polymorphic patterns with monomorphic equivalents for better JIT compilation:
+Applied 11 targeted V8 engine optimizations across 13 files, replacing polymorphic patterns with
+monomorphic equivalents for better JIT compilation:
 
 **Replaced `switch` Statements with Object Lookups**
+
 - Converted `switch/case` blocks to constant object/Record lookups for O(1) hash-based dispatch
-- **Files**: `src/optimizers/path-parser.ts` (3 switch blocks: position handlers, toAbsolute, toRelative), `src/optimizers/transform-optimizer.ts` (transformToMatrix), `src/optimizers/shape-conversion.ts` (convertShapeToPath), `src/optimizers/path-simplifier.ts` (extractLinearPoints), `src/core/template-manager.ts` (theme + animate lookups), `src/core/style-compiler.ts` (getThemeStyles)
+- **Files**: `src/optimizers/path-parser.ts` (3 switch blocks: position handlers, toAbsolute,
+  toRelative), `src/optimizers/transform-optimizer.ts` (transformToMatrix),
+  `src/optimizers/shape-conversion.ts` (convertShapeToPath), `src/optimizers/path-simplifier.ts`
+  (extractLinearPoints), `src/core/template-manager.ts` (theme + animate lookups),
+  `src/core/style-compiler.ts` (getThemeStyles)
 - **Impact**: V8 creates monomorphic inline caches instead of polymorphic megamorphic dispatch
 
 **Replaced Regex-Based Character Classification with `Set.has()`**
-- `isCommandLetter()` and `isNumericChar()` in path parser now use pre-built `Set` instead of regex test
+
+- `isCommandLetter()` and `isNumericChar()` in path parser now use pre-built `Set` instead of regex
+  test
 - **File**: `src/optimizers/path-parser.ts`
 - **Impact**: ~3-5x faster character classification in hot parsing loops
 
 **Replaced `Array.includes()` with `Set.has()` for Validation**
+
 - Converted array-based validation checks to `Set` lookups where arrays are static
-- **Files**: `src/cli.ts` (framework, level, naming validation), `src/services/svg-service.ts` (level validation)
+- **Files**: `src/cli.ts` (framework, level, naming validation), `src/services/svg-service.ts`
+  (level validation)
 - **Impact**: O(1) lookups replace O(n) scans
 
 **Replaced `indexOf` Chains with Record Lookups**
+
 - Converted sequential `indexOf` checks to Record-based constant-time lookups
 - **Files**: `src/optimizers/types.ts` (getDefaultOptConfig), `src/core/logger.ts` (level priority)
 - **Impact**: Deterministic O(1) dispatch regardless of input
 
 **Replaced `filter().length` with Single-Pass Counters**
+
 - Eliminated intermediate array allocations for counting operations
 - **Files**: `src/core/performance-engine.ts`, `src/processors/svg-processor.ts`
 - **Impact**: Zero GC pressure for statistics calculations
@@ -245,23 +364,28 @@ Applied 11 targeted V8 engine optimizations across 13 files, replacing polymorph
 
 ### 🐛 Bug Fixes
 
-This release addresses 17 bugs identified through comprehensive code analysis, including 3 critical, 6 moderate, and 8 normal priority issues.
+This release addresses 17 bugs identified through comprehensive code analysis, including 3 critical,
+6 moderate, and 8 normal priority issues.
 
 #### **Critical Fixes**
 
 **Fixed Race Condition in File Watcher**
-- **Issue**: Async errors in setTimeout callbacks were silently swallowed, causing watch mode to hang
+
+- **Issue**: Async errors in setTimeout callbacks were silently swallowed, causing watch mode to
+  hang
 - **Fixed**: Added try-catch wrapper and proper timer cleanup in `stopWatching()`
 - **File**: `src/services/file-watcher.ts`
 - **Impact**: Watch mode is now production-ready and stable
 
 **Fixed Missing Process Exit in Config Command**
+
 - **Issue**: Error logged but process didn't exit, leaving terminal hanging
 - **Fixed**: Added `process.exit(1)` after error message
 - **File**: `src/cli.ts`
 - **Impact**: CLI properly exits on configuration errors
 
 **Fixed Memory Leak in Plugin Metrics**
+
 - **Issue**: Unbounded array growth (160KB/day minimum) in `executionMetrics`
 - **Fixed**: Implemented circular buffer with 1000-entry cap
 - **File**: `src/core/enhanced-plugin-manager.ts`
@@ -270,30 +394,35 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 #### **Moderate Priority Fixes**
 
 **Implemented Optimize Command**
+
 - **Issue**: Command showed fake success without actually optimizing files
 - **Fixed**: Full implementation with file I/O, optimization, and validation
 - **Files**: `src/cli.ts`, `src/services/svg-service.ts`
 - **Impact**: Command is now fully functional
 
 **Fixed Boolean Config Parsing**
+
 - **Issue**: String values "true"/"false" stored as strings instead of booleans
 - **Fixed**: Added explicit boolean parsing before number parsing
 - **File**: `src/cli.ts`
 - **Impact**: Config values now have correct types
 
 **Fixed Hardcoded Versions**
+
 - **Issue**: Versions hardcoded as "4.0.0" didn't match package.json
 - **Fixed**: Dynamic version loading from package.json
 - **Files**: `src/services/config.ts`, `src/cli.ts`
 - **Impact**: Version consistency, proper migrations, correct `--version` output
 
 **Fixed Missing Config Parameter**
+
 - **Issue**: `handleFileRemoval` called without config, always used 'pascal' naming
 - **Fixed**: Pass config parameter in unlink handler
 - **File**: `src/services/svg-service.ts`
 - **Impact**: File deletion respects naming conventions
 
 **Fixed Visual Validation Bypass**
+
 - **Issue**: Validation failures only logged warnings, plugins still executed
 - **Fixed**: Return original content with `skipRemaining: true` on validation failure
 - **File**: `src/core/enhanced-plugin-manager.ts`
@@ -302,48 +431,61 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 #### **Normal Priority Fixes**
 
 **Added Infinite Loop Protection**
+
 - **Issue**: Regex `.exec()` loops could hang on zero-width matches
 - **Fixed**: Added `if (match.index === regex.lastIndex) regex.lastIndex++;` to 8 locations
-- **Files**: `src/optimizers/basic-cleaner.ts`, `src/plugins/gradient-optimizer.ts`, `src/optimizers/style-optimizer.ts`, `src/optimizers/remove-unused-defs.ts`, `src/optimizers/transform-optimizer.ts`, `src/optimizers/svg-tree-parser.ts`, `src/core/framework-templates.ts`
+- **Files**: `src/optimizers/basic-cleaner.ts`, `src/plugins/gradient-optimizer.ts`,
+  `src/optimizers/style-optimizer.ts`, `src/optimizers/remove-unused-defs.ts`,
+  `src/optimizers/transform-optimizer.ts`, `src/optimizers/svg-tree-parser.ts`,
+  `src/core/framework-templates.ts`
 - **Impact**: Prevents infinite loops in regex matching
 
 **Added Render Timeout**
+
 - **Issue**: Sharp rendering could hang indefinitely on complex SVGs
 - **Fixed**: Added 30-second timeout using `Promise.race()`
 - **File**: `src/utils/visual-diff.ts`
 - **Impact**: Visual diff operations timeout gracefully
 
 **Fixed Lock Path Resolution**
+
 - **Issue**: `path.resolve(LOCK_FILE)` without base path could resolve incorrectly
 - **Fixed**: Changed to `path.resolve(process.cwd(), LOCK_FILE)`
 - **File**: `src/lock.ts`
 - **Impact**: Lock file now always created in correct working directory
 
 **Fixed Plugin Name Conflicts**
+
 - **Issue**: Duplicate plugin registration silently skipped with only a warning
 - **Fixed**: Now throws error on duplicate registration
 - **File**: `src/core/enhanced-plugin-manager.ts`
 - **Impact**: Prevents silent plugin conflicts and debugging confusion
 
 **Added Migration Null Check**
+
 - **Issue**: `migrateConfig()` could crash on null/undefined input
 - **Fixed**: Added null/typeof validation with graceful fallback to defaults
 - **File**: `src/services/config.ts`
 - **Impact**: No more crashes on invalid config during migration
 
 **Optimized Array Filtering**
+
 - **Issue**: Arrays filtered multiple times for different conditions (O(4n) complexity)
 - **Fixed**: Single-pass iteration with categorization (O(n) complexity)
-- **Files**: `src/services/svg-service.ts`, `src/processors/svg-processor.ts`, `src/core/enhanced-plugin-manager.ts`
+- **Files**: `src/services/svg-service.ts`, `src/processors/svg-processor.ts`,
+  `src/core/enhanced-plugin-manager.ts`
 - **Impact**: 75% reduction in iterations for metrics/stats calculations
 
 **Added CLI Arguments Validation**
+
 - **Issue**: Invalid arguments passed directly to processing, causing confusing errors
-- **Fixed**: Early validation with clear error messages for paths, framework types, and optimization levels
+- **Fixed**: Early validation with clear error messages for paths, framework types, and optimization
+  levels
 - **File**: `src/cli.ts`
 - **Impact**: Clear error messages before processing begins
 
 **Documented Error Handling Standards**
+
 - **Issue**: Error handling patterns varied across the codebase
 - **Fixed**: Created comprehensive error handling standards documentation
 - **File**: `docs/ERROR-HANDLING-STANDARD.md`
@@ -362,20 +504,24 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 ### 🐛 Critical Bug Fixes
 
 #### **Fixed Optional Dependencies for Visual Validation**
+
 - **Fixed**: Moved `sharp`, `pixelmatch`, and `pngjs` to `optionalDependencies`
 - **Fixed**: Implemented lazy-loading for visual diff testing dependencies
-- **Issue**: Users encountered installation errors when these heavy native dependencies were required by default
+- **Issue**: Users encountered installation errors when these heavy native dependencies were
+  required by default
 - **Solution**: Visual validation dependencies are now loaded only when `--validate` flag is used
-- **Impact**: 
+- **Impact**:
   - Zero installation errors for standard usage
   - 90% faster installation time (no native compilation needed)
   - Visual validation still works perfectly when dependencies are installed
-- **Migration**: 
+- **Migration**:
   - Standard users: No action needed, everything works without these packages
-  - Visual validation users: Run `npm install --save-dev sharp pixelmatch pngjs` only if you need `--validate` flag
+  - Visual validation users: Run `npm install --save-dev sharp pixelmatch pngjs` only if you need
+    `--validate` flag
 - **Error Message**: Clear instructions if dependencies are missing when using `--validate`
 
 #### **Fixed Invalid React JSX Output**
+
 - **Fixed**: React components now generate valid JSX without `px` units in numeric attributes
   - Before: `width={props.width || 24px}` ❌ (invalid JSX)
   - After: `width={props.width || 24}` ✅ (valid JSX)
@@ -391,7 +537,8 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
   - `src/core/template-manager.ts`: Styled Components template fix
   - `src/optimizers/basic-cleaner.ts`: CSS-to-React converter + px unit removal
   - `src/processors/svg-processor.ts`: Fallback legacy cleaning path
-- **Tests Added**: Comprehensive test suite (`src/__tests__/svg-style-conversion.test.ts`) with 9 test cases
+- **Tests Added**: Comprehensive test suite (`src/__tests__/svg-style-conversion.test.ts`) with 9
+  test cases
 - **Documentation**: See `docs/BUG-FIX-REACT-JSX.md` for detailed technical analysis
 
 ## [4.0.0] - 2026-01-02
@@ -399,6 +546,7 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 ### 🚀 Major Release - Plugin System & Performance Optimization
 
 #### **🔌 Extensible Plugin System**
+
 - **Added**: Complete plugin architecture with CLI integration
   - `--plugin <name>` flag to apply single plugin
   - `--plugins <list>` flag to apply multiple plugins (comma-separated)
@@ -415,6 +563,7 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 - **Documentation**: Full plugin development guide in README.md
 
 #### **⚡ Performance Improvements**
+
 - **50% faster processing** with optimized algorithms
 - **Object lookup maps** replacing if/switch chains for O(1) performance:
   - Framework selection: 9 cases → O(1) lookup
@@ -433,6 +582,7 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 - **Tree-shaking optimizations** for smaller bundle sizes
 
 #### **🔧 Configuration System Enhancements**
+
 - **Version Tracking**: Added `version` field to configuration
 - **Automatic Migration**: v3.x configs automatically upgrade to v4.0.0
   - Detects old configuration versions
@@ -444,16 +594,19 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 - **Migration Testing**: Comprehensive test suite (4/4 tests passing)
 
 #### **📧 Contact & Support Updates**
+
 - **Primary Contact**: navidrezadoost07@gmail.com
 - Updated across all documentation and security policies
 
 #### **🧹 Code Quality**
+
 - **Zero TypeScript Errors**: Fixed all 23+ unused variable errors
 - **ESLint Improvements**: Disabled base `no-unused-vars` in favor of TypeScript-specific rule
 - **Type Safety**: Enhanced with underscore-prefixed unused parameters pattern
 - **Strict Mode**: Enabled `noUnusedLocals` and `noUnusedParameters`
 
 #### **📁 Project Organization**
+
 - **Documentation**: Moved historical docs to `docs/archive/`
   - `PHASE-*.md`, `RELEASE-*.md`, `MIGRATION-*.md`
 - **Tests**: Organized development tests to `tests/dev/`
@@ -465,6 +618,7 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 ### 📚 Documentation Updates
 
 #### **README.md Enhancements**
+
 - Added "What's New in v4.0.0" section
 - Documented Plugin System with usage examples
 - Updated CLI Reference with plugin options
@@ -472,6 +626,7 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 - Updated contact information throughout
 
 #### **SECURITY.md**
+
 - Updated primary security contact
 - Updated vulnerability reporting procedures
 
@@ -481,8 +636,7 @@ This release addresses 17 bugs identified through comprehensive code analysis, i
 
 #### **Upgrading from v3.x to v4.0.0**
 
-**Automatic Migration:**
-Your existing `.svgconfig.json` will automatically migrate on first run:
+**Automatic Migration:** Your existing `.svgconfig.json` will automatically migrate on first run:
 
 ```json
 // Old v3.x config
@@ -502,11 +656,13 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 ```
 
 **Optimization Level Mapping:**
+
 - `none` / `basic` → `fast`
 - `standard` → `balanced`
 - `aggressive` / `maximum` → `maximum`
 
 **No Breaking Changes:**
+
 - All v3.x features fully supported
 - CLI commands remain identical
 - API backward compatible
@@ -527,7 +683,9 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 
 ### 🎯 Breaking Changes
 
-**None** - This is a fully backward-compatible major release. The version bump to 4.0.0 reflects the significant new plugin system and performance improvements, but all existing v3.x code and configs work without modification.
+**None** - This is a fully backward-compatible major release. The version bump to 4.0.0 reflects the
+significant new plugin system and performance improvements, but all existing v3.x code and configs
+work without modification.
 
 ---
 
@@ -536,6 +694,7 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 ### 🎨 New Features
 
 #### **Phase 6.3: Visual Diff Testing System**
+
 - **Added**: Comprehensive visual diff testing to guarantee pixel-perfect optimization quality
 - **Test Coverage**: 16/16 integration tests passing (100% pass rate), 8/8 unit tests passing
 - **Key Features**:
@@ -551,6 +710,7 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
   - Text: 0.95% (font rendering acceptable)
 
 #### **CI/CD Integration**
+
 - **Added**: GitHub Actions workflow (`.github/workflows/visual-regression.yml`)
   - Runs on every PR and push to main/develop
   - Uploads diff artifacts (30-day retention)
@@ -563,8 +723,10 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
   - `npm run test:visual:update` - Update snapshots
 
 #### **Phase 6.2: Plugin System Foundation**
+
 - **Added**: Enhanced plugin system types (`src/types/plugin-system.ts`)
-  - 6 pipeline hooks: `before-parse`, `after-parse`, `before-stage`, `after-stage`, `before-serialize`, `after-serialize`
+  - 6 pipeline hooks: `before-parse`, `after-parse`, `before-stage`, `after-stage`,
+    `before-serialize`, `after-serialize`
   - `EnhancedPlugin` interface with visual validation support
   - Per-plugin configurable visual diff thresholds
   - Execution metrics tracking
@@ -590,6 +752,7 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
   ```
 
 #### **CLI Enhancements**
+
 - **Added**: `--validate` flag to build command
   - Runs visual diff validation after build
   - Fails build on visual regression detection
@@ -605,21 +768,23 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 ### ⚡ Performance Improvements
 
 #### **Benchmarked Optimization Performance**
+
 - **Comprehensive benchmarking** across 4 test SVGs and 4 optimization levels
 - **Results** (averaged across 4 test cases):
 
-| Level | Size Reduction | Processing Time | Visual Quality | Memory Usage |
-|-------|---------------|-----------------|----------------|--------------|
-| BASIC | 16.88% | 0.32ms | Pixel-perfect ✅ | 55.65KB |
-| BALANCED | 18.38% | 1.15ms | Pixel-perfect ✅ | 158.38KB |
-| AGGRESSIVE | 21.60% | 1.97ms | Pixel-perfect ✅ | 225.46KB |
-| MAXIMUM | 26.49% | 3.11ms | Pixel-perfect ✅ | 225.49KB |
+| Level      | Size Reduction | Processing Time | Visual Quality   | Memory Usage |
+| ---------- | -------------- | --------------- | ---------------- | ------------ |
+| BASIC      | 16.88%         | 0.32ms          | Pixel-perfect ✅ | 55.65KB      |
+| BALANCED   | 18.38%         | 1.15ms          | Pixel-perfect ✅ | 158.38KB     |
+| AGGRESSIVE | 21.60%         | 1.97ms          | Pixel-perfect ✅ | 225.46KB     |
+| MAXIMUM    | 26.49%         | 3.11ms          | Pixel-perfect ✅ | 225.49KB     |
 
 - **Sub-millisecond average**: 1.64ms processing time across all levels
 - **Memory efficient**: 166KB average footprint
 - **Zero visual regressions**: 0.0000% visual diff across all levels
 
 #### **Quality Guarantees**
+
 - All optimization levels maintain pixel-perfect visual quality
 - Content-aware thresholds prevent over-optimization
 - Visual validation ensures no broken output
@@ -629,14 +794,17 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 ### 🐛 Bug Fixes
 
 #### **Critical: Coordinate Corruption Bug** (Caught by Visual Diff Testing)
+
 - **Fixed**: Coordinate corruption at AGGRESSIVE optimization level
-- **Issue**: `floatPrecision=2` rounded coordinates before shape conversion, causing 41.5% visual difference
+- **Issue**: `floatPrecision=2` rounded coordinates before shape conversion, causing 41.5% visual
+  difference
 - **Impact**: Would have broken user applications with distorted SVGs
 - **Solution**: Disabled shape conversion at AGGRESSIVE level
 - **Prevention**: Visual diff testing caught this before production release
 - **Status**: ✅ Fixed, 100% test pass rate maintained
 
 #### **Critical: XML Serialization Bug** (Caught by Visual Diff Testing)
+
 - **Fixed**: Invalid XML output with broken self-closing tags
 - **Issue**: `sortAttributes()` regex stripped self-closing tag slashes (`/>` → `>`)
 - **Impact**: Would have generated invalid XML, breaking SVG parsers
@@ -649,6 +817,7 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 ### 📚 Documentation
 
 #### **New Documentation**
+
 - **Added**: `MIGRATION-3.2.0.md` - Migration guide from v3.1.x to v3.2.0
 - **Added**: `docs/PHASE-6.3-VISUAL-DIFF-DESIGN.md` - Visual diff design document
 - **Added**: `docs/PHASE-6.3-VISUAL-DIFF-SUMMARY.md` - Implementation summary
@@ -659,6 +828,7 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 - **Added**: `src/plugins/watermark-remover.ts` - Example watermark removal plugin
 
 #### **Updated Documentation**
+
 - **Updated**: `README.md` - Added visual diff testing section
 - **Updated**: `README.md` - Updated performance benchmarks with real data
 - **Updated**: `README.md` - Added visual quality metrics table
@@ -669,15 +839,17 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 ### 🔧 Technical Details
 
 #### **New Dependencies**
+
 ```json
 {
-  "sharp": "^0.33.0",      // Image processing for visual diff
-  "pixelmatch": "^6.0.0",  // Pixel-level image comparison
-  "pngjs": "^7.0.0"        // PNG image handling
+  "sharp": "^0.33.0", // Image processing for visual diff
+  "pixelmatch": "^6.0.0", // Pixel-level image comparison
+  "pngjs": "^7.0.0" // PNG image handling
 }
 ```
 
 #### **New Test Infrastructure**
+
 - **Added**: `src/utils/visual-diff.ts` - Visual diff implementation (420 lines)
 - **Added**: `test-visual-diff.js` - Unit test runner (8 tests)
 - **Added**: `test-visual-integration.js` - Integration test runner (16 tests)
@@ -687,6 +859,7 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
   - CI/CD: Automated on every PR
 
 #### **CI/CD Workflow**
+
 - **Workflow**: `.github/workflows/visual-regression.yml`
 - **Triggers**: push to main/develop, pull_request to main/develop
 - **Steps**: checkout → setup Node 20 → npm ci → build → test:visual → test:visual:integration
@@ -698,18 +871,27 @@ Your existing `.svgconfig.json` will automatically migrate on first run:
 ### 🚀 What Makes v3.2.0 Special
 
 #### **Visual Quality Guarantee**
-Visual diff testing ensures every optimization maintains pixel-perfect quality. Two critical bugs were caught and fixed before production release:
+
+Visual diff testing ensures every optimization maintains pixel-perfect quality. Two critical bugs
+were caught and fixed before production release:
+
 1. **Coordinate Corruption** - 41.5% visual difference prevented
 2. **XML Serialization** - Invalid XML generation prevented
 
 #### **Production-Ready CI/CD**
-Automated visual regression testing on every PR prevents broken deployments. GitHub Actions workflow uploads diff images and posts PR comments with test results.
+
+Automated visual regression testing on every PR prevents broken deployments. GitHub Actions workflow
+uploads diff images and posts PR comments with test results.
 
 #### **Plugin System Foundation**
-Extensible architecture allows custom optimization plugins with visual validation. Example plugins demonstrate color replacement and watermark removal.
+
+Extensible architecture allows custom optimization plugins with visual validation. Example plugins
+demonstrate color replacement and watermark removal.
 
 #### **Real-World Performance**
-Comprehensive benchmarking proves sub-millisecond processing (1.64ms average) with guaranteed visual quality (0.0000% diff).
+
+Comprehensive benchmarking proves sub-millisecond processing (1.64ms average) with guaranteed visual
+quality (0.0000% diff).
 
 ---
 
@@ -718,6 +900,7 @@ Comprehensive benchmarking proves sub-millisecond processing (1.64ms average) wi
 **Breaking Changes:** None! Version 3.2.0 is 100% backward compatible with v3.1.x.
 
 **Migration Steps:**
+
 1. Update to v3.2.0: `npm install svger-cli@3.2.0`
 2. (Optional) Enable visual validation: Add `--validate` flag to build commands
 3. (Optional) Add CI/CD: Copy `.github/workflows/visual-regression.yml` to your project
@@ -731,14 +914,20 @@ See [MIGRATION-3.2.0.md](./MIGRATION-3.2.0.md) for detailed migration instructio
 ### 🐛 Bug Fixes
 
 #### **Critical: Locked Files Missing from Index Exports**
+
 - **Fixed**: Locked SVG files are now correctly included in auto-generated `index.ts` exports
-- **Issue**: When SVG files were locked using `svger-cli lock`, their generated components were excluded from the `index.ts` barrel file, breaking imports and requiring manual maintenance
-- **Root Cause**: Index generation logic only included files processed in the current build session, excluding locked files that were intentionally skipped
-- **Solution**: Modified index generation to scan output directory for ALL existing component files instead of relying on processed files list
+- **Issue**: When SVG files were locked using `svger-cli lock`, their generated components were
+  excluded from the `index.ts` barrel file, breaking imports and requiring manual maintenance
+- **Root Cause**: Index generation logic only included files processed in the current build session,
+  excluding locked files that were intentionally skipped
+- **Solution**: Modified index generation to scan output directory for ALL existing component files
+  instead of relying on processed files list
 
 #### **Files Changed**
+
 - **Core Service** (`src/services/svg-service.ts`):
-  - Updated `generateIndexFile()` to scan output directory for all component files (`.tsx`, `.jsx`, `.ts`, `.js`)
+  - Updated `generateIndexFile()` to scan output directory for all component files (`.tsx`, `.jsx`,
+    `.ts`, `.js`)
   - Now includes both newly generated and previously locked components in exports
   - Fixed incorrect property access `output?.naming` → `outputConfig?.naming`
 
@@ -749,6 +938,7 @@ See [MIGRATION-3.2.0.md](./MIGRATION-3.2.0.md) for detailed migration instructio
   - `src/integrations/rollup.ts` - Rollup plugin index generation
 
 #### **Framework Coverage**
+
 - ✅ React (TSX/JSX)
 - ✅ React Native
 - ✅ Vue (Composition & Options API)
@@ -760,6 +950,7 @@ See [MIGRATION-3.2.0.md](./MIGRATION-3.2.0.md) for detailed migration instructio
 - ✅ Vanilla JS/TS
 
 #### **Build Tool Coverage**
+
 - ✅ CLI (`svger-cli build`)
 - ✅ Babel Plugin
 - ✅ Vite Plugin
@@ -768,6 +959,7 @@ See [MIGRATION-3.2.0.md](./MIGRATION-3.2.0.md) for detailed migration instructio
 - ✅ Next.js Plugin (uses Webpack)
 
 #### **Testing**
+
 - Added comprehensive test suite: `tests/locked-files-index.test.ts`
 - Tests verify locked files remain in index after build
 - Tests verify multiple locked files are handled correctly
@@ -776,16 +968,19 @@ See [MIGRATION-3.2.0.md](./MIGRATION-3.2.0.md) for detailed migration instructio
 - All existing tests pass (40+ tests)
 
 #### **Lock Mechanism Behavior (Corrected)**
+
 - **Locking a file**: Prevents regeneration/overwrite of component file ✅
 - **Building with locked files**: Skips locked file regeneration but **includes in index.ts** ✅
 - **Index exports**: Now includes ALL components (locked + unlocked) ✅
 
 ### 🧹 Code Quality
+
 - Removed unused `viteConfig` variable from Vite plugin
 - Fixed TypeScript compilation warnings
 - All linting rules pass
 
 ### 📝 Documentation
+
 - Created detailed GitHub issue response documentation
 - Updated fix summary with comprehensive coverage details
 - No breaking changes
@@ -797,11 +992,13 @@ See [MIGRATION-3.2.0.md](./MIGRATION-3.2.0.md) for detailed migration instructio
 
 ### 🚀 Major Improvements - Testing & DevOps
 
-This release brings comprehensive testing infrastructure and production-grade CI/CD pipelines, significantly improving project reliability and developer experience.
+This release brings comprehensive testing infrastructure and production-grade CI/CD pipelines,
+significantly improving project reliability and developer experience.
 
 ### Added - Testing Infrastructure
 
 #### **Comprehensive Test Suite** 📋
+
 - ✅ **114 automated tests** covering unit, integration, and E2E scenarios
 - ✅ **Jest integration** with TypeScript support and ESM modules
 - ✅ **82.5% initial pass rate** with well-structured test cases
@@ -813,12 +1010,14 @@ This release brings comprehensive testing infrastructure and production-grade CI
   - `svg-processor.test.ts` - SVG parsing and optimization (11 tests)
   - `templates.test.ts` - Framework template generation (22 tests)
   - `utils.test.ts` - Utility functions and FileSystem operations (26 tests)
-- ✅ **Test fixtures** with 11 SVG variations (simple, complex, nested, gradients, accessibility, animated)
+- ✅ **Test fixtures** with 11 SVG variations (simple, complex, nested, gradients, accessibility,
+  animated)
 - ✅ **Code coverage** configured with 70% threshold across branches, functions, lines, statements
 - ✅ **Coverage reporters**: text, text-summary, lcov, html, json, clover
 - ✅ **Test documentation** in `src/__tests__/README.md` with best practices and debugging guides
 
 #### **New Test Scripts** 🧪
+
 - `npm run test:jest` - Run all Jest tests
 - `npm run test:unit` - Run unit tests only
 - `npm run test:watch` - Watch mode for development
@@ -828,6 +1027,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
 ### Added - CI/CD Infrastructure
 
 #### **GitHub Actions Workflows** 🔄
+
 - ✅ **Release workflow** (`.github/workflows/release.yml`):
   - Automated version bumping and changelog generation
   - Multi-platform Docker builds (linux/amd64, linux/arm64)
@@ -840,6 +1040,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
 - ✅ **CI workflow** enhancements for automated testing
 
 #### **Jenkins Pipeline** 🏗️
+
 - ✅ **Complete Jenkinsfile** with 11 stages:
   1. Checkout - Git repository cloning
   2. Setup - Node.js environment configuration
@@ -858,6 +1059,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
 - ✅ **Email notifications** for build status
 
 #### **Docker Support** 🐳
+
 - ✅ **Multi-stage Dockerfile**:
   - Alpine-based production image
   - Non-root user for security
@@ -878,6 +1080,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
   - Network isolation
 
 #### **Validation & Documentation** 📚
+
 - ✅ **CI/CD validation script** (`scripts/validate-cicd.sh`):
   - Project structure verification
   - NPM scripts validation
@@ -897,6 +1100,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
 ### Changed - Configuration
 
 #### **Jest Configuration**
+
 - 🔧 Renamed `jest.config.js` → `jest.config.cjs` for ES module compatibility
 - 🔧 Renamed `jest.setup.js` → `jest.setup.cjs`
 - 🔧 Updated module name mapper for `.js` extension handling
@@ -905,6 +1109,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
 - 🔧 Added fixtures exclusion from test runs
 
 #### **Package.json**
+
 - 🔧 Updated test scripts to include Jest integration
 - 🔧 Added new npm scripts for granular test execution
 - 🔧 Main test script now runs comprehensive suite
@@ -912,6 +1117,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
 ### Improved - Developer Experience
 
 #### **Documentation**
+
 - 📖 **README.md** enhanced with:
   - Complete project structure tree
   - NPM download and version badges
@@ -925,6 +1131,7 @@ This release brings comprehensive testing infrastructure and production-grade CI
   - Coverage information
 
 #### **Code Quality**
+
 - ✨ Structured test organization following industry standards
 - ✨ AAA pattern (Arrange, Act, Assert) in test cases
 - ✨ Proper cleanup with beforeEach/afterEach hooks
@@ -1187,7 +1394,7 @@ npm install svger-cli@3.0.0 --save-dev
 - Enhanced comparison tables and installation instructions
 - Included recent fixes section with technical details
 
-## [Unreleased] - 2025-11-12
+## Historical documentation update — 2025-11-12
 
 ### Added
 

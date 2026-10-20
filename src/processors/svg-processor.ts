@@ -23,8 +23,11 @@ import type { EnhancedPluginManager } from '../core/enhanced-plugin-manager.js';
 import type { FrameworkType } from '../types/index.js';
 import {
   applySVGInputSafety,
+  collectAdmittedSVGDocument,
   type SVGInputSafetyOptions,
 } from '../security/input-safety.js';
+import { lowerAdmittedSVGToIR } from '../compiler/lower-svg-document-to-ir.js';
+import { emitSvelteIRComponent } from '../compiler/svelte-ir-emitter.js';
 import { writeOutputFileAtomic } from '../io/atomic-write.js';
 import {
   DiagnosticError,
@@ -344,6 +347,32 @@ export class SVGProcessor {
         optimizationLevel
       );
       throwIfAborted(options.signal);
+
+      if (options.svelteCompiler === 'ir-v1') {
+        if ((options.framework ?? 'react') !== 'svelte') {
+          throw new DiagnosticError(
+            'E_INVALID_CONFIGURATION',
+            'The IR v1 compiler is available only for Svelte.',
+            { exitCode: ExitCode.InvalidConfiguration }
+          );
+        }
+        const collected = collectAdmittedSVGDocument(pluginProcessedContent, {
+          maxInputSizeBytes: options.maxInputSizeBytes,
+          source: componentName,
+          unsafeInputPolicy: options.unsafeInputPolicy,
+          warn: message => this.logger.warn(message),
+        });
+        const ir = lowerAdmittedSVGToIR(
+          collected.source,
+          collected.document,
+          componentName
+        );
+        return emitSvelteIRComponent(
+          ir,
+          componentName,
+          options.typescript ?? true
+        );
+      }
 
       // Create full options object with required fields
       const fullOptions: ComponentGenerationOptions = {

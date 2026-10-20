@@ -1,3 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+
+const require = createRequire(import.meta.url);
+
 /**
  * Phase 6.3: Visual Diff Testing
  *
@@ -11,7 +17,7 @@
  *
  * These dependencies are lazy-loaded and optional.
  * Install them only if you need visual validation:
- * npm install --save-dev sharp pixelmatch pngjs
+ * npm install --save-dev sharp@^0.35.5 pixelmatch pngjs
  */
 
 // Lazy imports - only loaded when visual validation is used
@@ -21,32 +27,6 @@ let sharp: any = null;
 let pixelmatch: any = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let PNG: any = null;
-
-/**
- * Lazy-load optional visual diff dependencies
- */
-async function loadVisualDiffDependencies() {
-  if (sharp && pixelmatch && PNG) {
-    return; // Already loaded
-  }
-
-  try {
-    const sharpModule = await import('sharp');
-    sharp = sharpModule.default;
-
-    const pixelmatchModule = await import('pixelmatch');
-    pixelmatch = pixelmatchModule.default;
-
-    const pngjsModule = await import('pngjs');
-    PNG = pngjsModule.PNG;
-  } catch (error) {
-    throw new Error(
-      'Visual diff validation requires optional dependencies. Install them with:\n' +
-        'npm install --save-dev sharp pixelmatch pngjs\n\n' +
-        'Or skip visual validation by removing the --validate flag.'
-    );
-  }
-}
 
 // ============================================================================
 // Type Definitions
@@ -139,10 +119,110 @@ export class VisualDiffError extends Error {
   constructor(
     message: string,
     public readonly code:
-      'RENDER_FAILED' | 'COMPARISON_FAILED' | 'THRESHOLD_EXCEEDED'
+      | 'RENDER_FAILED'
+      | 'COMPARISON_FAILED'
+      | 'THRESHOLD_EXCEEDED'
+      | 'DEPENDENCY_UNAVAILABLE'
   ) {
     super(message);
     this.name = 'VisualDiffError';
+  }
+}
+
+function versionAtLeast(
+  value: string,
+  minimum: readonly [number, number, number]
+): boolean {
+  const normalized = value.replace(/^v/u, '');
+  const match =
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/u.exec(
+      normalized
+    );
+  if (!match || match[4]) return false;
+
+  const version = [Number(match[1]), Number(match[2]), Number(match[3])];
+  for (let index = 0; index < minimum.length; index++) {
+    if (version[index] !== minimum[index]) {
+      return version[index] > minimum[index];
+    }
+  }
+  return true;
+}
+
+/** @internal Exported for the compatibility-policy regression only. */
+export function assertRasterizerCompatibility(
+  nodeVersion: string,
+  sharpVersion: string
+): void {
+  if (!versionAtLeast(nodeVersion, [20, 9, 0])) {
+    throw new VisualDiffError(
+      `Visual rasterization is unavailable on Node ${nodeVersion}; it requires Node >=20.9.0. SVG generation remains supported on Node >=18.17.0.`,
+      'DEPENDENCY_UNAVAILABLE'
+    );
+  }
+
+  if (!versionAtLeast(sharpVersion, [0, 35, 5])) {
+    throw new VisualDiffError(
+      `Visual rasterization requires sharp >=0.35.5 because installed sharp ${sharpVersion} is below the security floor.`,
+      'DEPENDENCY_UNAVAILABLE'
+    );
+  }
+}
+
+/**
+ * Lazy-load optional visual diff dependencies. `sharp` is deliberately not an
+ * automatic dependency: its patched release line no longer supports Node 18.
+ */
+async function loadVisualDiffDependencies() {
+  if (sharp && pixelmatch && PNG) {
+    return; // Already loaded
+  }
+
+  try {
+    assertRasterizerCompatibility(process.versions.node, '0.35.5');
+    // Inspect package metadata before loading native code, so an older optional
+    // installation is rejected before its renderer is initialized.
+    const sharpPackageJsonPath = require.resolve('sharp/package.json');
+    const sharpMetadata = JSON.parse(
+      readFileSync(sharpPackageJsonPath, 'utf8')
+    ) as { version?: unknown };
+    if (typeof sharpMetadata.version !== 'string') {
+      throw new VisualDiffError(
+        'Visual rasterization could not verify the installed sharp package version; refusing to load an unverified renderer.',
+        'DEPENDENCY_UNAVAILABLE'
+      );
+    }
+    assertRasterizerCompatibility(process.versions.node, sharpMetadata.version);
+
+    // Keep this dynamic so TypeScript does not require the optional package at build time.
+    const sharpEntryPoint = require.resolve('sharp');
+    const sharpModule = await import(pathToFileURL(sharpEntryPoint).href);
+    const sharpCandidate = sharpModule.default;
+    const installedSharpVersion = sharpCandidate?.versions?.sharp;
+    if (
+      typeof installedSharpVersion !== 'string' ||
+      installedSharpVersion !== sharpMetadata.version
+    ) {
+      throw new VisualDiffError(
+        'Visual rasterization found inconsistent sharp package and runtime versions; refusing to use an unverified renderer.',
+        'DEPENDENCY_UNAVAILABLE'
+      );
+    }
+    assertRasterizerCompatibility(process.versions.node, installedSharpVersion);
+
+    const pixelmatchModule = await import('pixelmatch');
+    const pngjsModule = await import('pngjs');
+    sharp = sharpCandidate;
+    pixelmatch = pixelmatchModule.default;
+    PNG = pngjsModule.PNG;
+  } catch (error) {
+    if (error instanceof VisualDiffError) throw error;
+    throw new VisualDiffError(
+      'Visual diff validation is unavailable. It requires Node >=20.9.0 and separately installed optional dependencies: sharp >=0.35.5, pixelmatch, and pngjs. Node 18 remains supported for ordinary SVG generation, but rasterization is disabled there. Install the dependencies with:\n' +
+        'npm install --save-dev sharp@^0.35.5 pixelmatch pngjs\n\n' +
+        'Or skip visual validation by removing the --validate flag.',
+      'DEPENDENCY_UNAVAILABLE'
+    );
   }
 }
 
@@ -193,6 +273,7 @@ export async function renderSVG(
       if (timeout) clearTimeout(timeout);
     }
   } catch (error) {
+    if (error instanceof VisualDiffError) throw error;
     throw new VisualDiffError(
       `Failed to render SVG: ${error instanceof Error ? error.message : String(error)}`,
       'RENDER_FAILED'

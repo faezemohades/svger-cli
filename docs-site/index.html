@@ -1,763 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="SVGER-CLI v4.0.9 documentation: CLI commands, frameworks, integrations, security controls, configuration, release status, and governance gates.">
-  <title>SVGER-CLI v4.0.9 Documentation</title>
-  <link rel="icon" type="image/png" href="svger-cli-logo.png">
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #101318;
-      --panel: #171b22;
-      --panel-soft: #1d242d;
-      --text: #edf2f7;
-      --muted: #a8b3c2;
-      --line: #303946;
-      --green: #35c17d;
-      --blue: #5aa9ff;
-      --amber: #f0b85a;
-      --red: #ff6b6b;
-      --violet: #9b8cff;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    a {
-      color: var(--blue);
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    code,
-    pre {
-      font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-    }
-
-    pre {
-      margin: 0;
-      overflow-x: auto;
-      padding: 16px;
-      background: #0b0e13;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      font-size: 13px;
-    }
-
-    code {
-      color: #dce7f5;
-    }
-
-    .shell {
-      color: #cde6d6;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      border-bottom: 1px solid var(--line);
-      background: rgba(16, 19, 24, 0.94);
-      backdrop-filter: blur(10px);
-    }
-
-    .header-inner,
-    main,
-    footer {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    .header-inner {
-      min-height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--text);
-    }
-
-    .brand img {
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      background: var(--panel-soft);
-      border: 1px solid var(--line);
-    }
-
-    .brand strong {
-      display: block;
-      font-size: 16px;
-      letter-spacing: 0;
-    }
-
-    .brand span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 12px;
-      font-size: 13px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-      gap: 32px;
-      padding: 56px 0 32px;
-      align-items: center;
-    }
-
-    h1 {
-      font-size: clamp(38px, 6vw, 68px);
-      line-height: 1;
-      margin: 0 0 20px;
-      letter-spacing: 0;
-    }
-
-    h2 {
-      font-size: 30px;
-      line-height: 1.15;
-      margin: 0 0 14px;
-      letter-spacing: 0;
-    }
-
-    h3 {
-      font-size: 19px;
-      margin: 0 0 10px;
-    }
-
-    p {
-      color: var(--muted);
-      margin: 0 0 16px;
-    }
-
-    section {
-      padding: 44px 0;
-      border-top: 1px solid var(--line);
-    }
-
-    .lead {
-      font-size: 20px;
-      color: #c9d4e3;
-      max-width: 760px;
-    }
-
-    .card,
-    .callout {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 20px;
-    }
-
-    .callout {
-      border-left: 4px solid var(--amber);
-    }
-
-    .callout.ok {
-      border-left-color: var(--green);
-    }
-
-    .callout.blocked {
-      border-left-color: var(--red);
-    }
-
-    .grid {
-      display: grid;
-      gap: 16px;
-    }
-
-    .grid.two {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .grid.three {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .stat {
-      background: var(--panel-soft);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 16px;
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 26px;
-      color: var(--text);
-    }
-
-    .stat span {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      overflow: hidden;
-      display: block;
-      overflow-x: auto;
-    }
-
-    thead,
-    tbody {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
-
-    th,
-    td {
-      text-align: left;
-      padding: 12px;
-      border-bottom: 1px solid var(--line);
-      vertical-align: top;
-      font-size: 14px;
-    }
-
-    th {
-      color: var(--text);
-      background: #202834;
-      font-weight: 700;
-    }
-
-    td {
-      color: var(--muted);
-    }
-
-    tr:last-child td {
-      border-bottom: 0;
-    }
-
-    .pill {
-      display: inline-block;
-      margin: 4px 6px 4px 0;
-      padding: 4px 9px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--panel-soft);
-      color: #dce7f5;
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .green { color: var(--green); }
-    .blue { color: var(--blue); }
-    .amber { color: var(--amber); }
-    .red { color: var(--red); }
-    .violet { color: var(--violet); }
-
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 22px;
-    }
-
-    .button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 40px;
-      padding: 9px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      background: var(--panel-soft);
-      color: var(--text);
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .button.primary {
-      background: #1f6feb;
-      border-color: #1f6feb;
-      color: white;
-    }
-
-    .audit-list {
-      columns: 2;
-      padding-left: 18px;
-      color: var(--muted);
-    }
-
-    footer {
-      padding-top: 28px;
-      padding-bottom: 44px;
-      color: var(--muted);
-      border-top: 1px solid var(--line);
-    }
-
-    @media (max-width: 860px) {
-      .hero,
-      .grid.two,
-      .grid.three {
-        grid-template-columns: 1fr;
-      }
-
-      nav {
-        justify-content: flex-start;
-      }
-
-      thead,
-      tbody {
-        min-width: 720px;
-      }
-
-      .audit-list {
-        columns: 1;
-      }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="header-inner">
-      <a class="brand" href="#top" aria-label="SVGER-CLI documentation home">
-        <img src="svger-cli-logo.png" alt="SVGER-CLI logo">
-        <span>
-          <strong>SVGER-CLI</strong>
-          <span>Documentation reviewed for v4.0.9</span>
-        </span>
-      </a>
-      <nav aria-label="Primary navigation">
-        <a href="#status">Status</a>
-        <a href="#quick-start">Quick start</a>
-        <a href="#cli">CLI</a>
-        <a href="commands.html">Commands</a>
-        <a href="#live-evidence">Live evidence</a>
-        <a href="#frameworks">Frameworks</a>
-        <a href="#integrations">Integrations</a>
-        <a href="#security">Security</a>
-        <a href="#coverage">Coverage</a>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="SVGER-CLI documentation and local evaluation guidance."
+    />
+    <title>SVGER-CLI documentation</title>
+    <link rel="icon" type="image/png" href="svger-cli-logo.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Overview</a><a href="commands.html">Commands</a>
+        <a href="optimizer.html">Compiler modes</a
+        ><a href="evaluation.html">Local evaluation</a>
       </nav>
-    </div>
-  </header>
-
-  <main id="top">
-    <section class="hero" aria-labelledby="hero-title">
-      <div>
-        <p class="pill green">Current source version: 4.0.9</p>
-        <h1 id="hero-title">SVG to component compiler for modern JavaScript stacks.</h1>
-        <p class="lead">
-          SVGER-CLI builds optimized SVG components for React, React Native, Vue, Angular, Svelte,
-          Solid, Preact, Lit, and vanilla JavaScript. This page is tied to the current implementation
-          surface, not the older v4.0.3/v4.0.7 marketing copy previously deployed.
-        </p>
-        <div class="button-row">
-          <a class="button primary" href="https://www.npmjs.com/package/svger-cli">View on npm</a>
-          <a class="button" href="commands.html">Commands and live testing</a>
-          <a class="button" href="https://github.com/faezemohades/svger-cli">View repository</a>
-          <a class="button" href="optimizer.html">Optimizer guide</a>
-          <a class="button" href="benchmark-demo.html">Browser benchmark</a>
-        </div>
-      </div>
-      <div class="card">
-        <h2>At a glance</h2>
-        <div class="grid">
-          <div class="stat"><strong>9</strong><span>framework targets</span></div>
-          <div class="stat"><strong>10</strong><span>CLI command groups</span></div>
-          <div class="stat"><strong>6</strong><span>official build/test integrations</span></div>
-          <div class="stat"><strong>15/15</strong><span>live runtime smoke assertions passed</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="status" aria-labelledby="status-title">
-      <h2 id="status-title">Release and Governance Status</h2>
-      <div class="grid two">
-        <div class="callout ok">
-          <h3>Implementation state</h3>
-          <p>
-            The repository source is at <code>4.0.9</code>. Phase 0 safety containment, Phase 1
-            architecture evidence, and P2-201 parser research documents are present in the repository.
-          </p>
-        </div>
-        <div class="callout blocked">
-          <h3>Publication state</h3>
-          <p>
-            npm still reports <code>svger-cli</code> latest as <code>4.0.8</code> until the
-            v4.0.9 release is published and independently verified. P2-202 parser implementation
-            remains blocked.
-          </p>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr><th>Gate</th><th>Current documentation position</th><th>Where to verify</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Phase 0</td>
-            <td>Implementation complete; official publication gate still requires registry verification.</td>
-            <td><code>docs/phase0-release-gate.md</code>, <code>reports/phase-0-report.md</code></td>
-          </tr>
-          <tr>
-            <td>Phase 1</td>
-            <td>Local implementation evidence exists; compatibility rows remain approval-gated.</td>
-            <td><code>reports/phase1-implementation-report.md</code>, <code>compatibility-ledger-v4.1.md</code></td>
-          </tr>
-          <tr>
-            <td>Phase 2</td>
-            <td>P2-201 ADR and qualification plan are documentation/research only.</td>
-            <td><code>docs/ADR-P2-201-XML-PARSER-SELECTION.md</code>, <code>reports/phase2-start-report.md</code></td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <span id="live-benchmark" aria-hidden="true"></span>
-    <section id="live-evidence" aria-labelledby="live-evidence-title">
-      <h2 id="live-evidence-title">Live Runtime Evidence</h2>
-      <p>
-        The docs-site is backed by real execution on Linux x64 with Node v24.18.0 and npm 11.16.0
-        after rebuilding the CLI from source. Evidence is recorded in
-        <code>reports/docs-site-live-evidence-2026-07-24.md</code> and
-        <code>reports/docs-site-live-evidence-2026-07-24.json</code>.
+    </header>
+    <main>
+      <p class="eyebrow">SVGER-CLI · planned 4.1.0 documentation</p>
+      <h1>Generate framework components from SVG files</h1>
+      <p class="lead">
+        SVGER-CLI is a Node.js command-line tool and library for generating
+        typed or JavaScript components from SVG input.
       </p>
-      <div class="grid three">
-        <div class="card">
-          <h3>Runtime smoke</h3>
-          <p><strong class="green">15/15</strong> checks passed for version, help, safe generation, unsafe rejection, strip mode, optimizer directory use, and ESM import.</p>
-        </div>
-        <div class="card">
-          <h3>Formal tests</h3>
-          <p><strong class="green">Pass</strong> for typecheck, lint budget, full test suite, security containment, safety matrix, and Phase 1 smoke contracts.</p>
-        </div>
-        <div class="card">
-          <h3>Measured efficiency</h3>
-          <p><strong class="green">Measured</strong> optimizer size/time data is published in the command reference, with claims limited to reproducible local evidence.</p>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr><th>Suite or command</th><th>Result</th><th>What it proves</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>npm run typecheck</code></td><td>Pass</td><td>TypeScript source integrity.</td></tr>
-          <tr><td><code>npm run lint:budget</code></td><td>Pass</td><td>0 errors, 14/14 approved warnings.</td></tr>
-          <tr><td><code>npm run test</code></td><td>Pass</td><td>Frameworks 11/11, config 10/10, E2E 8/8, integrations 7/7.</td></tr>
-          <tr><td><code>npm run test:security</code></td><td>Pass</td><td>27 containment assertions.</td></tr>
-          <tr><td><code>npm run test:safety-matrix</code></td><td>Pass</td><td>Reject, strip, and sandbox behavior across entry points.</td></tr>
-          <tr><td><code>node scripts/benchmark-comprehensive.js</code></td><td>Pass</td><td>Optimizer size/time behavior across repository samples.</td></tr>
-        </tbody>
-      </table>
-      <div class="button-row">
-        <a class="button primary" href="commands.html#live">Open full live evidence</a>
-        <a class="button" href="commands.html#benchmarks">Open benchmark evidence</a>
-      </div>
-    </section>
-
-    <section id="quick-start" aria-labelledby="quick-start-title">
-      <h2 id="quick-start-title">Quick Start</h2>
-      <div class="grid two">
-        <div>
-          <h3>Install</h3>
-          <pre><code class="shell">npm install --save-dev svger-cli</code></pre>
-        </div>
-        <div>
-          <h3>Check the CLI</h3>
-          <pre><code class="shell">npx svger --version
-npx svger --help</code></pre>
-        </div>
-        <div>
-          <h3>Build a directory</h3>
-          <pre><code class="shell">npx svger build ./src/icons ./src/components/icons \
-  --framework react \
-  --typescript \
-  --optimize balanced</code></pre>
-        </div>
-        <div>
-          <h3>Generate one component</h3>
-          <pre><code class="shell">npx svger generate ./src/icons/logo.svg ./src/components/icons \
-  --framework vue \
-  --composition</code></pre>
-        </div>
-      </div>
-      <div class="callout">
-        <p>
-          The old documentation used <code>convert</code> and <code>batch</code>. The current
-          executable command names are <code>generate</code> for one SVG and <code>build</code> for
-          a source directory.
-        </p>
-      </div>
-    </section>
-
-    <section id="cli" aria-labelledby="cli-title">
-      <h2 id="cli-title">Complete CLI Surface</h2>
+      <aside role="note">
+        <strong>Release status:</strong> 4.1.0 is a planned, unpublished
+        version. The release remains NO-GO; this documentation update does not
+        authorize publication.
+      </aside>
+      <h2>Install and build</h2>
+      <pre><code>npm install svger-cli
+npx svger build ./icons ./components</code></pre>
       <p>
-        This is the compact command map. The full option-by-option reference, recipes, live smoke
-        results, benchmark summary, and known limitations are documented in
-        <a href="commands.html">Commands and Live Evidence</a>.
+        The package declares Node.js ≥18.17. See
+        <a href="commands.html">the command reference</a> for language and
+        framework options.
       </p>
-      <table>
-        <thead>
-          <tr><th>Command</th><th>Purpose</th><th>Important options</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>build &lt;src&gt; &lt;out&gt;</code></td>
-            <td>Build every discovered SVG from a source folder to an output folder.</td>
-            <td><code>--framework</code>, <code>--typescript</code>, <code>--optimize</code>, <code>--recursive</code>, <code>--include</code>, <code>--exclude</code>, <code>--dry-run</code>, <code>--check</code>, <code>--diff</code>, <code>--format</code></td>
-          </tr>
-          <tr>
-            <td><code>generate &lt;svgFile&gt; &lt;out&gt;</code></td>
-            <td>Convert one SVG file into one framework component.</td>
-            <td><code>--framework</code>, <code>--typescript</code>, <code>--composition</code>, <code>--standalone</code>, <code>--optimize</code></td>
-          </tr>
-          <tr>
-            <td><code>watch &lt;src&gt; &lt;out&gt;</code></td>
-            <td>Watch a source folder and rebuild components after file changes.</td>
-            <td><code>--unsafe-input-policy</code>, <code>--max-input-size</code></td>
-          </tr>
-          <tr>
-            <td><code>optimize &lt;input&gt; [output]</code></td>
-            <td>Optimize SVG files without generating components. Current runtime evidence verifies directory input/output.</td>
-            <td><code>--level</code>, <code>--validate</code>, <code>--in-place</code>, <code>--unsafe-input-policy</code></td>
-          </tr>
-          <tr>
-            <td><code>config</code></td>
-            <td>Create, show, update, and explain resolved configuration.</td>
-            <td><code>--init</code>, <code>--show</code>, <code>--set key=value</code>, <code>--explain</code>, <code>--format json</code></td>
-          </tr>
-          <tr>
-            <td><code>plugins</code></td>
-            <td>Load and list built-in or external plugins and show metrics.</td>
-            <td><code>--load &lt;names&gt;</code></td>
-          </tr>
-          <tr>
-            <td><code>lock</code> / <code>unlock</code></td>
-            <td>Protect source SVG files from accidental overwrite workflows.</td>
-            <td>Accept one or more file paths.</td>
-          </tr>
-          <tr>
-            <td><code>clean &lt;out&gt;</code></td>
-            <td>Remove generated SVG component output from a target directory.</td>
-            <td><code>--out</code> remains as a deprecated alias.</td>
-          </tr>
-          <tr>
-            <td><code>recover &lt;directory&gt;</code></td>
-            <td>Inspect and roll back incomplete output transactions.</td>
-            <td><code>--format pretty|json</code></td>
-          </tr>
-          <tr>
-            <td><code>migrate &lt;target&gt; [path]</code></td>
-            <td>Migrate v4 config, imports, or plugin declarations.</td>
-            <td><code>--dry-run</code>, <code>--no-backup</code>, <code>--format json</code></td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section id="frameworks" aria-labelledby="framework-title">
-      <h2 id="framework-title">Framework Coverage</h2>
+      <h2>Framework targets</h2>
       <p>
-        The implementation defines these framework targets in <code>FrameworkType</code>. Each target
-        keeps source generation framework-idiomatic while preserving the same security and input gates.
+        Production generation targets React, Preact, Solid, Vue, Svelte,
+        Angular, Lit, Vanilla, and React Native. JavaScript and TypeScript
+        support varies by framework; unsupported combinations return
+        diagnostics. Svelte’s experimental IR emitter is opt-in and the legacy
+        route remains the default.
       </p>
-      <div class="grid three">
-        <div class="card"><h3>React</h3><p>TypeScript JSX, SVG props, forward-ref capable output.</p></div>
-        <div class="card"><h3>React Native</h3><p>React Native SVG component generation for mobile icon systems.</p></div>
-        <div class="card"><h3>Vue 3</h3><p>SFC output with Composition API and <code>&lt;script setup&gt;</code> support.</p></div>
-        <div class="card"><h3>Angular</h3><p>Standalone component support, OnPush-oriented configuration, optional signals flag.</p></div>
-        <div class="card"><h3>Svelte</h3><p>Svelte component output with TypeScript-capable templates.</p></div>
-        <div class="card"><h3>Solid</h3><p>Fine-grained JSX output for Solid projects.</p></div>
-        <div class="card"><h3>Preact</h3><p>Lightweight React-compatible component output.</p></div>
-        <div class="card"><h3>Lit</h3><p>Web component output for Lit and standards-based custom elements.</p></div>
-        <div class="card"><h3>Vanilla</h3><p>Plain JavaScript/TypeScript module output for non-framework stacks.</p></div>
-      </div>
-    </section>
-
-    <section id="integrations" aria-labelledby="integration-title">
-      <h2 id="integration-title">Build Tool and Test Integrations</h2>
-      <table>
-        <thead>
-          <tr><th>Export path</th><th>Public API</th><th>Notes</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>svger-cli/webpack</code></td><td><code>SvgerWebpackPlugin</code>, <code>svgerLoader</code></td><td>Webpack 5 plugin and loader aliases.</td></tr>
-          <tr><td><code>svger-cli/vite</code></td><td><code>svgerVitePlugin</code></td><td>Vite plugin with HMR and virtual-module options.</td></tr>
-          <tr><td><code>svger-cli/rollup</code></td><td><code>svgerRollupPlugin</code></td><td>Rollup 4 plugin with generated output and source-map options.</td></tr>
-          <tr><td><code>svger-cli/babel</code></td><td><code>svgerBabelPlugin</code>, <code>createBabelPlugin</code></td><td>Babel 7 import transformation and initialization processing.</td></tr>
-          <tr><td><code>svger-cli/nextjs</code></td><td><code>withSvger</code>, <code>SvgerNextJsPlugin</code>, <code>configureSvgImports</code></td><td>Next.js 14-16 wrapper around the Webpack integration.</td></tr>
-          <tr><td><code>svger-cli/jest</code></td><td><code>svgerJestTransformer</code>, <code>jestPreset</code>, <code>createJestTransformer</code></td><td>Jest 29-30 SVG component transformer/preset.</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section id="optimizer" aria-labelledby="optimizer-title">
-      <h2 id="optimizer-title">Optimizer and Package Contents</h2>
-      <div class="grid two">
-        <div class="card">
-          <h3>Optimization levels</h3>
-          <p>
-            Component generation accepts <code>none</code>, <code>basic</code>,
-            <code>balanced</code>, <code>aggressive</code>, and <code>maximum</code>. The standalone
-            optimizer command defaults to <code>balanced</code>.
-          </p>
-          <pre><code class="shell">npx svger optimize ./icons --level maximum
-npx svger build ./icons ./components --optimize aggressive</code></pre>
-        </div>
-        <div class="card">
-          <h3>Published package shape</h3>
-          <p>
-            The v4.0.9 package candidate includes compiled runtime output, curated docs, examples,
-            public binaries, policy files, and 606 intentional sample SVG assets. Internal reports,
-            tests, coverage, source maps, and <code>.github</code> are excluded.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section id="security" aria-labelledby="security-title">
-      <h2 id="security-title">Security and Safety Controls</h2>
-      <div class="grid two">
-        <div class="card">
-          <h3>Input safety</h3>
-          <p>
-            Unsafe raw SVG content is rejected by default across CLI and integration entry points.
-            The only permissive mode is explicit <code>--unsafe-input-policy strip</code>. A maximum
-            input size can be set with <code>--max-input-size</code>.
-          </p>
-        </div>
-        <div class="card">
-          <h3>Filesystem safety</h3>
-          <p>
-            Build output is sandboxed to the requested output directory. Phase 1 adds atomic writes,
-            transaction recovery, deterministic reports, and cache fingerprinting for reproducible
-            builds.
-          </p>
-        </div>
-      </div>
-      <pre><code class="shell">npx svger build ./icons ./components --unsafe-input-policy reject
-npx svger build ./icons ./components --unsafe-input-policy strip --max-input-size 1048576
-npx svger recover ./components --format json</code></pre>
-    </section>
-
-    <section id="configuration" aria-labelledby="configuration-title">
-      <h2 id="configuration-title">Configuration</h2>
       <p>
-        Configuration can come from defaults, <code>.svgconfig.json</code>, and CLI options. Use
-        <code>config explain</code> to inspect origin and resolved values.
+        Webpack, Vite, Rollup, Babel, Next.js, and Jest integrations are
+        available through documented package subpaths. See
+        <a href="optimizer.html">compiler modes and limits</a>.
       </p>
-      <pre><code class="shell">npx svger config --init
-npx svger config --show
-npx svger config --set framework=react
-npx svger config explain --format json</code></pre>
-      <div class="grid three">
-        <div class="card"><h3>Processing</h3><p><code>watch</code>, <code>parallel</code>, <code>batchSize</code>, <code>maxConcurrency</code>, <code>cache</code>, <code>unsafeInputPolicy</code>.</p></div>
-        <div class="card"><h3>Output</h3><p><code>source</code>, <code>output</code>, <code>outputConfig.naming</code>, generated extension, output directory.</p></div>
-        <div class="card"><h3>Frameworks</h3><p>React, Vue, and Angular sub-configuration plus general framework options.</p></div>
-      </div>
-    </section>
-
-    <section id="api" aria-labelledby="api-title">
-      <h2 id="api-title">Programmatic API</h2>
+      <h2>Measured performance</h2>
       <p>
-        The root package export exposes services, commands, compiler ports, diagnostics, reporting,
-        configuration resolution, cache helpers, and integration factories. Type declarations are
-        shipped with the package.
+        The latest local evaluation (Node.js 22.22.2 / npm 10.9.7) measured a
+        750-group, 2,251-element Svelte fixture at 10.086 ms legacy median and
+        75.562 ms opt-in IR median (about 7.5× slower); p95 was 12.426 ms and
+        85.575 ms. A separate Node.js 20.20.2 run measured 10.768 ms legacy and
+        77.829 ms IR. These are host-specific observations, not performance
+        guarantees or evidence to change the production default.
       </p>
-      <pre><code class="shell">import {
-  SVGProcessor,
-  createSVGCompiler,
-  BuildCommand,
-  formatBuildReport,
-  svgerVitePlugin,
-  jestPreset
-} from 'svger-cli';</code></pre>
       <p>
-        Public subpath exports are available for Webpack, Vite, Rollup, Babel, Next.js, Jest, and
-        <code>package.json</code>.
+        Re-run the configurable, opt-in evaluator using the
+        <a href="evaluation.html">evaluation guide</a>. Nothing is benchmarked
+        by opening this site.
       </p>
-    </section>
-
-    <section id="support" aria-labelledby="support-title">
-      <h2 id="support-title">Support Matrix</h2>
-      <table>
-        <thead>
-          <tr><th>Area</th><th>Supported or gated lines</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Node.js</td><td>Production: Node 22 and 24 LTS. Forward smoke: Node 26 Current. Legacy smoke only: Node 18.17.</td></tr>
-          <tr><td>TypeScript</td><td>5.6.3 minimum compatibility, 5.9.3 primary, 7.0.2 current compatibility.</td></tr>
-          <tr><td>Bundlers</td><td>Webpack 5, Vite 6-8, Rollup 4, Babel 7, Next.js 14-16, Jest 29-30.</td></tr>
-          <tr><td>Release validation</td><td>Phase 0/Phase 1 validation scripts, package conformance, safety matrix, tarball consumer smoke.</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section id="coverage" aria-labelledby="coverage-title">
-      <h2 id="coverage-title">Documentation Coverage Map</h2>
+      <h2>Security and limitations</h2>
       <p>
-        This page now covers the shipped implementation surface. The repository also keeps deeper
-        source documents for framework details, integrations, support, migration, optional visual
-        validation dependencies, governance, and release evidence.
+        SVG input is admitted by the security boundary before generation.
+        External references, active content, malformed XML, and configured
+        resource-limit violations are rejected by default. Static SVG support
+        does not imply full browser rendering equivalence. Read the package’s
+        <a
+          href="https://github.com/faezemohades/svger-cli/blob/main/docs/OPTIONAL-DEPENDENCIES.md"
+          >optional dependency guide</a
+        >
+        and
+        <a
+          href="https://github.com/faezemohades/svger-cli/blob/main/docs/SUPPORT-MATRIX.md"
+          >support matrix</a
+        >.
       </p>
-      <ul class="audit-list">
-        <li><code>README.md</code></li>
-        <li><code>docs-site/commands.html</code></li>
-        <li><code>docs/FRAMEWORK-GUIDE.md</code></li>
-        <li><code>docs/INTEGRATIONS.md</code></li>
-        <li><code>docs/OPTIONAL-DEPENDENCIES.md</code></li>
-        <li><code>docs/SUPPORT-MATRIX.md</code></li>
-        <li><code>docs/phase0-release-gate.md</code></li>
-        <li><code>docs/phase0-migration-notice.md</code></li>
-        <li><code>docs/phase0-rollback-plan.md</code></li>
-        <li><code>docs/ADR-P2-201-XML-PARSER-SELECTION.md</code></li>
-        <li><code>reports/package-conformance-v4.0.9.md</code></li>
-        <li><code>reports/docs-site-live-evidence-2026-07-24.md</code></li>
-        <li><code>reports/phase1-implementation-report.md</code></li>
-        <li><code>reports/phase2-start-report.md</code></li>
-      </ul>
-      <div class="callout ok">
-        <p>
-          Documentation review evidence for this update is recorded in
-          <code>reports/docs-site-review-2026-07-24.md</code> and
-          <code>reports/docs-site-review-2026-07-24.json</code>. Runtime evidence is recorded in
-          <code>reports/docs-site-live-evidence-2026-07-24.md</code> and
-          <code>reports/docs-site-live-evidence-2026-07-24.json</code>.
-        </p>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>
-      SVGER-CLI documentation site reviewed on 2026-07-24. Released under the MIT License.
-      Live site: <a href="https://faezemohades.github.io/svger-cli/">https://faezemohades.github.io/svger-cli/</a>
-    </p>
-  </footer>
-</body>
+    </main>
+    <footer>
+      <p>
+        Static documentation. No telemetry, remote scripts, or automatic
+        evaluation.
+      </p>
+    </footer>
+  </body>
 </html>

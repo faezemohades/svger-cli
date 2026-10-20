@@ -89,6 +89,8 @@ export interface SVGConfig {
   // Framework Configuration
   framework: FrameworkType;
   typescript: boolean;
+  /** Explicit opt-in to the internal static Svelte Compiler IR v1 route. */
+  svelteCompiler?: 'legacy' | 'ir-v1';
   componentType?: ComponentType;
   frameworkOptions?: FrameworkOptions;
 
@@ -195,6 +197,7 @@ export interface ComponentGenerationOptions {
   svgContent: string;
   framework: FrameworkType;
   typescript: boolean;
+  svelteCompiler?: 'legacy' | 'ir-v1';
   defaultWidth?: number;
   defaultHeight?: number;
   defaultFill?: string;
@@ -274,7 +277,10 @@ export interface Template {
 export type FileSystemEvent = 'change' | 'rename';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type ProcessingStatus =
-  'pending' | 'processing' | 'completed' | 'failed';
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
 
 export interface ProcessingJob {
   id: string;

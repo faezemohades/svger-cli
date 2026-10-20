@@ -22,6 +22,7 @@ for (const script of ['quality:fast', 'quality:full', 'quality:release']) {
 }
 assert.match(packageJson.scripts['quality:full'], /test:phase0/u);
 assert.match(packageJson.scripts['quality:full'], /test:phase1/u);
+assert.match(packageJson.scripts['quality:full'], /test:phase4/u);
 assert.match(packageJson.scripts['quality:release'], /package:conformance/u);
 assert.match(packageJson.scripts['quality:fast'], /check:public-contract/u);
 assert.match(packageJson.scripts['test:jest'], /--runInBand/u);
