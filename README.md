@@ -22,12 +22,15 @@ documentation page launches a benchmark or uploads a report merely by being open
 
 ## Contents
 
+- [Find the right workflow](#find-the-right-workflow)
 - [At a glance](#at-a-glance)
 - [Which version should I use?](#which-version-should-i-use)
 - [Installation and prerequisites](#installation-and-prerequisites)
 - [Your first conversion](#your-first-conversion)
+- [Generated files and imports](#what-is-generated-files-exports-and-integration)
 - [Framework cookbook](#framework-cookbook) — React, React Native, Vue, Svelte, Angular, Solid,
   Preact, Lit, Vanilla
+- [Sample SVG testing](#sample-svg-testing)
 - [Svelte IR v1 opt-in (planned 4.1.0)](#svelte-ir-v1-opt-in-planned-410)
 - [Command reference](#command-reference) — every registered CLI command and its options
 - [Configuration reference](#configuration-reference)
@@ -37,10 +40,29 @@ documentation page launches a benchmark or uploads a report merely by being open
 - [Local benchmark, quality and security evaluation (planned 4.1.0)](#local-benchmark-quality-and-security-evaluation-planned-410)
 - [Security model and limitations](#security-model-and-limitations)
 - [Recipes for teams and CI](#recipes-for-teams-and-ci)
+- [CI and container deployment patterns](#ci-and-container-deployment-patterns)
 - [Troubleshooting](#troubleshooting)
 - [Contributor commands](#contributor-commands)
 - [Categorized documentation directory](#categorized-documentation-directory)
 - [Release and contribution policy](#release-and-contribution-policy)
+
+## Find the right workflow
+
+The original project documentation included a quick-jump index. This version keeps that practical
+idea, but links only to the supported or explicitly qualified workflows described below.
+
+| Your goal                                | Start here                                                                       | What you will accomplish                                          |
+| ---------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Convert the first SVG                    | [Your first conversion](#your-first-conversion)                                  | Install the CLI, generate components, and inspect the outputs.    |
+| Generate for a particular UI framework   | [Framework cookbook](#framework-cookbook)                                        | Choose the correct target and consumer toolchain.                 |
+| Set up a multi-framework library         | [Multi-target generation](#generate-several-targets-from-the-same-svg-catalog)   | Generate independently for several frameworks.                    |
+| Choose flags or understand a command     | [Command reference](#command-reference)                                          | Learn each registered command's purpose and options.              |
+| Integrate with the build pipeline        | [Build tool integrations](#build-tool-and-test-integrations)                     | Configure Vite, Webpack, Rollup, Babel, Next.js, or Jest.         |
+| Test sample SVG assets                   | [Sample SVG testing](#sample-svg-testing)                                        | Exercise generation against sample files.                         |
+| Compare local compilers                  | [Local evaluation](#local-benchmark-quality-and-security-evaluation-planned-410) | Collect real host-specific timing, quality, and regression data.  |
+| Protect generated output and collaborate | [Team workflows](#recipes-for-teams-and-ci)                                      | Review changes, handle interruptions, and validate CI state.      |
+| Set up CI or containerized generation    | [Deployment patterns](#ci-and-container-deployment-patterns)                     | Reproduce a generation/check workflow in an isolated environment. |
+| Find detailed reference material         | [Documentation directory](#categorized-documentation-directory)                  | Follow categorized guides and API references.                     |
 
 ## At a glance
 
@@ -146,6 +168,45 @@ The general syntax is `svger-cli build <src> <out>` and `svger-cli generate <svg
 documentation sometimes uses `--src` and `--out`; these are deprecated build/watch/clean aliases,
 **not** the preferred form. Inspect the actual generated filename, extension, props and index
 exports because their details depend on framework, language and configuration.
+
+### What is generated? Files, exports, and integration
+
+The original README showed generated file trees and import patterns; those are useful for
+understanding what happens after `build`. The exact filenames, extensions, barrel exports, and props
+depend on framework, naming configuration, and compiler mode. **This is an example layout, not a
+literal output contract:**
+
+```text
+src/generated/icons/
+├── Home.tsx             # Example React/TypeScript component (name may differ)
+├── Search.tsx           # Example React/TypeScript component
+└── index.ts             # Optional generated barrel, if enabled
+```
+
+For a React project, inspect the generated barrel before choosing named imports:
+
+```tsx
+// Example consumer code; adapt names to the actual generated files.
+import { Home, Search } from './generated/icons';
+
+export function Navigation() {
+  return (
+    <nav aria-label="Primary">
+      <button type="button" aria-label="Home">
+        <Home width={20} height={20} />
+      </button>
+      <button type="button" aria-label="Search">
+        <Search width={20} height={20} />
+      </button>
+    </nav>
+  );
+}
+```
+
+If no barrel is generated, import each component from its actual file. For Vue, Svelte and Angular,
+generated component syntax and import/registration conventions differ; use the relevant framework
+recipe rather than renaming a `.tsx` file. SVG optimization can also change markup. Review output
+for accessibility and visual correctness before shipping.
 
 ## Framework cookbook
 
@@ -308,6 +369,36 @@ npx svger-cli build assets/icons src/generated/vanilla-ts --framework vanilla --
 **Use case:** non-framework applications and simple shared UI utilities. The generated output's
 export/DOM contract depends on the selected language and generator; inspect it before integrating.
 
+### Consumer-side patterns beyond React, Vue, and Svelte
+
+The old README illustrated components for all nine targets. The following deliberately shows **how a
+consuming application might integrate the generated output**, without asserting that the generator
+always uses a particular symbol, selector or custom-element tag.
+
+| Target            | Consumer pattern                                                                                                          | What you must verify in generated code                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **React Native**  | Import and render the generated component in JSX.                                                                         | `react-native-svg` peer dependency, emitted native SVG imports and props.                             |
+| **Angular**       | Import the generated component class into the appropriate module/standalone component and use its selector in a template. | Class export, selector, standalone configuration and required Angular version.                        |
+| **Solid**         | Import the generated JSX component and use it in a Solid template.                                                        | JSX transform, prop typing and export form.                                                           |
+| **Preact**        | Import the component into a Preact application and render in JSX.                                                         | Preact JSX setup and exported component name.                                                         |
+| **Lit**           | Import the generated element module, then use its registered tag in markup.                                               | Element registration and custom-element tag name; these cannot be guessed from SVG filenames.         |
+| **Vanilla JS/TS** | Import and invoke the generated factory or API from browser-side code.                                                    | Whether the output returns an element, markup, or another type; check the generated export signature. |
+
+For example, this is a **consumer illustration** for React Native after inspecting the emitted
+component and installing the corresponding SVG runtime:
+
+```tsx
+// The actual import path/export depends on the generated artifact.
+import Home from './generated/react-native/Home';
+
+export function MobileTabIcon() {
+  return <Home width={24} height={24} />;
+}
+```
+
+Install `react-native-svg` in the React Native application when the generated artifact requires it.
+Framework packages and their consumer compilers are not automatically installed by SVGER-CLI.
+
 ### Generate several targets from the same SVG catalog
 
 ```bash
@@ -338,6 +429,28 @@ is appropriate for monorepos and component libraries; package and test each targ
 The JS/TS column describes the intended generator-language contract, not a guarantee that every
 downstream toolchain needs no configuration. More in [Framework Guide](./docs/FRAMEWORK-GUIDE.md)
 and [Support Matrix](./docs/SUPPORT-MATRIX.md).
+
+## Sample SVG testing
+
+The older README introduced an optional `test-svger` executable and sample assets. That is useful
+for trying the generator without creating a full application, but the older text's **“500+ SVGs,”
+default output, flag behavior, and example timings are historical claims**, not independently
+certified for the planned 4.1.0 branch.
+
+```bash
+# First install the project package so its local executables are available.
+npm install --save-dev svger-cli
+
+# Run the installed sample-testing utility, where supplied by this package version.
+./node_modules/.bin/test-svger
+```
+
+**Purpose:** exercise bundled/sample SVG processing using the installed package's test utility. This
+is a local test operation, not a production build or substitute for the reproducible Phase 040
+evaluator. It may create test output; use a disposable directory if you do not want generated files
+in your project. For supported flags and the current asset inventory, consult
+[Sample SVG Testing](./docs/SAMPLE-SVGS-TESTING.md) and inspect the installed `test-svger`
+implementation before assuming options from older documentation.
 
 ## Svelte IR v1 opt-in (planned 4.1.0)
 
@@ -1026,6 +1139,55 @@ npm run evaluate:local
 are intended for the **planned 4.1.0 development branch**; inspect `package.json` for the complete
 script list and exact definitions in your checkout. A release remains blocked until required
 independent CI, maintainer review and security/governance closure.
+
+### CI and container deployment patterns
+
+The old README included lengthy GitHub Actions and Docker examples. These shorter patterns capture
+the useful workflow without claiming built-in hosting, deployment, or remote execution. **Generated
+output should be treated as an artifact**, reviewed and tested like other source code.
+
+**Example: CI validation when generated artifacts are committed to Git.** Adjust paths and Node
+versions for your project:
+
+```yaml
+# .github/workflows/generated-icons.yml
+name: Validate generated icons
+on: [push, pull_request]
+jobs:
+  icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npx svger-cli build assets/icons src/generated/icons --framework react --check
+```
+
+`npm ci` restores the project's committed dependency lock; `--check` validates whether generated
+output is current without rewriting it. This example assumes the SVG inputs, output policy,
+framework, and installed CLI version match the local generator configuration. Pin workflow actions
+to commit SHAs for a more restrictive supply-chain policy.
+
+**Example: an isolated container generation step.** This is suitable when SVG conversion is part of
+a CI artifact pipeline rather than an in-browser benchmark:
+
+```dockerfile
+# Dockerfile.icons — example; pin the exact digest in controlled CI environments.
+FROM node:20-alpine
+WORKDIR /workspace
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY assets/icons ./assets/icons
+RUN npx svger-cli build assets/icons src/generated/icons --framework react --typescript
+```
+
+`RUN npm ci` installs the locked toolchain; the final step produces generated components inside the
+image. Copy or export the resulting files from the build stage only after verifying their expected
+paths. Native optional rasterization needs a separate compatible environment and is not enabled by
+these examples.
 
 ## Troubleshooting
 
