@@ -14,6 +14,50 @@ export interface SVGXMLFinding {
 export interface SVGXMLScan {
   findings: SVGXMLFinding[];
   edits: Array<{ start: number; end: number }>;
+  document?: SVGXMLDocument;
+}
+
+export interface SVGXMLSourceSpan {
+  start: number;
+  end: number;
+  unit: 'utf16-code-unit';
+}
+
+export interface SVGXMLName {
+  namespaceUri: string | null;
+  localName: string;
+  qualifiedName: string;
+  prefix: string | null;
+}
+
+export interface SVGXMLAttribute {
+  kind: 'attribute';
+  name: SVGXMLName;
+  value: string;
+  sourceSpan: SVGXMLSourceSpan;
+}
+
+export interface SVGXMLTextNode {
+  kind: 'text' | 'cdata' | 'comment';
+  value: string;
+  sourceSpan: SVGXMLSourceSpan;
+  contentSpan?: SVGXMLSourceSpan;
+}
+
+export interface SVGXMLElement {
+  kind: 'element';
+  name: SVGXMLName;
+  attributes: SVGXMLAttribute[];
+  children: Array<SVGXMLElement | SVGXMLTextNode>;
+  startTagSpan: SVGXMLSourceSpan;
+  endTagSpan?: SVGXMLSourceSpan;
+}
+
+export interface SVGXMLDocument {
+  kind: 'document';
+  prolog: SVGXMLTextNode[];
+  epilog: SVGXMLTextNode[];
+  root: SVGXMLElement;
 }
 
 export class SVGXMLSecurityError extends Error {
@@ -35,6 +79,9 @@ export class SVGXMLSecurityError extends Error {
 const MAX_DEPTH = 256;
 const MAX_ELEMENTS = 100_000;
 const MAX_ATTRIBUTES = 256;
+const MAX_TOTAL_ATTRIBUTES = 250_000;
+const MAX_DECODED_TEXT_BYTES = 10 * 1024 * 1024;
+const MAX_ATTRIBUTE_VALUE_BYTES = 10 * 1024 * 1024;
 const MAX_FINDINGS = 256;
 const MAX_EDITS = 10_000;
 const MAX_STYLE_SIZE_BYTES = 1024 * 1024;
@@ -69,6 +116,7 @@ const ENTITIES: Record<string, string> = {
 interface Attr {
   name: string;
   value: string;
+  normalizedValue: string;
   start: number;
   end: number;
 }
@@ -77,6 +125,7 @@ interface Frame {
   lower: string;
   namespaces: Map<string, string>;
   unsafeStart?: number;
+  node?: SVGXMLElement;
 }
 
 function invalid(message: string, offset: number): never {
@@ -115,6 +164,41 @@ function decodeEntities(value: string, offset: number): string {
     i = end;
   }
   return result;
+}
+
+function normalizeXmlText(value: string): string {
+  return value.replace(/\r\n?/gu, '\n');
+}
+
+function normalizeXmlAttribute(value: string): string {
+  return value.replace(/\r\n?|\n|\t/gu, ' ');
+}
+
+function expandedName(
+  qualifiedName: string,
+  namespaces: ReadonlyMap<string, string>,
+  attribute = false,
+  offset = 0
+): SVGXMLName {
+  const colon = qualifiedName.indexOf(':');
+  if (colon !== qualifiedName.lastIndexOf(':'))
+    invalid('Malformed qualified XML name.', offset);
+  const prefix = colon < 0 ? null : qualifiedName.slice(0, colon);
+  const localName = colon < 0 ? qualifiedName : qualifiedName.slice(colon + 1);
+  if (!localName) invalid('Malformed qualified XML name.', offset);
+  const namespaceUri =
+    qualifiedName === 'xmlns' || prefix === 'xmlns'
+      ? 'http://www.w3.org/2000/xmlns/'
+      : attribute && prefix === null
+        ? null
+        : prefix === null
+          ? (namespaces.get('') ?? null)
+          : (namespaces.get(prefix) ?? null);
+  return { namespaceUri, localName, qualifiedName, prefix };
+}
+
+function sourceSpan(start: number, end: number): SVGXMLSourceSpan {
+  return { start, end, unit: 'utf16-code-unit' };
 }
 
 function cssUnescape(css: string): string {
@@ -228,7 +312,10 @@ function add(
   scan.edits.push({ start, end });
 }
 
-export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
+export function scanSVGSecurityBoundary(
+  input: string,
+  options: { collectDocument?: boolean } = {}
+): SVGXMLScan {
   const hasBOM = input.startsWith('\uFEFF');
   const text = input;
   if (text.includes('\u0000') || text.includes('\uFFFD')) {
@@ -264,6 +351,24 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
   let styleChunks: string[] = [];
   let styleSizeBytes = 0;
   let styleStart = 0;
+  let totalAttributes = 0;
+  let decodedTextBytes = 0;
+  let attributeValueBytes = 0;
+  const document: SVGXMLDocument | undefined = options.collectDocument
+    ? { kind: 'document', prolog: [], epilog: [], root: undefined as never }
+    : undefined;
+  let rootNode: SVGXMLElement | undefined;
+
+  const appendTextNode = (value: string, start: number, end: number): void => {
+    const parent = stack.at(-1)?.node;
+    if (document && parent && value.length > 0) {
+      parent.children.push({
+        kind: 'text',
+        value,
+        sourceSpan: sourceSpan(start, end),
+      });
+    }
+  };
   const appendStyleText = (chunk: string): void => {
     styleSizeBytes += Buffer.byteLength(chunk, 'utf8');
     if (
@@ -322,9 +427,22 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
       const raw = text.slice(valueStart, valueEnd);
       if (/[<>]/.test(raw))
         invalid('Invalid character in XML attribute value.', valueStart);
+      const decodedValue = decodeEntities(raw, valueStart);
+      const normalizedValue = decodeEntities(
+        normalizeXmlAttribute(raw),
+        valueStart
+      );
+      attributeValueBytes += Buffer.byteLength(normalizedValue, 'utf8');
+      if (attributeValueBytes > MAX_ATTRIBUTE_VALUE_BYTES)
+        throw new SVGXMLSecurityError(
+          'E_SVG_XML_LIMIT',
+          'SVG aggregate attribute values exceed the scanner limit.',
+          { limit: MAX_ATTRIBUTE_VALUE_BYTES, offset: attrStart }
+        );
       attrs.push({
         name: attrName,
-        value: decodeEntities(raw, valueStart),
+        value: decodedValue,
+        normalizedValue,
         start: attrStart,
         end: valueEnd + 1,
       });
@@ -345,9 +463,23 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
     const chars = text.slice(pos, textEnd);
     if (!stack.length && chars.trim())
       invalid('Text is not allowed outside the SVG root element.', pos);
+    if (chars.includes(']]>'))
+      invalid(
+        'The sequence ]]> is not allowed in XML text.',
+        pos + chars.indexOf(']]>')
+      );
+    const normalizedText = decodeEntities(normalizeXmlText(chars), pos);
+    decodedTextBytes += Buffer.byteLength(normalizedText, 'utf8');
+    if (decodedTextBytes > MAX_DECODED_TEXT_BYTES)
+      throw new SVGXMLSecurityError(
+        'E_SVG_XML_LIMIT',
+        'SVG decoded text exceeds the scanner limit.',
+        { limit: MAX_DECODED_TEXT_BYTES, offset: pos }
+      );
     if (stack.at(-1)?.lower === 'style')
       appendStyleText(decodeEntities(chars, pos));
     else decodeEntities(chars, pos);
+    appendTextNode(normalizedText, pos, textEnd);
     if (open < 0) {
       pos = text.length;
       break;
@@ -358,6 +490,17 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
       const end = text.indexOf('-->', open + 4);
       if (end < 0 || text.slice(open + 4, end).includes('--'))
         invalid('Malformed XML comment.', open);
+      if (document) {
+        const comment: SVGXMLTextNode = {
+          kind: 'comment',
+          value: normalizeXmlText(text.slice(open + 4, end)),
+          sourceSpan: sourceSpan(open, end + 3),
+        };
+        const parent = stack.at(-1)?.node;
+        if (parent) parent.children.push(comment);
+        else if (!rootNode) document.prolog.push(comment);
+        else document.epilog.push(comment);
+      }
       pos = end + 3;
       continue;
     }
@@ -366,8 +509,26 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
         invalid('CDATA is only valid inside the SVG root.', open);
       const end = text.indexOf(']]>', open + 9);
       if (end < 0) invalid('Unterminated CDATA section.', open);
+      const cdataValue = normalizeXmlText(text.slice(open + 9, end));
+      decodedTextBytes += Buffer.byteLength(cdataValue, 'utf8');
+      if (decodedTextBytes > MAX_DECODED_TEXT_BYTES)
+        throw new SVGXMLSecurityError(
+          'E_SVG_XML_LIMIT',
+          'SVG decoded text exceeds the scanner limit.',
+          { limit: MAX_DECODED_TEXT_BYTES, offset: open }
+        );
       if (stack.at(-1)?.lower === 'style')
         appendStyleText(text.slice(open + 9, end));
+      if (document) {
+        const parent = stack.at(-1)?.node;
+        if (parent)
+          parent.children.push({
+            kind: 'cdata',
+            value: cdataValue,
+            sourceSpan: sourceSpan(open, end + 3),
+            contentSpan: sourceSpan(open + 9, end),
+          });
+      }
       pos = end + 3;
       continue;
     }
@@ -426,6 +587,7 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
       }
       if (frame.unsafeStart !== undefined)
         scan.edits.push({ start: frame.unsafeStart, end: i + 1 });
+      if (frame.node) frame.node.endTagSpan = sourceSpan(open, i + 1);
       pos = i + 1;
       continue;
     }
@@ -444,6 +606,13 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
         'E_SVG_XML_LIMIT',
         'SVG element count exceeds the safety limit.',
         { limit: MAX_ELEMENTS }
+      );
+    totalAttributes += tag.attrs.length;
+    if (totalAttributes > MAX_TOTAL_ATTRIBUTES)
+      throw new SVGXMLSecurityError(
+        'E_SVG_XML_LIMIT',
+        'SVG aggregate attribute count exceeds the scanner limit.',
+        { limit: MAX_TOTAL_ATTRIBUTES, offset: open }
       );
     if (stack.length + 1 > MAX_DEPTH)
       throw new SVGXMLSecurityError(
@@ -533,6 +702,25 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
         );
       }
     }
+    let elementNode: SVGXMLElement | undefined;
+    if (document) {
+      elementNode = {
+        kind: 'element',
+        name: expandedName(tag.name, namespaces, false, open),
+        attributes: tag.attrs.map(attr => ({
+          kind: 'attribute' as const,
+          name: expandedName(attr.name, namespaces, true, attr.start),
+          value: attr.normalizedValue,
+          sourceSpan: sourceSpan(attr.start, attr.end),
+        })),
+        children: [],
+        startTagSpan: sourceSpan(open, tag.end),
+      };
+      const parent = stack.at(-1)?.node;
+      if (parent) parent.children.push(elementNode);
+      else rootNode = elementNode;
+      if (tag.self) elementNode.endTagSpan = sourceSpan(open, tag.end);
+    }
     if (lower === 'style') {
       styleStart = open;
       styleChunks = [];
@@ -545,6 +733,7 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
         lower,
         namespaces,
         ...(unsafeStart === undefined ? {} : { unsafeStart }),
+        ...(elementNode === undefined ? {} : { node: elementNode }),
       });
     else if (unsafeStart !== undefined)
       scan.edits[scan.edits.length - 1] = { start: open, end: tag.end };
@@ -552,5 +741,9 @@ export function scanSVGSecurityBoundary(input: string): SVGXMLScan {
   if (stack.length) invalid('Unclosed XML element.', text.length);
   if (roots !== 1)
     invalid('SVG input must contain exactly one <svg> root element.', 0);
+  if (document && rootNode) {
+    document.root = rootNode;
+    scan.document = document;
+  }
   return scan;
 }

@@ -321,10 +321,16 @@ export interface OutputContent {
 // transaction still stages privately; the lock only protects the shared final
 // names and the hadOriginal snapshots from interleaving with another commit.
 const outputDirectoryTails = new Map<string, Promise<void>>();
+let outputDirectoryPendingWaiters = 0;
 
 /** @internal Exposed only from this module for lifecycle regression tests. */
 export function getOutputTransactionLockCountForTesting(): number {
   return outputDirectoryTails.size;
+}
+
+/** @internal Exposed only from this module for lock-order regression tests. */
+export function getOutputTransactionPendingWaiterCountForTesting(): number {
+  return outputDirectoryPendingWaiters;
 }
 
 async function withOutputDirectoryLock<T>(
@@ -347,7 +353,14 @@ async function withOutputDirectoryLock<T>(
     release = resolve;
   });
   outputDirectoryTails.set(key, current);
-  await previous;
+  if (previous !== undefined) {
+    outputDirectoryPendingWaiters++;
+    try {
+      await previous;
+    } finally {
+      outputDirectoryPendingWaiters--;
+    }
+  }
   try {
     return await operation();
   } finally {

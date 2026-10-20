@@ -3,9 +3,9 @@
   "package": "svger-cli@4.0.9",
   "summary": {
     "filename": "svger-cli-4.0.9.tgz",
-    "packedBytes": 634254,
-    "unpackedBytes": 2079669,
-    "entryCount": 754,
+    "packedBytes": 635977,
+    "unpackedBytes": 2067570,
+    "entryCount": 753,
     "groups": {
       ".svgerconfig.example.json": 1,
       "CHANGELOG.md": 1,
@@ -15,9 +15,9 @@
       "SECURITY.md": 1,
       "assets": 606,
       "bin": 2,
-      "dist": 125,
+      "dist": 128,
       "docs": 8,
-      "examples": 6,
+      "examples": 2,
       "package.json": 1
     }
   },
@@ -53,10 +53,10 @@
     "id": "svger-cli@4.0.9",
     "name": "svger-cli",
     "version": "4.0.9",
-    "size": 634254,
-    "unpackedSize": 2079669,
-    "shasum": "02f96fdc79135664e2a204cb4d263d1b2b6d8526",
-    "integrity": "sha512-6/ito1n4ocXB8oxivWTEJS/SpW4MOfnmxqiJU28KtbsxUjdj6kPNkBVatiudbldOX+flmvP25wyDZh9FuCIGzA==",
+    "size": 635977,
+    "unpackedSize": 2067570,
+    "shasum": "01882e3027aa9aab6fc8368b80e36d7aa6603ba1",
+    "integrity": "sha512-OM6rOJMGmL91NOzNCb/HOE2ndNmf2b8DELv5ctiNzK64bhrwrmm46Pu1h8zX/qRuzaR0TmWIJ6Owv49+uQFTKQ==",
     "filename": "svger-cli-4.0.9.tgz",
     "files": [
       {
@@ -3156,12 +3156,12 @@
       },
       {
         "path": "dist/application/output-transaction.d.ts",
-        "size": 947,
+        "size": 1111,
         "mode": 420
       },
       {
         "path": "dist/application/output-transaction.js",
-        "size": 22904,
+        "size": 23322,
         "mode": 420
       },
       {
@@ -3171,12 +3171,12 @@
       },
       {
         "path": "dist/application/svg-compiler-application-service.d.ts",
-        "size": 1933,
+        "size": 1974,
         "mode": 420
       },
       {
         "path": "dist/application/svg-compiler-application-service.js",
-        "size": 19627,
+        "size": 19811,
         "mode": 420
       },
       {
@@ -3196,7 +3196,7 @@
       },
       {
         "path": "dist/cache/content-addressable-cache.js",
-        "size": 7065,
+        "size": 7128,
         "mode": 420
       },
       {
@@ -3265,6 +3265,21 @@
         "mode": 420
       },
       {
+        "path": "dist/compiler/ir-v1.js",
+        "size": 8219,
+        "mode": 420
+      },
+      {
+        "path": "dist/compiler/lower-svg-document-to-ir.js",
+        "size": 5310,
+        "mode": 420
+      },
+      {
+        "path": "dist/compiler/svelte-ir-emitter.js",
+        "size": 7056,
+        "mode": 420
+      },
+      {
         "path": "dist/config.js",
         "size": 1525,
         "mode": 420
@@ -3276,7 +3291,7 @@
       },
       {
         "path": "dist/configuration/resolver.js",
-        "size": 8140,
+        "size": 8567,
         "mode": 420
       },
       {
@@ -3631,22 +3646,22 @@
       },
       {
         "path": "dist/processors/svg-processor.js",
-        "size": 18822,
+        "size": 8665,
         "mode": 420
       },
       {
         "path": "dist/security/input-safety.d.ts",
-        "size": 1070,
+        "size": 2737,
         "mode": 420
       },
       {
         "path": "dist/security/input-safety.js",
-        "size": 6744,
+        "size": 4532,
         "mode": 420
       },
       {
         "path": "dist/security/svg-xml-safety.js",
-        "size": 17858,
+        "size": 11351,
         "mode": 420
       },
       {
@@ -3691,7 +3706,7 @@
       },
       {
         "path": "dist/types/index.d.ts",
-        "size": 6150,
+        "size": 6311,
         "mode": 420
       },
       {
@@ -3736,12 +3751,12 @@
       },
       {
         "path": "dist/utils/visual-diff.d.ts",
-        "size": 4858,
+        "size": 4611,
         "mode": 420
       },
       {
         "path": "dist/utils/visual-diff.js",
-        "size": 10644,
+        "size": 5491,
         "mode": 420
       },
       {
@@ -3761,7 +3776,7 @@
       },
       {
         "path": "docs/INTEGRATIONS.md",
-        "size": 13975,
+        "size": 14763,
         "mode": 420
       },
       {
@@ -3771,7 +3786,7 @@
       },
       {
         "path": "docs/OPTIONAL-DEPENDENCIES.md",
-        "size": 4438,
+        "size": 5010,
         "mode": 420
       },
       {
@@ -3795,26 +3810,6 @@
         "mode": 420
       },
       {
-        "path": "examples/babel.config.example.js",
-        "size": 4917,
-        "mode": 420
-      },
-      {
-        "path": "examples/jest.config.example.js",
-        "size": 3399,
-        "mode": 420
-      },
-      {
-        "path": "examples/next.config.example.js",
-        "size": 2821,
-        "mode": 420
-      },
-      {
-        "path": "examples/rollup.config.example.js",
-        "size": 2912,
-        "mode": 420
-      },
-      {
         "path": "examples/vite.config.example.js",
         "size": 2292,
         "mode": 420
@@ -3826,11 +3821,11 @@
       },
       {
         "path": "package.json",
-        "size": 14564,
+        "size": 15720,
         "mode": 420
       }
     ],
-    "entryCount": 754,
+    "entryCount": 753,
     "bundled": []
   },
   "tarEntries": [
@@ -3838,7 +3833,6 @@
     "package/dist/optimizers/advanced-stages.js",
     "package/dist/application/artifact-contract.js",
     "package/dist/io/atomic-write.js",
-    "package/examples/babel.config.example.js",
     "package/dist/integrations/babel.js",
     "package/dist/optimizers/basic-cleaner.js",
     "package/dist/application/bounded-scheduler.js",
@@ -3868,15 +3862,15 @@
     "package/dist/types/index.js",
     "package/dist/security/input-safety.js",
     "package/dist/types/integrations.js",
+    "package/dist/compiler/ir-v1.js",
     "package/dist/integrations/jest-preset.js",
-    "package/examples/jest.config.example.js",
     "package/dist/lock.js",
     "package/dist/core/logger.js",
+    "package/dist/compiler/lower-svg-document-to-ir.js",
     "package/dist/commands/migrate-command.js",
     "package/dist/migration/migration-toolkit.js",
     "package/dist/optimizers/move-attrs-to-parent.js",
     "package/dist/utils/native.js",
-    "package/examples/next.config.example.js",
     "package/dist/integrations/nextjs.js",
     "package/dist/optimizers/numeric-optimizer.js",
     "package/dist/commands/operational-commands.js",
@@ -3895,13 +3889,13 @@
     "package/dist/optimizers/remove-unused-defs.js",
     "package/dist/contracts/reporting.js",
     "package/dist/configuration/resolver.js",
-    "package/examples/rollup.config.example.js",
     "package/dist/integrations/rollup.js",
     "package/dist/optimizers/shape-conversion.js",
     "package/dist/application/source-discovery.js",
     "package/dist/plugins/stroke-normalizer.js",
     "package/dist/core/style-compiler.js",
     "package/dist/optimizers/style-optimizer.js",
+    "package/dist/compiler/svelte-ir-emitter.js",
     "package/dist/application/svg-compiler-application-service.js",
     "package/dist/processors/svg-processor.js",
     "package/dist/services/svg-service.js",

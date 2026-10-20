@@ -63,6 +63,7 @@ export interface BuildRequest {
   frameworkOptions?: FrameworkOptions;
   optimize?: string;
   typescript?: boolean;
+  svelteCompiler?: 'legacy' | 'ir-v1';
   maxInputSizeBytes?: number;
   unsafeInputPolicy?: UnsafeInputPolicy;
   mode?: BuildMode;
@@ -135,6 +136,9 @@ function requestConfiguration(request: BuildRequest): Partial<SVGConfig> {
     ...(request.typescript === undefined
       ? {}
       : { typescript: request.typescript }),
+    ...(request.svelteCompiler === undefined
+      ? {}
+      : { svelteCompiler: request.svelteCompiler }),
     ...(request.maxInputSizeBytes === undefined
       ? {}
       : { maxInputSizeBytes: request.maxInputSizeBytes }),
@@ -575,6 +579,7 @@ export class SVGCompilerApplicationService {
               {
                 framework: config.framework,
                 typescript: config.typescript,
+                svelteCompiler: config.svelteCompiler,
                 frameworkOptions: config.frameworkOptions,
                 defaultWidth: config.defaultWidth,
                 defaultHeight: config.defaultHeight,

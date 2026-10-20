@@ -164,7 +164,7 @@ export default {
 | `sourcemap`  | boolean | `false`                    | Generate source maps                      |
 | `exportType` | string  | `'default'`                | Export type ('default' or 'named')        |
 
-[See full example →](./examples/rollup.config.example.js)
+[See the full Rollup configuration in the SVGER-CLI repository →](https://github.com/faezemohades/svger-cli/blob/main/examples/rollup.config.example.js)
 
 ---
 
@@ -312,7 +312,7 @@ module.exports = {
 };
 ```
 
-[See full example →](./examples/babel.config.example.js)
+[See the full Babel configuration in the SVGER-CLI repository →](https://github.com/faezemohades/svger-cli/blob/main/examples/babel.config.example.js)
 
 ---
 
@@ -354,7 +354,7 @@ module.exports = withSvger({
 | `ssr`        | boolean | `true`                     | Enable Server-Side Rendering support      |
 | `hmr`        | boolean | `true`                     | Enable Hot Module Replacement             |
 
-[See full example →](./examples/next.config.example.js)
+[See the full Next.js configuration in the SVGER-CLI repository →](https://github.com/faezemohades/svger-cli/blob/main/examples/next.config.example.js)
 
 ---
 
@@ -401,7 +401,7 @@ transform: {
 }
 ```
 
-[See full example →](./examples/jest.config.example.js)
+[See the full Jest configuration in the SVGER-CLI repository →](https://github.com/faezemohades/svger-cli/blob/main/examples/jest.config.example.js)
 
 ---
 
@@ -471,14 +471,16 @@ All integrations support these frameworks:
 
 ## 📚 Complete Examples
 
-Explore full working examples in the [`examples/`](./examples/) directory:
+The npm archive includes the Webpack and Vite configuration files in `examples/`. To preserve the
+reviewed package entry-count headroom, the full Babel, Jest, Next.js, and Rollup files remain in the
+repository rather than the tarball. Their complete configurations are available here:
 
 - [Webpack Configuration](./examples/webpack.config.example.js)
 - [Vite Configuration](./examples/vite.config.example.js)
-- [Rollup Configuration](./examples/rollup.config.example.js)
-- [Babel Configuration](./examples/babel.config.example.js)
-- [Next.js Configuration](./examples/next.config.example.js)
-- [Jest Configuration](./examples/jest.config.example.js)
+- [Rollup Configuration](https://github.com/faezemohades/svger-cli/blob/main/examples/rollup.config.example.js)
+- [Babel Configuration](https://github.com/faezemohades/svger-cli/blob/main/examples/babel.config.example.js)
+- [Next.js Configuration](https://github.com/faezemohades/svger-cli/blob/main/examples/next.config.example.js)
+- [Jest Configuration](https://github.com/faezemohades/svger-cli/blob/main/examples/jest.config.example.js)
 
 ---
 

@@ -10,7 +10,10 @@ import {
   commitOutputTransaction,
 } from '../../dist/index.js';
 import { runBounded } from '../../dist/application/bounded-scheduler.js';
-import { getOutputTransactionLockCountForTesting } from '../../dist/application/output-transaction.js';
+import {
+  getOutputTransactionLockCountForTesting,
+  getOutputTransactionPendingWaiterCountForTesting,
+} from '../../dist/application/output-transaction.js';
 import { SvgerWebpackPlugin } from '../../dist/integrations/webpack.js';
 import { SVGService } from '../../dist/services/svg-service.js';
 import { fileWatcher } from '../../dist/services/file-watcher.js';
@@ -42,6 +45,18 @@ function createTrackedSignal() {
   };
 }
 
+async function waitForTransactionWaiters(expected) {
+  for (let turn = 0; turn < 10_000; turn++) {
+    if (getOutputTransactionPendingWaiterCountForTesting() === expected) return;
+    await new Promise(resolve => setImmediate(resolve));
+  }
+  assert.equal(
+    getOutputTransactionPendingWaiterCountForTesting(),
+    expected,
+    'transactions should reach the lock registration boundary'
+  );
+}
+
 // Concurrent commits into a shared output directory must never interleave the
 // files from two independently generated artifact sets.
 {
@@ -70,7 +85,8 @@ function createTrackedSignal() {
 }
 
 // A partially applied transaction failure restores the prior output, releases
-// its directory lock, and permits already-queued aliases in FIFO order.
+// its directory lock, and permits aliases already registered at the canonical
+// directory lock to proceed in waiter-registration FIFO order.
 {
   const output = path.join(fixture, 'failure-output');
   const outputAlias = path.join(fixture, 'failure-output-alias');
@@ -85,6 +101,14 @@ function createTrackedSignal() {
   } catch (error) {
     if (!['EPERM', 'EACCES', 'ENOTSUP'].includes(error?.code)) throw error;
     symlinkAliasCreated = false;
+  }
+  if (symlinkAliasCreated) {
+    assert.equal(await fs.realpath(outputAlias), await fs.realpath(output));
+  } else {
+    assert.equal(
+      path.resolve(output, '..', 'failure-output'),
+      path.resolve(output)
+    );
   }
   await fs.writeFile(path.join(output, 'left.txt'), 'original-left');
   await fs.writeFile(path.join(output, 'right.txt'), 'original-right');
@@ -103,17 +127,6 @@ function createTrackedSignal() {
   });
   let failureInjected = false;
   const originalRename = fs.rename;
-  const originalRealpath = fs.realpath;
-  let directRealpathCalls = 0;
-  let notifyAliasResolved;
-  let notifyThirdResolved;
-  const aliasResolved = new Promise(resolve => {
-    notifyAliasResolved = resolve;
-  });
-  const thirdResolved = new Promise(resolve => {
-    notifyThirdResolved = resolve;
-  });
-
   fs.rename = async (source, destination) => {
     if (
       !failureInjected &&
@@ -136,26 +149,6 @@ function createTrackedSignal() {
     }
     return renamed;
   };
-  fs.realpath = async candidate => {
-    const result = await originalRealpath.call(fs, candidate);
-    if (
-      symlinkAliasCreated &&
-      path.resolve(String(candidate)) === outputAlias
-    ) {
-      notifyAliasResolved();
-    }
-    if (path.resolve(String(candidate)) === output) {
-      directRealpathCalls++;
-      if (!symlinkAliasCreated && directRealpathCalls === 2) {
-        notifyAliasResolved();
-      }
-      if (directRealpathCalls === (symlinkAliasCreated ? 2 : 3)) {
-        notifyThirdResolved();
-      }
-    }
-    return result;
-  };
-
   try {
     const failed = commitOutputTransaction(output, [
       { outputFileName: 'left.txt', content: 'failed-left' },
@@ -176,6 +169,7 @@ function createTrackedSignal() {
     ).then(() => {
       secondSettled = true;
     });
+    await waitForTransactionWaiters(1);
     const third = commitOutputTransaction(output, [
       { outputFileName: 'left.txt', content: 'third-left' },
       { outputFileName: 'right.txt', content: 'third-right' },
@@ -183,10 +177,7 @@ function createTrackedSignal() {
       thirdSettled = true;
     });
 
-    await Promise.all([aliasResolved, thirdResolved]);
-    // Let both realpath continuations enqueue behind the held first commit.
-    await Promise.resolve();
-    await Promise.resolve();
+    await waitForTransactionWaiters(2);
     assert.equal(secondSettled, false);
     assert.equal(thirdSettled, false);
     assert.equal(getOutputTransactionLockCountForTesting(), 1);
@@ -215,6 +206,7 @@ function createTrackedSignal() {
       'third-right'
     );
     assert.equal(getOutputTransactionLockCountForTesting(), 0);
+    assert.equal(getOutputTransactionPendingWaiterCountForTesting(), 0);
     assert.deepEqual(
       (await fs.readdir(fixture)).filter(
         name =>
@@ -226,7 +218,6 @@ function createTrackedSignal() {
   } finally {
     releaseFailurePoint();
     fs.rename = originalRename;
-    fs.realpath = originalRealpath;
   }
 
   for (let index = 0; index < 25; index++) {

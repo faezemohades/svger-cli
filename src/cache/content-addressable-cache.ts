@@ -110,6 +110,7 @@ export function createPipelineFingerprint(
     featureFlags: Object.freeze({
       typescript: config.typescript,
       framework: config.framework,
+      svelteCompiler: config.svelteCompiler ?? 'legacy',
       stripUnsafeInput: config.unsafeInputPolicy === 'strip',
     }),
     resolvedConfigHash: hashValue(stableSerialize(config)),

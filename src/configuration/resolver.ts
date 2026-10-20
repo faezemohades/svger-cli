@@ -55,6 +55,18 @@ function configurationErrors(
   if (typeof record.typescript !== 'boolean') {
     errors.push('typescript must be a boolean');
   }
+  if (
+    record.svelteCompiler !== undefined &&
+    record.svelteCompiler !== 'legacy' &&
+    record.svelteCompiler !== 'ir-v1'
+  ) {
+    errors.push('svelteCompiler must be "legacy" or "ir-v1"');
+  } else if (
+    record.svelteCompiler !== undefined &&
+    record.framework !== 'svelte'
+  ) {
+    errors.push('svelteCompiler is supported only for Svelte');
+  }
   for (const key of ['watch', 'parallel', 'cache']) {
     if (typeof record[key] !== 'boolean') {
       errors.push(`${key} must be a boolean`);
@@ -263,7 +275,11 @@ export function resolveConfiguration(
   const config = result as unknown as SVGConfig;
   const errors = configurationErrors(
     config,
-    new Set([...Object.keys(defaultConfig), 'frameworkOptions'])
+    new Set([
+      ...Object.keys(defaultConfig),
+      'frameworkOptions',
+      'svelteCompiler',
+    ])
   );
   if (errors.length > 0) {
     throw new DiagnosticError(
