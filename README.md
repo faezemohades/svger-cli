@@ -433,25 +433,25 @@ and [Support Matrix](./docs/SUPPORT-MATRIX.md).
 
 ## Sample SVG testing
 
-The older README introduced an optional `test-svger` executable and sample assets. That is useful
-for trying the generator without creating a full application, but the older text's **“500+ SVGs,”
-default output, flag behavior, and example timings are historical claims**, not independently
-certified for the planned 4.1.0 branch.
+The `test-svger` executable is a small local smoke utility. It creates temporary synthetic SVGs by
+default; the 606-file development corpus remains in the source repository and is excluded from npm
+packages. It can also process a caller-supplied SVG folder.
 
 ```bash
-# First install the project package so its local executables are available.
+# Install the package so its executable is available.
 npm install --save-dev svger-cli
 
-# Run the installed sample-testing utility, where supplied by this package version.
-./node_modules/.bin/test-svger
+# Run a bounded synthetic smoke test.
+npx test-svger --count 10 --framework react
+
+# Or use your own SVGs.
+npx test-svger --input ./assets/my-icons --count 50 --output ./generated
 ```
 
-**Purpose:** exercise bundled/sample SVG processing using the installed package's test utility. This
-is a local test operation, not a production build or substitute for the reproducible Phase 040
-evaluator. It may create test output; use a disposable directory if you do not want generated files
-in your project. For supported flags and the current asset inventory, consult
-[Sample SVG Testing](./docs/SAMPLE-SVGS-TESTING.md) and inspect the installed `test-svger`
-implementation before assuming options from older documentation.
+This is a smoke utility, not a performance benchmark. For a real local comparison against SVGR using
+the repository-only corpus and process CPU/RSS measurements, see the [live benchmark guide](https://faezemohades.github.io/svger-cli/benchmark.html) and
+[sample testing notes](./docs/SAMPLE-SVGS-TESTING.md). The browser page requires a user-started
+loopback companion; it does not run code on page load or upload reports.
 
 ## Svelte IR v1 opt-in (planned 4.1.0)
 
@@ -459,6 +459,8 @@ The Svelte IR compiler uses the production SVG safety scanner, a bounded XML doc
 validated internal IR, and a Svelte emitter for a **documented static SVG subset**. It intentionally
 rejects unsupported SVG constructs rather than silently falling back to the legacy generator. No
 other framework is routed through production IR by this setting.
+
+IR emitters for other frameworks are experiments only; they are not production compiler routes.
 
 ### Option 1 — `.svgconfig.json`
 
@@ -1236,7 +1238,7 @@ branch.
 | `npm run quality:release`          | Release-oriented local quality gate                               | Pre-release evidence, not authorization                          |
 | `npm run evaluate:local`           | Opt-in local benchmark + quality/security report                  | Reproducible measurement (planned branch)                        |
 | `npm run docs:generate`            | Build generated TypeDoc API reference                             | Public API changes                                               |
-| `node scripts/check-docs-site.mjs` | Validate docs-site links/navigation                               | Docs changes (planned branch)                                    |
+| `npm run docs:check`              | Regenerate and validate docs-site links, SEO metadata, and benchmark contracts | Documentation or benchmark UI changes                            |
 | `git diff --check`                 | Detect whitespace errors in changed lines                         | Before commits                                                   |
 
 **Publishing safety:** do **not** run scripts such as `release`, `release:minor`, `release:major`,
@@ -1252,10 +1254,12 @@ hosted documentation website.
 | Category                | Document / page                                                                                                                                   | Covers                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | Documentation home      | [Hosted site](https://faezemohades.github.io/svger-cli/) · [docs-site index](./docs-site/index.html)                                              | Website entry point and site navigation                                |
+| Getting started         | [Getting started](./docs-site/getting-started.html) · [Installation](./docs-site/installation.html)                                             | Install, first build, runtime requirements                              |
 | CLI commands            | [Docs-site commands](./docs-site/commands.html) · [Quick Reference](./docs/QUICK-REFERENCE.md)                                                    | Command usage and common flags                                         |
-| Frameworks              | [Framework Guide](./docs/FRAMEWORK-GUIDE.md) · [Support Matrix](./docs/SUPPORT-MATRIX.md)                                                         | React, React Native, Vue, Svelte, Angular, Solid, Preact, Lit, Vanilla |
+| Frameworks              | [Framework overview](./docs-site/frameworks.html) · [Framework Guide](./docs/FRAMEWORK-GUIDE.md) · [Support Matrix](./docs/SUPPORT-MATRIX.md)   | React, React Native, Vue, Svelte, Angular, Solid, Preact, Lit, Vanilla |
 | Integrations            | [Integration Guide](./docs/INTEGRATIONS.md) · [Pipeline Integration](./docs/PIPELINE-INTEGRATION.md)                                              | Webpack, Vite, Rollup, Babel, Next.js, Jest and build pipelines        |
-| Evaluation              | [Evaluation Guide](./docs/EVALUATION.md) · [Local report viewer](./docs-site/evaluation.html) · [Schema](./docs-site/evaluation-report-schema.js) | Local benchmarks, JSON schema, security/quality interpretation         |
+| Live comparison         | [Run local SVGER vs SVGR comparison](./docs-site/benchmark.html) · [Methodology](./docs-site/BENCHMARK_TESTING.md)                                | Real transforms, CPU/RAM metrics, fixture digest, limitations          |
+| Evaluation              | [Evaluation Guide](./docs/EVALUATION.md) · [Local report viewer](./docs-site/evaluation.html) · [Schema](./docs-site/evaluation-report-schema.js) | Local reports, JSON schema, security/quality interpretation            |
 | Performance             | [Results](./docs/performance/PERFORMANCE-RESULTS.md) · [Real-world benchmark notes](./docs/performance/REAL-WORLD-BENCHMARKS.md)                  | Host-specific historical evidence and test methodology                 |
 | Optimization            | [Docs-site optimizer](./docs-site/optimizer.html)                                                                                                 | Optimization guidance and limitations                                  |
 | Packages / native tools | [Optional Dependencies](./docs/OPTIONAL-DEPENDENCIES.md)                                                                                          | `sharp`, Node policy, rasterization capability                         |
@@ -1268,14 +1272,14 @@ hosted documentation website.
 ### Documentation site navigation
 
 - **Start:** [https://faezemohades.github.io/svger-cli/](https://faezemohades.github.io/svger-cli/)
+- **Live comparison:** [SVGER-CLI vs SVGR local benchmark](./docs-site/benchmark.html)
 - **Command documentation:** [docs-site/commands.html](./docs-site/commands.html)
 - **Evaluation report viewer:** [docs-site/evaluation.html](./docs-site/evaluation.html)
 - **Evaluation methodology:** [docs-site/BENCHMARK_TESTING.md](./docs-site/BENCHMARK_TESTING.md)
 - **Comparisons and limitations:** [docs-site/COMPARISON.md](./docs-site/COMPARISON.md)
 
-The hosted URL is the repository's documented GitHub Pages location, **not evidence that the
-unpublished 4.1.0 site has been deployed**. For the currently prepared features, read the
-checked-out files above.
+The hosted URL is the repository's GitHub Pages location, **not evidence that this branch's changes
+have been deployed**. For the currently prepared features, read the checked-out files above.
 
 ## Release and contribution policy
 
