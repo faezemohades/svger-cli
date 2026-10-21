@@ -3,11 +3,11 @@
 ## QG-003 — Package smoke budget
 
 The package smoke test preserves the measured compressed tarball size of **628,062 bytes** as its
-reference point and enforces the approved provisional maximum of **640,623 bytes**. These values
-are intentionally tracked separately: the reference records the inspected package; the maximum is
-the release gate. The smoke test also retains offline local-tarball installation, public entrypoint
-and CLI checks, and consumer TypeScript declaration compilation. The package remains constrained
-to the reviewed 606-file SVG asset corpus and its existing entry-count/headroom gates.
+reference point and enforces the approved provisional maximum of **640,623 bytes**. These values are
+intentionally tracked separately: the reference records the inspected package; the maximum is the
+release gate. The smoke test also retains offline local-tarball installation, public entrypoint and
+CLI checks, and consumer TypeScript declaration compilation. The package remains constrained to the
+reviewed 606-file SVG asset corpus and its existing entry-count/headroom gates.
 
 ## Phase 00.4 — SVG input security hardening
 
@@ -40,3 +40,13 @@ the 14-warning ceiling. The current findings are in `src/core/performance-engine
 `src/core/style-compiler.ts` (5), `src/optimizers/advanced-stages.ts` (3),
 `src/plugins/color-replacer.ts` (1), and `src/plugins/watermark-remover.ts` (1). These warnings
 remain visible and are not disabled or suppressed.
+
+## Sealed baseline verifier
+
+`npm run baseline:verify` checks lockfile hashes, exact file membership, portable path identities,
+and rejects symlinks and unsupported entries. The verifier enforces a 1 MiB lockfile limit, 10,000
+manifest-entry limit, 64-level traversal-depth limit, and 20,000 discovered-filesystem-entry limit.
+Its `lstat` checks detect symlinks observed during traversal but do not eliminate time-of-check to
+time-of-use races if another process mutates the archive concurrently. Run the gate against a
+trusted, immutable checkout; stronger concurrent-mutation guarantees require a filesystem-handle-
+based design. `npm run baseline:policy` also runs the verifier's disposable-fixture security tests.
