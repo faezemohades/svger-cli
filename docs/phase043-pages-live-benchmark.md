@@ -99,3 +99,24 @@ they are not clean-checkout CI. No remote Git operation, deployment, or publicat
 Directive 043-C remains OPEN pending real Chromium and Firefox runs, an exact-commit clean-checkout
 qualification, maintainer review of the Pages artifact/configuration, and any owner approval needed
 before remote CI. SEC-INC-001 remains OPEN and npm publication remains NO-GO.
+
+### Clean-checkout qualification of local commit `b0dcafd`
+
+The scoped implementation was committed locally as `b0dcafd` (`feat: add documentation site and
+local benchmark`). Existing staged README and package-report changes were deliberately excluded and
+remain separate in the primary worktree. A detached worktree at this exact commit received a fresh
+root `npm ci --ignore-scripts` and benchmark-tool `npm ci --ignore-scripts`; no proxy was used for
+these npm registry operations.
+
+From that clean source commit, the production build, docs/SEO/link/benchmark-contract checks, actual
+50/100/170 worker qualification, public package contract, package smoke, and archive conformance
+passed. The resulting npm archive had 148 entries and 246,953 compressed bytes, with zero corpus
+SVGs and zero benchmark-only dependencies. The checked-out static docs regenerated without a Git
+diff; the sitemap, metadata, links, and local assets passed their checks. The workflow defines no
+deployment artifact upload, and no Pages artifact was deployed or published.
+
+This validates committed-source behavior locally, not GitHub-hosted CI. The previous working-tree
+archive measured 247,093 bytes; the clean commit's README differs because the separate README edits
+were intentionally not included in `b0dcafd`. Both artifacts remained within package limits, with
+zero corpus SVGs. For final candidate qualification, the exact final commit still needs remote CI and
+an independently reviewed archive. Browser verification and maintainer approval remain open.
