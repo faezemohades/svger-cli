@@ -40,7 +40,6 @@ jobs:
       - name: Preserve exact baseline blob bytes
         shell: bash
         run: |
-          git config core.autocrlf false
           node --input-type=module <<'NODE'
           import { execFileSync } from 'node:child_process';
           import { mkdirSync, writeFileSync } from 'node:fs';
@@ -57,10 +56,11 @@ jobs:
             const bytes = execFileSync('git', ['cat-file', 'blob', `${revision}:${relativePath}`]);
             mkdirSync(path.dirname(relativePath), { recursive: true });
             writeFileSync(relativePath, bytes);
+            const expectedBlob = execFileSync('git', ['rev-parse', `${revision}:${relativePath}`], { encoding: 'utf8' }).trim();
+            const actualBlob = execFileSync('git', ['hash-object', '--no-filters', relativePath], { encoding: 'utf8' }).trim();
+            if (actualBlob !== expectedBlob) throw new Error(`Working-tree bytes differ from Git blob: ${relativePath}`);
           }
           NODE
-          git status --short -- baselines
-          test -z "$(git status --porcelain -- baselines)"
 
       - name: Install dependencies
         run: npm ci
