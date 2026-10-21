@@ -31,6 +31,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Preserve exact tracked file bytes
+        shell: bash
+        run: |
+          git config core.autocrlf false
+          git checkout-index --all --force
+          test -z "$(git status --porcelain)"
+
       - name: Setup Node.js ${{ matrix.node }}
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
