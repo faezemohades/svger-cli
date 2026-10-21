@@ -31,18 +31,36 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Preserve exact tracked file bytes
-        shell: bash
-        run: |
-          git config core.autocrlf false
-          git checkout-index --all --force
-          test -z "$(git status --porcelain)"
-
       - name: Setup Node.js ${{ matrix.node }}
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+
+      - name: Preserve exact baseline blob bytes
+        shell: bash
+        run: |
+          git config core.autocrlf false
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+
+          const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          const paths = execFileSync('git', ['ls-tree', '-r', '-z', '--name-only', revision, '--', 'baselines'])
+            .toString('utf8')
+            .split('\0')
+            .filter(Boolean);
+
+          for (const relativePath of paths) {
+            if (!relativePath.startsWith('baselines/')) throw new Error(`Unexpected path: ${relativePath}`);
+            const bytes = execFileSync('git', ['cat-file', 'blob', `${revision}:${relativePath}`]);
+            mkdirSync(path.dirname(relativePath), { recursive: true });
+            writeFileSync(relativePath, bytes);
+          }
+          NODE
+          git status --short -- baselines
+          test -z "$(git status --porcelain -- baselines)"
 
       - name: Install dependencies
         run: npm ci
