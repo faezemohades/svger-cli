@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate Solid SVG components | SVGER-CLI</title><meta name="description" content="Generate Solid JSX or TSX component source from SVG files and validate it with your Solid toolchain.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/solid.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Generate Solid SVG components"><meta property="og:description" content="Generate Solid JSX or TSX component source from SVG files and validate it with your Solid toolchain."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/solid.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Generate Solid SVG components", "description": "Generate Solid JSX or TSX component source from SVG files and validate it with your Solid toolchain.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/solid.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Generate Solid SVG components</h1>
+<p class="lead">Solid output is generated as JavaScript or TypeScript component source. Install Solid and its build tooling in the consuming app.</p><pre><code>npx svger build ./icons ./src/icons --framework solid --typescript
+npx svger build ./icons ./src/icons-js --framework solid --no-typescript</code></pre><p>Build the generated source with the same Solid compiler and JSX settings as the application. Verify props, SVG attributes, references, and accessibility behavior with representative inputs.</p><p>The <code>--signals</code> option is available on the build command for applicable generator behavior; consult <code>svger build --help</code> for the installed version. See <a href="configuration.html">configuration</a> and <a href="commands.html">commands</a>.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

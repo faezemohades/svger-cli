@@ -68,7 +68,8 @@ idea, but links only to the supported or explicitly qualified workflows describe
 
 SVGER-CLI processes SVG source files and produces framework components. Its supported public
 functionality includes a CLI, a library/service API, and integrations with common build tools. The
-default compiler remains the **legacy generator** in all framework targets.
+legacy compiler remains the default in all framework targets; the Svelte IR compiler is available
+only through its explicitly qualified opt-in.
 
 | Area                       | Capability                                                                                                | Important qualification                                                                                              |
 | -------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |

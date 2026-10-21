@@ -1,0 +1,15 @@
+{
+  "name": "svger-cli-pages-benchmark",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Optional localhost-only SVGER-CLI versus SVGR benchmark companion.",
+  "scripts": {
+    "test": "node --test test.mjs",
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@svgr/core": "8.1.0",
+    "@svgr/plugin-jsx": "8.1.0"
+  }
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://faezemohades.github.io/svger-cli/</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/getting-started.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/installation.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/frameworks.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/react.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/react-native.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/vue.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/angular.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/svelte.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/solid.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/preact.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/lit.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/vanilla.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/commands.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/configuration.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/api.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/integrations.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/plugins.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/optimization.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/migration.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/security.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/troubleshooting.html</loc></url>
+  <url><loc>https://faezemohades.github.io/svger-cli/benchmark.html</loc></url>
+</urlset>

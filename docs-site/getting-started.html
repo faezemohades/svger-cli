@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started with SVGER-CLI | SVGER-CLI</title><meta name="description" content="A practical first build: install SVGER-CLI, choose a framework, generate components, and validate them in your application.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/getting-started.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Getting started with SVGER-CLI"><meta property="og:description" content="A practical first build: install SVGER-CLI, choose a framework, generate components, and validate them in your application."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/getting-started.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Getting started with SVGER-CLI", "description": "A practical first build: install SVGER-CLI, choose a framework, generate components, and validate them in your application.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/getting-started.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Getting started with SVGER-CLI</h1>
+<p class="lead">This walkthrough takes an SVG folder to framework component files. Run commands from the consumer application's root so paths and configuration are predictable.</p>
+<h2>1. Install the CLI</h2><pre><code>npm install --save-dev svger-cli</code></pre><p>The package supports Node.js according to its declared engine range. Use a currently supported Node LTS for production; see <a href="installation.html">installation and runtime guidance</a>.</p>
+<h2>2. Organize source icons</h2><p>Place trusted <code>.svg</code> files in a dedicated folder such as <code>./assets/icons</code>. Keep originals in version control. The build discovers immediate children by default; use <code>--recursive</code> for nested folders.</p>
+<h2>3. Generate one target</h2><pre><code>npx svger build ./assets/icons ./src/components/icons --framework react --typescript</code></pre><p>Choose one of the <a href="frameworks.html">supported output targets</a>. The target framework and its compiler remain the consuming app's responsibility.</p>
+<h2>4. Compile and inspect generated files</h2><p>Run the app's own TypeScript/framework build and tests. Review accessibility labels, IDs and references, CSS assumptions, dimensions, and the generated diff. A successful conversion is not proof of browser-rendering equivalence.</p>
+<h2>5. Make the build repeatable</h2><p>Commit configuration and generated outputs only if that matches your project policy. Use <code>--check</code> in CI to detect stale generated artifacts, and <code>--dry-run</code> to preview without writing.</p>
+<pre><code>npx svger build ./assets/icons ./src/components/icons --framework react --check --format json</code></pre>
+<p>Continue to <a href="commands.html">the command reference</a> or <a href="configuration.html">configuration guide</a>.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

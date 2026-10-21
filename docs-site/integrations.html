@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bundler and test integrations | SVGER-CLI</title><meta name="description" content="Configure SVGER-CLI with Vite, Webpack, Rollup, Babel, Next.js, and Jest using package subpath imports.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/integrations.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Bundler and test integrations"><meta property="og:description" content="Configure SVGER-CLI with Vite, Webpack, Rollup, Babel, Next.js, and Jest using package subpath imports."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/integrations.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Bundler and test integrations", "description": "Configure SVGER-CLI with Vite, Webpack, Rollup, Babel, Next.js, and Jest using package subpath imports.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/integrations.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Bundler and test integrations</h1>
+<p class="lead">Use documented integration subpaths instead of running the CLI from a build hook. Integrations execute in the toolchain process; configure file scope and only load trusted plugins.</p>
+<h2>Vite</h2><pre><code>import { svgerVitePlugin } from 'svger-cli/vite';
+export default { plugins: [svgerVitePlugin({ source: './src/icons', framework: 'react' })] };</code></pre>
+<h2>Webpack</h2><pre><code>const { SvgerWebpackPlugin } = require('svger-cli/webpack');
+module.exports = { plugins: [new SvgerWebpackPlugin({ source: './src/icons', output: './src/generated' })] };</code></pre>
+<h2>Other integrations</h2><p>Package subpaths are <code>svger-cli/rollup</code>, <code>svger-cli/babel</code>, <code>svger-cli/nextjs</code>, and <code>svger-cli/jest</code>. Confirm options and compatibility against the installed version and the <a href="https://github.com/faezemohades/svger-cli/blob/main/docs/INTEGRATIONS.md">full integration guide</a>. Integrations are release-gated against the documented toolchain matrix; using a different major may work without being covered.</p><p>Build plugins can write generated files or transform SVG imports depending on integration mode. Review source and destination paths, watch/HMR behavior, and CI permissions before enabling writes.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

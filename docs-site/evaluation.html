@@ -7,6 +7,9 @@
       name="description"
       content="Run and inspect an opt-in local SVGER compiler evaluation."
     />
+    <meta name="robots" content="noindex,follow" />
+    <meta property="og:title" content="Local evaluation reports · SVGER-CLI" />
+    <meta property="og:description" content="Read a local SVGER-CLI evaluation report in your browser without uploading it." />
     <title>Local evaluation · SVGER-CLI</title>
     <link rel="icon" type="image/png" href="svger-cli-logo.png" />
     <link rel="stylesheet" href="styles.css" />
@@ -16,7 +19,8 @@
       <nav aria-label="Main navigation">
         <a href="index.html">Overview</a><a href="commands.html">Commands</a
         ><a href="optimizer.html">Compiler modes</a
-        ><a href="evaluation.html">Local evaluation</a>
+        ><a href="benchmark.html">Live comparison</a>
+        <a href="evaluation.html">Local reports</a>
       </nav>
     </header>
     <main>
@@ -47,6 +51,7 @@ npm run evaluate:local -- --groups 50,750 --warmups 8 --samples 40 --output ./ev
         only builds you trust; do not benchmark untrusted code.
       </p>
       <h2>View a report</h2>
+      <p>To run new real comparisons against SVGR on 50, 100, or 170 SVG files, use the <a href="benchmark.html">live local benchmark</a>. The page requires a local companion; GitHub Pages does not run Node code.</p>
       <p>
         Reports are unsigned, self-reported local evidence. Schema validation
         does not authenticate who or what produced a report. Performance

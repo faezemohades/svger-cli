@@ -12,10 +12,17 @@ const repositoryRoot = path.resolve(
 const packageJson = JSON.parse(
   await readFile(path.join(repositoryRoot, 'package.json'), 'utf8')
 );
+const reportOutputArgument = process.argv.indexOf('--report-output');
+if (reportOutputArgument >= 0 && !process.argv[reportOutputArgument + 1]) {
+  throw new Error('--report-output requires a file path.');
+}
+const reportPath = reportOutputArgument >= 0
+  ? path.resolve(repositoryRoot, process.argv[reportOutputArgument + 1])
+  : path.join(repositoryRoot, 'reports', `package-conformance-v${packageJson.version}.json`);
 const approvedPackageBaseline = {
   entryCount: 757,
   packedBytes: 616_992,
-  intentionalAssetCount: 606,
+  intentionalAssetCount: 0,
   growthTolerance: 0.05,
 };
 const maximumEntryCount = Math.floor(
@@ -89,7 +96,7 @@ if (forbiddenGroups.length > 0) {
 }
 if ((groups.assets ?? 0) !== approvedPackageBaseline.intentionalAssetCount) {
   throw new Error(
-    `Expected the reviewed ${approvedPackageBaseline.intentionalAssetCount}-file public sample corpus, received ${groups.assets ?? 0} files.`
+    `Expected ${approvedPackageBaseline.intentionalAssetCount} packaged development SVG assets, received ${groups.assets ?? 0} files.`
   );
 }
 assertPackageBudgets({
@@ -111,7 +118,7 @@ const report = {
   },
   intentionalLargeGroups: {
     assets:
-      '606 documented sample SVGs support the public test-svger executable and published benchmarking workflow.',
+      'The development SVG corpus is retained in the source repository for local benchmarks and excluded from npm packages.',
     docs: 'A curated set of user-facing Markdown supports offline package documentation; generated API media and internal archives are excluded.',
   },
   budgets: {
@@ -123,14 +130,7 @@ const report = {
   npmPackDryRun: dryRun,
   tarEntries,
 };
-await writeFile(
-  path.join(
-    repositoryRoot,
-    'reports',
-    `package-conformance-v${packageJson.version}.json`
-  ),
-  `${JSON.stringify(report, null, 2)}\n`
-);
+await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 await rm(workRoot, { recursive: true, force: true });
 console.log(
   `Archived package conformance for ${packed.filename}: ${packed.entryCount} files, ${packed.size} bytes.`

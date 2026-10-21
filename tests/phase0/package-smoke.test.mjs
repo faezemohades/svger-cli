@@ -19,7 +19,7 @@ const packageJson = JSON.parse(
 );
 const approvedPackageBaseline = {
   entryCount: 757,
-  intentionalAssetCount: 606,
+  intentionalAssetCount: 0,
   growthTolerance: 0.05,
   requiredHeadroom: 0.05,
 };
@@ -131,7 +131,7 @@ assert.deepEqual(
 assert.equal(
   packResult.files.filter(file => file.path.startsWith('assets/svges/')).length,
   approvedPackageBaseline.intentionalAssetCount,
-  'the intentional public sample corpus changed without package-budget review'
+  'the development SVG corpus must not be included in the npm package'
 );
 assertPackageBudgets({
   size: packResult.size,

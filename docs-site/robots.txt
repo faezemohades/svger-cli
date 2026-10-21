@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://faezemohades.github.io/svger-cli/sitemap.xml

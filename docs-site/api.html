@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVGER-CLI programmatic API | SVGER-CLI</title><meta name="description" content="Use the public createSVGCompiler API to build components, inspect resolved configuration, and consume structured reports.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/api.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="SVGER-CLI programmatic API"><meta property="og:description" content="Use the public createSVGCompiler API to build components, inspect resolved configuration, and consume structured reports."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/api.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "SVGER-CLI programmatic API", "description": "Use the public createSVGCompiler API to build components, inspect resolved configuration, and consume structured reports.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/api.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>SVGER-CLI programmatic API</h1>
+<p class="lead">The public package root exports <code>createSVGCompiler</code>. It creates a scoped compiler service with <code>build()</code> and <code>config.explain()</code>.</p><pre><code>import { createSVGCompiler } from 'svger-cli';
+
+const compiler = await createSVGCompiler({ cwd: process.cwd() });
+const report = await compiler.build({
+  src: './icons',
+  out: './src/generated/icons',
+  framework: 'react',
+  typescript: true,
+});
+console.log(report.status, report.artifacts.length);</code></pre>
+<p>Request fields include source/output paths, framework, language, optimization, selection, concurrency and safety policy. Validate reports and handle failure status in the calling application. Internal compiler modules are not public imports; rely on declarations from the installed package.</p><h2>Configuration explanation</h2><pre><code>const entries = compiler.config.explain({ framework: 'svelte' });</code></pre><p>For method signatures, inspect the installed <code>dist/index.d.ts</code>. Browse the generated <a href="https://faezemohades.github.io/svger-cli/api/">API reference</a> if present in the deployment, or the repository's TypeDoc output.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

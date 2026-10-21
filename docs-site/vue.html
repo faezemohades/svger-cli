@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate Vue 3 SVG components | SVGER-CLI</title><meta name="description" content="Generate Vue single-file components from SVG files using Options or Composition API output.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/vue.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Generate Vue 3 SVG components"><meta property="og:description" content="Generate Vue single-file components from SVG files using Options or Composition API output."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/vue.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Generate Vue 3 SVG components", "description": "Generate Vue single-file components from SVG files using Options or Composition API output.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/vue.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Generate Vue 3 SVG components</h1>
+<p class="lead">Vue output uses <code>.vue</code> single-file components. Select Composition API script setup or the default component style where offered.</p><h2>Composition API</h2><pre><code>npx svger build ./icons ./src/icons --framework vue --typescript --composition</code></pre><h2>JavaScript output</h2><pre><code>npx svger build ./icons ./src/icons --framework vue --no-typescript --composition</code></pre><p>Compile generated files with the Vue compiler version and bundler used by your app. Check component naming, props, SVG accessibility semantics, styling assumptions, IDs, and resource references in the generated output.</p><h2>Build integration</h2><p>Use the <a href="integrations.html">Vite or Webpack integration guide</a> for build-time imports. See <a href="configuration.html">configuration precedence</a> for persistent framework defaults.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

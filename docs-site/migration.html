@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Migration and compatibility guide | SVGER-CLI</title><meta name="description" content="Migrate earlier SVGER-CLI configuration and command usage while preserving reproducible output and release compatibility.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/migration.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Migration and compatibility guide"><meta property="og:description" content="Migrate earlier SVGER-CLI configuration and command usage while preserving reproducible output and release compatibility."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/migration.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Migration and compatibility guide", "description": "Migrate earlier SVGER-CLI configuration and command usage while preserving reproducible output and release compatibility.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/migration.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Migration and compatibility guide</h1>
+<p class="lead">Before migrating, commit existing configuration and generated output, then run a preview. This project maintains a compatibility baseline; do not assume planned changes are published.</p><pre><code>svger migrate config .svgconfig.json --dry-run
+svger migrate config .svgconfig.json</code></pre><p>Migration targets include configuration, plugin declarations, and import forms. Backups are created by default for supported migrations. Review the report before accepting changes.</p><h2>Deprecated options</h2><p>V4 aliases such as <code>--src</code>, <code>--out</code>, and older naming flags may emit deprecation warnings. Prefer positional source/output arguments and configuration keys documented by the installed version.</p><h2>Version differences</h2><p>The documentation source may describe an unpublished candidate. Check <code>svger --version</code>, the package changelog, and the compatibility matrix before relying on new flags. See <a href="https://github.com/faezemohades/svger-cli/blob/main/docs/MIGRATION-4.0.0.md">the migration guide</a>.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

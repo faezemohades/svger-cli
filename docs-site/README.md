@@ -1,24 +1,41 @@
 # SVGER-CLI documentation site
 
-This is the static GitHub Pages site deployed from `docs-site/`. It documents the planned,
-unpublished 4.1.0 worktree; release status remains NO-GO. Historical review files in `reports/`
-retain the claims and measurements made at their original dates and are not current-release
-evidence.
+This folder is a static, crawlable documentation website intended for GitHub Pages. Generate its
+23 indexable HTML pages, search index, sitemap, robots file, redirects, and 404 page with:
 
-The site pages are `index.html`, `commands.html`, `optimizer.html`, and `evaluation.html`. The
-former browser benchmark simulator is retired; `benchmark-demo.html` now points to measured local
-evaluation instructions, and the obsolete simulator script has been removed.
+```sh
+python3 tools/site-docs/build.py
+npm run docs:check
+```
 
-The API reference under `docs/api/` is generated separately by TypeDoc (`npm run docs:generate`).
-The Pages workflow serves `docs-site/`, so the API reference is not currently part of the deployed
-site.
+The content covers installation, all nine output targets, commands, configuration, public API,
+plugins, integrations, optimization boundaries, migration, security, troubleshooting, and
+benchmark methodology. Pages are generated from `tools/site-docs/build.py`; edit that source and
+regenerate rather than hand-editing generated framework pages.
 
-Preview locally by opening `index.html` or serving this directory with a static file server. The
-report viewer reads a user-selected JSON file locally, with no upload, telemetry, remote scripts, or
-benchmark on page load.
+## Live comparison
 
-Run `npm run docs:check` to validate local HTML links and anchors without network access. Update
-navigation and the status/version labels alongside source documentation when CLI behavior, package
-version, security policy, or measured evidence changes. The 4.0.9 public package contract file is a
-historical compatibility baseline; it is intentionally not renamed or rewritten for the planned
-version.
+GitHub Pages is static and cannot execute local Node packages or measure local process CPU/RAM.
+The benchmark UI therefore requires an explicitly started local companion. From the repository root,
+build the package, install the benchmark-only pinned SVGR dependencies, then run
+`npm run benchmark:site`. The browser sends only a selected count (50, 100, or 170) to a companion
+bound to `127.0.0.1`; it receives measured results and does not upload them. The companion is a
+developer utility, not an OS sandbox or a hosted public execution service. Do not run it from an
+untrusted checkout.
+
+The companion rejects requests without an approved `Origin`, rejects unexpected `Host` values,
+accepts only bounded JSON fixture-count requests, limits each worker to three minutes, kills a worker
+when the browser request is interrupted, and allows only one active comparison. The public Pages
+origin is specifically allowlisted; this is still not protection against a compromised trusted site
+or local malicious process. Use the benchmark page's Run button for readiness checks; direct browser
+navigation to `/health` has no `Origin` and is intentionally denied.
+
+Comparison results are host-specific. They report real transformations from the checked-in source
+corpus, wall/CPU time, sampled peak RSS, success counts, output bytes, versions, and fixture digest.
+No result is precomputed and no implementation is presented as the guaranteed winner.
+
+The package release remains subject to its separate authorization and governance gates. The sample
+corpus is retained in the source repository and must remain excluded from npm tarballs. The
+historical 4.0.9 public package contract is not rewritten by site generation. The current workflow
+qualifies static content, benchmark workers, and package artifacts only; it does not deploy Pages.
+Deployment remains pending the separately authorized maintainer decision and browser qualification.

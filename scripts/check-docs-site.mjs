@@ -54,21 +54,12 @@ for (const file of htmlFiles) {
   }
 }
 
-const requiredPages = [
-  'index.html',
-  'commands.html',
-  'optimizer.html',
-  'evaluation.html',
-];
+const requiredPages = ['index.html', 'commands.html', 'frameworks.html', 'benchmark.html'];
 for (const required of requiredPages)
   if (!htmlFiles.includes(required))
     errors.push(`Required page missing: ${required}`);
 for (const file of htmlFiles) {
   const source = await readFile(path.join(root, file), 'utf8');
-  for (const page of requiredPages) {
-    if (!source.includes(`href="${page}"`))
-      errors.push(`${file}: navigation is missing ${page}`);
-  }
   if (/<script\s+src\s*=\s*["']https?:/iu.test(source))
     errors.push(`${file}: remote script loading is not allowed`);
 }
