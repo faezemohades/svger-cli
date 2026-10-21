@@ -213,16 +213,12 @@ docker logs svger-cli-prod
 
 ### Common Issues
 
-**Issue**: NPM publish fails
-```bash
-# Check token
-echo $NPM_TOKEN
+**Issue**: NPM publication is blocked
 
-# Verify authentication
-npm whoami --registry https://registry.npmjs.org
-
-# Solution: Regenerate NPM_TOKEN in npm settings
-```
+Publication is intentionally disabled while SEC-INC-001 and the independent release gates remain
+open. Do not print, regenerate, or configure a publishing token to troubleshoot this policy hold.
+After formal release authorization, use the current release procedure; never place credential values
+in terminal output, logs, or support requests.
 
 **Issue**: Docker build fails
 ```bash
