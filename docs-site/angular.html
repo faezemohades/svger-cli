@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate Angular SVG components | SVGER-CLI</title><meta name="description" content="Generate TypeScript Angular components from SVG files, including standalone component workflows.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/angular.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Generate Angular SVG components"><meta property="og:description" content="Generate TypeScript Angular components from SVG files, including standalone component workflows."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/angular.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Generate Angular SVG components", "description": "Generate TypeScript Angular components from SVG files, including standalone component workflows.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/angular.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Generate Angular SVG components</h1>
+<p class="lead">Angular generation requires TypeScript; JavaScript output is not supported for this target. The CLI creates source components and does not replace Angular workspace configuration.</p><pre><code>npx svger build ./icons ./src/app/icons --framework angular --typescript --standalone</code></pre><p>Use <code>--standalone</code> when appropriate for the target application. Compile with the app's Angular CLI and verify generated imports and metadata in that workspace.</p><h2>Module-based applications</h2><p>Omit <code>--standalone</code> when the output is intended for a module-oriented setup, then register components according to that application's architecture. Validate selectors, naming collisions, and accessibility behavior.</p><h2>Support</h2><p>Supported major lines are maintained in the <a href="https://github.com/faezemohades/svger-cli/blob/main/docs/SUPPORT-MATRIX.md">support matrix</a>; compatibility outside that matrix may work but is not release-gated.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

@@ -1,93 +1,26 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="SVGER-CLI documentation and local evaluation guidance."
-    />
-    <title>SVGER-CLI documentation</title>
-    <link rel="icon" type="image/png" href="svger-cli-logo.png" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header>
-      <nav aria-label="Main navigation">
-        <a href="index.html">Overview</a><a href="commands.html">Commands</a>
-        <a href="optimizer.html">Compiler modes</a
-        ><a href="evaluation.html">Local evaluation</a>
-      </nav>
-    </header>
-    <main>
-      <p class="eyebrow">SVGER-CLI · planned 4.1.0 documentation</p>
-      <h1>Generate framework components from SVG files</h1>
-      <p class="lead">
-        SVGER-CLI is a Node.js command-line tool and library for generating
-        typed or JavaScript components from SVG input.
-      </p>
-      <aside role="note">
-        <strong>Release status:</strong> 4.1.0 is a planned, unpublished
-        version. The release remains NO-GO; this documentation update does not
-        authorize publication.
-      </aside>
-      <h2>Install and build</h2>
-      <pre><code>npm install svger-cli
-npx svger build ./icons ./components</code></pre>
-      <p>
-        The package declares Node.js ≥18.17. See
-        <a href="commands.html">the command reference</a> for language and
-        framework options.
-      </p>
-      <h2>Framework targets</h2>
-      <p>
-        Production generation targets React, Preact, Solid, Vue, Svelte,
-        Angular, Lit, Vanilla, and React Native. JavaScript and TypeScript
-        support varies by framework; unsupported combinations return
-        diagnostics. Svelte’s experimental IR emitter is opt-in and the legacy
-        route remains the default.
-      </p>
-      <p>
-        Webpack, Vite, Rollup, Babel, Next.js, and Jest integrations are
-        available through documented package subpaths. See
-        <a href="optimizer.html">compiler modes and limits</a>.
-      </p>
-      <h2>Measured performance</h2>
-      <p>
-        The latest local evaluation (Node.js 22.22.2 / npm 10.9.7) measured a
-        750-group, 2,251-element Svelte fixture at 10.086 ms legacy median and
-        75.562 ms opt-in IR median (about 7.5× slower); p95 was 12.426 ms and
-        85.575 ms. A separate Node.js 20.20.2 run measured 10.768 ms legacy and
-        77.829 ms IR. These are host-specific observations, not performance
-        guarantees or evidence to change the production default.
-      </p>
-      <p>
-        Re-run the configurable, opt-in evaluator using the
-        <a href="evaluation.html">evaluation guide</a>. Nothing is benchmarked
-        by opening this site.
-      </p>
-      <h2>Security and limitations</h2>
-      <p>
-        SVG input is admitted by the security boundary before generation.
-        External references, active content, malformed XML, and configured
-        resource-limit violations are rejected by default. Static SVG support
-        does not imply full browser rendering equivalence. Read the package’s
-        <a
-          href="https://github.com/faezemohades/svger-cli/blob/main/docs/OPTIONAL-DEPENDENCIES.md"
-          >optional dependency guide</a
-        >
-        and
-        <a
-          href="https://github.com/faezemohades/svger-cli/blob/main/docs/SUPPORT-MATRIX.md"
-          >support matrix</a
-        >.
-      </p>
-    </main>
-    <footer>
-      <p>
-        Static documentation. No telemetry, remote scripts, or automatic
-        evaluation.
-      </p>
-    </footer>
-  </body>
-</html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVG to component documentation | SVGER-CLI</title><meta name="description" content="Learn to generate framework components from SVG files with SVGER-CLI.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="SVG to component documentation"><meta property="og:description" content="Learn to generate framework components from SVG files with SVGER-CLI."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "SVG to component documentation", "description": "Learn to generate framework components from SVG files with SVGER-CLI.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>SVG to component documentation</h1>
+<p class="lead">SVGER-CLI converts admitted SVG files into source components for React, React Native, Vue, Angular, Svelte, Solid, Preact, Lit, and browser-native JavaScript.</p>
+<div class="callout"><strong>Release status:</strong> package 4.1.0 is planned and unpublished. This site documents source behavior; it is not a release notice or npm availability guarantee.</div>
+<h2>Start with a workflow</h2><p>Install the CLI, select a target framework, build a directory, and compile the generated files in the consuming application. SVGER generates source; it does not install framework runtimes.</p>
+<pre><code>npm install --save-dev svger-cli
+npx svger build ./icons ./src/components/icons --framework react --typescript</code></pre>
+<h2>Choose a framework</h2><ul><li><a href="react.html">React and JSX</a> · <a href="react-native.html">React Native</a> · <a href="vue.html">Vue 3</a></li><li><a href="angular.html">Angular</a> · <a href="svelte.html">Svelte</a> · <a href="solid.html">Solid</a></li><li><a href="preact.html">Preact</a> · <a href="lit.html">Lit</a> · <a href="vanilla.html">Vanilla DOM</a></li></ul>
+<h2>Documentation categories</h2><div class="card-grid"><a class="card" href="getting-started.html"><h3>Getting started</h3><p>Build your first set of components and verify the output.</p></a><a class="card" href="commands.html"><h3>CLI reference</h3><p>Commands, options, exit behavior, and safe workflows.</p></a><a class="card" href="configuration.html"><h3>Configuration</h3><p>Config files, precedence, naming, optimization, and examples.</p></a><a class="card" href="integrations.html"><h3>Build integrations</h3><p>Vite, Webpack, Rollup, Babel, Next.js, and Jest.</p></a><a class="card" href="security.html"><h3>SVG security</h3><p>Admission rules, external references, and trust boundaries.</p></a><a class="card" href="benchmark.html"><h3>Live local comparison</h3><p>Run real SVGER and SVGR transforms on 50, 100, or 170 files.</p></a></div>
+<h2>What the benchmark does—and does not—claim</h2><p>GitHub Pages cannot measure the CPU and resident memory of local Node processes. The benchmark page connects only after you start its loopback companion; metrics come from fresh local Node child processes. Results are host-specific and may favor either implementation. No preselected winner or synthetic result is displayed.</p>
+<h2>Support and limits</h2><p>Read the <a href="installation.html">installation guide</a>, <a href="optimization.html">compiler and optimization limits</a>, and <a href="troubleshooting.html">troubleshooting guide</a>. Input security, framework syntax validation, semantic coverage, and pixel comparison are distinct checks.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

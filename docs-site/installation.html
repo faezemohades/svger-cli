@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install SVGER-CLI | SVGER-CLI</title><meta name="description" content="Install the SVGER-CLI package, check Node.js compatibility, and understand optional dependencies and package contents.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/installation.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Install SVGER-CLI"><meta property="og:description" content="Install the SVGER-CLI package, check Node.js compatibility, and understand optional dependencies and package contents."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/installation.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Install SVGER-CLI", "description": "Install the SVGER-CLI package, check Node.js compatibility, and understand optional dependencies and package contents.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/installation.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Install SVGER-CLI</h1>
+<p class="lead">SVGER-CLI is installed as a project tool. It emits component source but does not bundle React, Vue, Angular, Svelte, or other framework runtimes into your application.</p>
+<h2>Install from npm</h2><pre><code>npm install --save-dev svger-cli
+npx svger --version
+npx svger --help</code></pre><p>Package publication is controlled independently from this documentation. Check the npm registry for the version currently available to your account.</p>
+<h2>Runtime compatibility</h2><p>Use the <a href="https://nodejs.org/en/about/previous-releases">Node.js release table</a> and the package's <a href="https://github.com/faezemohades/svger-cli/blob/main/docs/SUPPORT-MATRIX.md">support matrix</a> when selecting a runtime. The declared compatibility floor and currently security-supported Node releases are different concepts.</p>
+<h2>Optional visual validation</h2><p>Raster-based <code>--validate</code> is optional and needs compatible separately installed packages. Ordinary source generation does not require the rasterizer. See <a href="https://github.com/faezemohades/svger-cli/blob/main/docs/OPTIONAL-DEPENDENCIES.md">optional dependency requirements</a> before enabling it in CI.</p>
+<h2>Development checkout</h2><p>Repository-only tests, benchmark tools, and the SVG sample corpus are not runtime dependencies. The sample corpus is maintained for project testing and is intentionally excluded from the npm package.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

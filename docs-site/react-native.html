@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate React Native SVG components | SVGER-CLI</title><meta name="description" content="Create React Native component source from SVG files and learn the react-native-svg runtime requirement.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/react-native.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Generate React Native SVG components"><meta property="og:description" content="Create React Native component source from SVG files and learn the react-native-svg runtime requirement."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/react-native.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Generate React Native SVG components", "description": "Create React Native component source from SVG files and learn the react-native-svg runtime requirement.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/react-native.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Generate React Native SVG components</h1>
+<p class="lead">React Native output uses React Native SVG primitives. The consuming application must install and configure <code>react-native-svg</code>; generated source alone does not provide that runtime.</p><pre><code>npx svger build ./icons ./src/icons --framework react-native --typescript</code></pre><p>Use <code>--no-typescript</code> for JavaScript output when supported by the target configuration.</p><h2>Validate in the actual app</h2><p>Native renderers differ from browser SVG. Compile with the app's React Native toolchain and test representative icons on supported platforms. Check gradients, masks, clipping, text, external references, and unsupported SVG features rather than assuming browser support maps exactly to native output.</p><h2>Security and asset handling</h2><p>SVG input is admitted before generation. External references are restricted by default. Review the <a href="security.html">security guide</a> and <a href="frameworks.html">framework overview</a>.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate React SVG components | SVGER-CLI</title><meta name="description" content="Generate JSX or TSX React components from SVG files with SVGER-CLI, including accessibility and validation guidance.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/react.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Generate React SVG components"><meta property="og:description" content="Generate JSX or TSX React components from SVG files with SVGER-CLI, including accessibility and validation guidance."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/react.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Generate React SVG components", "description": "Generate JSX or TSX React components from SVG files with SVGER-CLI, including accessibility and validation guidance.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/react.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Generate React SVG components</h1>
+<p class="lead">React output is generated as JavaScript or TypeScript component source. Install React and its compiler in the consuming application; SVGER-CLI does not add them as runtime dependencies.</p>
+<h2>TypeScript TSX</h2><pre><code>npx svger build ./icons ./src/icons --framework react --typescript</code></pre><h2>JavaScript JSX</h2><pre><code>npx svger build ./icons ./src/icons --framework react --no-typescript</code></pre>
+<p>Use components with standard React imports from generated files. Check the output against your JSX runtime, lint rules, accessibility requirements, and the React version in your application. Review <code>viewBox</code>, title/label behavior, IDs, gradients, and references for each icon set.</p><h2>Single icon</h2><pre><code>npx svger generate ./icons/search.svg ./src/icons --framework react --typescript</code></pre>
+<p>For shared build pipelines, see <a href="integrations.html">Vite, Webpack, Rollup, Babel, Next.js, and Jest integration examples</a>. For all framework outputs see <a href="frameworks.html">the framework overview</a>.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

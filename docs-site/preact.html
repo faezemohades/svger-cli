@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate Preact SVG components | SVGER-CLI</title><meta name="description" content="Create Preact JSX or TSX components from SVG icons using SVGER-CLI.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/preact.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="Generate Preact SVG components"><meta property="og:description" content="Create Preact JSX or TSX components from SVG icons using SVGER-CLI."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/preact.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Generate Preact SVG components", "description": "Create Preact JSX or TSX components from SVG icons using SVGER-CLI.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/preact.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>Generate Preact SVG components</h1>
+<p class="lead">Preact components are emitted as JSX or TSX source. Keep Preact, JSX transform settings, and any compatibility layer configured in the application itself.</p><pre><code>npx svger build ./icons ./src/icons --framework preact --typescript
+npx svger build ./icons ./src/icons-js --framework preact --no-typescript</code></pre><p>Compile and render representative output with the project's Preact toolchain. Do not infer React runtime compatibility from syntactic JSX similarity.</p><p>See <a href="integrations.html">bundler integrations</a> and the <a href="frameworks.html">framework overview</a>.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

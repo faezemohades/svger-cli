@@ -1,0 +1,63 @@
+name: Documentation and Benchmark Qualification (No Deployment)
+
+on:
+  pull_request:
+    paths:
+      - 'docs-site/**'
+      - 'tools/site-docs/**'
+      - 'tools/site-benchmark/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/archive-package-conformance.mjs'
+      - 'tests/phase0/package-smoke.test.mjs'
+      - '.github/workflows/pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs-site/**'
+      - 'tools/site-docs/**'
+      - 'tools/site-benchmark/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/archive-package-conformance.mjs'
+      - 'tests/phase0/package-smoke.test.mjs'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: documentation-benchmark-qualification
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Select Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Install repository dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build SVGER and install benchmark-only dependencies
+        run: |
+          npm run build
+          npm --prefix tools/site-benchmark ci --ignore-scripts --no-audit --no-fund
+      - name: Validate docs, SEO, and benchmark request contracts
+        run: |
+          python3 tools/site-docs/build.py
+          node scripts/check-docs-site.mjs
+          node tools/site-docs/check.mjs
+          node --test tools/site-benchmark/test.mjs
+      - name: Qualify actual local benchmark workers and companion HTTP boundary
+        run: node tools/site-benchmark/qualify.mjs
+      - name: Verify npm archive and public contract without publishing
+        run: |
+          npm run check:public-contract
+          npm run test:package
+          npm run package:conformance

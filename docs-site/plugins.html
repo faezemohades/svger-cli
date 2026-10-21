@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVGER-CLI plugin guide | SVGER-CLI</title><meta name="description" content="Develop and use SVGER-CLI plugins safely, with hook examples, lifecycle guidance, and trust-boundary notes.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/plugins.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="SVGER-CLI plugin guide"><meta property="og:description" content="Develop and use SVGER-CLI plugins safely, with hook examples, lifecycle guidance, and trust-boundary notes."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/plugins.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "SVGER-CLI plugin guide", "description": "Develop and use SVGER-CLI plugins safely, with hook examples, lifecycle guidance, and trust-boundary notes.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/plugins.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>SVGER-CLI plugin guide</h1>
+<p class="lead">Plugins extend processing hooks and run in the same process as SVGER-CLI. A plugin is executable code with the permissions of the invoking user—there is no plugin sandbox.</p><h2>Load a plugin</h2><pre><code>svger plugins
+svger plugins --load ./plugins/my-plugin.js
+svger build ./icons ./out --plugin optimize,minify</code></pre><p>Only install or load plugins from sources you trust. Pin versions and review transitive packages; do not treat a plugin name or TypeScript type as a security boundary.</p><h2>Development</h2><p>Implement declared hooks, validate plugin metadata, avoid ambient network/filesystem access unless necessary, and return bounded diagnostics. Test hook ordering, errors, cleanup and repeated builds. See the <a href="https://github.com/faezemohades/svger-cli/blob/main/docs/PLUGIN-DEVELOPMENT-GUIDE.md">plugin development guide</a> for types and lifecycle contracts.</p><h2>Operational boundary</h2><p>Plugins receive no separate OS identity and are not isolated from the CLI. For high-risk untrusted plugin code, do not load it in a process containing credentials or sensitive paths.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

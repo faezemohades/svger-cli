@@ -106,7 +106,7 @@
     "!examples/next.config.example.js",
     "!examples/rollup.config.example.js",
     ".svgerconfig.example.json",
-    "assets/svges/**/*.svg"
+    "!assets/svges/**"
   ],
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.json && node scripts/minify-internal-production.mjs",
@@ -171,7 +171,10 @@
     "release:minor": "npm run release:authorization && npm version minor && npm publish",
     "release:major": "npm run release:authorization && npm version major && npm publish",
     "docs:generate": "typedoc --out docs/api src/index.ts",
-    "docs:check": "node scripts/check-docs-site.mjs",
+    "docs:check": "python3 tools/site-docs/build.py && node scripts/check-docs-site.mjs && node tools/site-docs/check.mjs && node --test tools/site-benchmark/test.mjs",
+    "docs:site:build": "python3 tools/site-docs/build.py",
+    "docs:site:check": "node tools/site-docs/check.mjs",
+    "benchmark:site": "node tools/site-benchmark/server.mjs",
     "evaluate:local": "node scripts/evaluate-local.mjs",
     "benchmark": "node --loader ts-node/esm scripts/benchmark.ts",
     "baseline:verify": "node scripts/verify-baseline.mjs",
@@ -179,6 +182,7 @@
     "baseline:update": "node scripts/update-baseline.mjs",
     "package:conformance": "node scripts/archive-package-conformance.mjs",
     "test:evaluation": "node tests/phase5/local-evaluation-contract.test.mjs",
+    "test:site-benchmark": "node --test tools/site-benchmark/test.mjs",
     "quality:fast": "npm run baseline:policy && npm run typecheck && npm run lint:budget && npm run build && npm run test:jest && npm run check:public-contract",
     "quality:full": "npm run quality:fast && npm run test:privacy && npm test && npm run test:phase0 && npm run test:phase1 && npm run test:package && npm run test:phase4 && npm run test:evaluation && npm run docs:check",
     "quality:release": "npm run quality:full && npm run package:conformance",

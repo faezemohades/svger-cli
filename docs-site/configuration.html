@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVGER-CLI configuration guide | SVGER-CLI</title><meta name="description" content="Configure framework, TypeScript, naming, optimization, file discovery, and compiler behavior for repeatable SVG builds.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/configuration.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="SVGER-CLI configuration guide"><meta property="og:description" content="Configure framework, TypeScript, naming, optimization, file discovery, and compiler behavior for repeatable SVG builds."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/configuration.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "SVGER-CLI configuration guide", "description": "Configure framework, TypeScript, naming, optimization, file discovery, and compiler behavior for repeatable SVG builds.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/configuration.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>SVGER-CLI configuration guide</h1>
+<p class="lead">SVGER reads <code>.svgconfig.json</code> from the working directory. Command options and project config combine into effective settings; inspect origins with <code>config --explain</code>.</p><pre><code>npx svger config --init
+npx svger config --set framework=vue
+npx svger config --set typescript=false
+npx svger config --set outputConfig.naming=kebab
+npx svger config --explain framework --format json</code></pre>
+<h2>Example configuration</h2><pre><code>{
+  "framework": "react",
+  "typescript": true,
+  "optimizationLevel": "basic",
+  "recursive": false,
+  "outputConfig": { "naming": "pascal" }
+}</code></pre><p>Use options supported by the installed version. Keep environment-specific paths in command invocations rather than sharing private machine paths in committed configs.</p>
+<h2>Reproducibility and discovery</h2><p>Hidden files are skipped and symlinks ignored by default. Set recursive/include/exclude rules deliberately; enforce sensible file-count and input-size limits. Default output-name collisions fail so you can resolve ambiguous names explicitly.</p><p>See <a href="commands.html">CLI options</a>, <a href="optimization.html">optimization levels</a>, and <a href="security.html">security policy</a>.</p>
+
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>

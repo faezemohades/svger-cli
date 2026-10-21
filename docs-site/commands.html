@@ -1,115 +1,30 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="SVGER-CLI commands and usage examples." />
-    <title>Commands · SVGER-CLI</title>
-    <link rel="icon" type="image/png" href="svger-cli-logo.png" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <header>
-      <nav aria-label="Main navigation">
-        <a href="index.html">Overview</a><a href="commands.html">Commands</a
-        ><a href="optimizer.html">Compiler modes</a
-        ><a href="evaluation.html">Local evaluation</a>
-      </nav>
-    </header>
-    <main>
-      <p class="eyebrow">CLI and API</p>
-      <h1>Commands</h1>
-      <p>
-        The binary names are <code>svger</code> and <code>svger-cli</code>. Use
-        <code>svger --help</code> and <code>svger &lt;command&gt; --help</code>
-        for the installed release's authoritative options. Version 4.1.0 is
-        planned and unpublished; this page describes the documented source
-        candidate, not an npm release.
-      </p>
-      <h2>Generate components</h2>
-      <pre><code># Build a directory (top-level only by default)
-npx svger build ./icons ./components --framework react --typescript
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVGER-CLI command reference | SVGER-CLI</title><meta name="description" content="Reference for SVGER-CLI build, generate, watch, optimize, config, plugins, lock, recover, migrate, and clean commands.">
+<link rel="canonical" href="https://faezemohades.github.io/svger-cli/commands.html"><meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article"><meta property="og:title" content="SVGER-CLI command reference"><meta property="og:description" content="Reference for SVGER-CLI build, generate, watch, optimize, config, plugins, lock, recover, migrate, and clean commands."><meta property="og:url" content="https://faezemohades.github.io/svger-cli/commands.html"><meta property="og:site_name" content="SVGER-CLI">
+<meta name="twitter:card" content="summary"><link rel="icon" href="svger-cli-logo.png"><link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "SVGER-CLI command reference", "description": "Reference for SVGER-CLI build, generate, watch, optimize, config, plugins, lock, recover, migrate, and clean commands.", "mainEntityOfPage": "https://faezemohades.github.io/svger-cli/commands.html", "publisher": {"@type": "Organization", "name": "SVGER-CLI"}}</script>
+</head><body><a class="skip-link" href="#main">Skip to content</a>
+<header><a class="brand" href="index.html">SVGER-CLI Docs</a><nav aria-label="Main navigation"><a href="index.html">Overview</a><a href="getting-started.html">Get started</a><a href="commands.html">Commands</a><a href="react.html">Frameworks</a><a href="integrations.html">Integrations</a><a href="security.html">Security</a><a href="benchmark.html">Live benchmark</a></nav>
+<form id="site-search" role="search"><label class="visually-hidden" for="search-query">Search documentation</label><input id="search-query" type="search" placeholder="Search docs" autocomplete="off"><button>Search</button><ul id="search-results" hidden></ul></form></header>
+<main id="main"><p class="eyebrow">Documentation · source-candidate behavior</p><h1>SVGER-CLI command reference</h1>
+<p class="lead">The binary names are <code>svger</code> and <code>svger-cli</code>. Use the installed version's help output as the authority for the command surface.</p><pre><code>svger --help
+svger build &lt;src&gt; &lt;out&gt; --framework react --typescript
+svger generate ./icons/search.svg ./src/icons --framework svelte
+svger watch ./icons ./src/icons</code></pre>
+<h2>Build options</h2><p><code>--framework</code> selects react, react-native, vue, angular, svelte, solid, preact, lit, or vanilla. TypeScript is the default where supported; use <code>--no-typescript</code> for JavaScript. Vue supports <code>--composition</code>, Angular supports <code>--standalone</code>. Builds also accept optimization, validation, include/exclude globs, recursion, hidden-file and symlink policies, collision policy, concurrency, file-count limits, dry-run/check/diff modes, and report formats.</p>
+<h2>Maintenance</h2><pre><code>svger optimize ./icon.svg ./out/icon.svg --level balanced
+svger config --init
+svger plugins
+svger lock ./icons/logo.svg
+svger unlock ./icons/logo.svg
+svger recover ./src/icons --format json
+svger migrate config .svgconfig.json --dry-run
+svger clean ./src/icons</code></pre><p><code>clean</code> removes generated files from the chosen directory. Check the path before running it. Plugins execute with the invoking user's process permissions; load only trusted code. Deprecated aliases may warn. Read the complete <a href="https://github.com/faezemohades/svger-cli/blob/main/docs/CLI-REFERENCE.md">CLI reference source</a> for exact flags and migration behavior.</p>
 
-# Generate one file
-npx svger generate ./icons/search.svg ./components --framework svelte --no-typescript
-
-# Watch for changes; stop with Ctrl-C
-npx svger watch ./icons ./components</code></pre>
-      <p>
-        Targets are React, React Native, Vue, Angular, Svelte, Solid, Preact,
-        Lit, and browser-native vanilla output. Use <code>--recursive</code>
-        for nested source folders and <code>--no-typescript</code> for
-        JavaScript where supported. Angular generation requires TypeScript.
-        See the repository's
-        <a
-          href="https://github.com/faezemohades/svger-cli/blob/main/docs/FRAMEWORK-GUIDE.md"
-          >framework guide</a
-        >
-        for target examples and caveats.
-      </p>
-      <h2>Preview and reporting</h2>
-      <pre><code>npx svger build ./icons ./components --dry-run
-npx svger build ./icons ./components --check
-npx svger build ./icons ./components --diff --format json</code></pre>
-      <p>
-        The three build modes are mutually exclusive. Build reports accept
-        <code>pretty</code>, <code>json</code>, or <code>ndjson</code>. Output
-        collisions fail by default; resolve names or explicitly choose a
-        deterministic collision policy.
-      </p>
-      <h2>Configure and optimize</h2>
-      <pre><code>npx svger config --init
-npx svger config --show
-npx svger config --set framework=vue
-npx svger config --explain framework --format json
-npx svger optimize ./icon.svg ./optimized/icon.svg --level balanced</code></pre>
-      <p>
-        Optimization changes SVG source and does not establish semantic or
-        pixel equivalence. Optional raster validation needs separately
-        installed dependencies and Node.js &gt;=20.9. Read the
-        <a
-          href="https://github.com/faezemohades/svger-cli/blob/main/docs/OPTIONAL-DEPENDENCIES.md"
-          >optional dependencies guide</a
-        >.
-      </p>
-      <h2>Maintenance and migrations</h2>
-      <pre><code>npx svger plugins
-npx svger lock ./icons/logo.svg
-npx svger unlock ./icons/logo.svg
-npx svger recover ./components --format json
-npx svger migrate config .svgconfig.json --dry-run
-npx svger clean ./components</code></pre>
-      <p>
-        <code>clean</code> removes generated files from the selected output
-        directory. Check the target before running it. Migrations preview with
-        <code>--dry-run</code> and create backups by default. The repository's
-        <a
-          href="https://github.com/faezemohades/svger-cli/blob/main/docs/CLI-REFERENCE.md"
-          >complete CLI reference</a
-        >
-        documents every command, option, default, and caution.
-      </p>
-      <h2>Programmatic use</h2>
-      <pre><code>import { createSVGCompiler } from 'svger-cli';
-
-const compiler = await createSVGCompiler({ cwd: process.cwd() });
-const report = await compiler.build({
-  src: './icons',
-  out: './components',
-  framework: 'svelte',
-  typescript: false,
-});</code></pre>
-      <p>
-        The public root facade provides <code>build()</code> and resolved
-        configuration explanations. Check the installed package declarations
-        for exact public types; internal compiler modules are not public imports.
-      </p>
-    </main>
-    <footer>
-      <p>
-        <a href="index.html">Overview</a> ·
-        <a href="evaluation.html">Local evaluation</a>
-      </p>
-    </footer>
-  </body>
-</html>
+<p class="source-link">Related source and version caveats: <a href="https://github.com/faezemohades/svger-cli">SVGER-CLI repository</a>.</p></main>
+<footer><p>Static documentation, no telemetry. Benchmark runs only on request through the local companion. Planned 4.1.0 documentation; package availability may differ.</p><a href="index.html">Documentation home</a></footer>
+<script src="search.js" defer></script></body></html>
