@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstring>
 #include <cstdlib>
 #include <filesystem>
@@ -257,14 +258,15 @@ void renameOpenHandle(HANDLE sourceHandle, const std::wstring& destinationDirect
       READ_CONTROL | FILE_ADD_FILE | FILE_LIST_DIRECTORY, true);
   inspectHandle(directory.value, true);
   const size_t nameBytes = destinationName.size() * sizeof(wchar_t);
-  std::vector<unsigned char> storage(sizeof(FILE_RENAME_INFO) + nameBytes);
+  const size_t infoBytes = offsetof(FILE_RENAME_INFO, FileName) + nameBytes;
+  std::vector<unsigned char> storage(infoBytes);
   auto* info = reinterpret_cast<FILE_RENAME_INFO*>(storage.data());
   info->ReplaceIfExists = FALSE;
   info->RootDirectory = directory.value;
   info->FileNameLength = static_cast<DWORD>(nameBytes);
   memcpy(info->FileName, destinationName.data(), nameBytes);
   if (!SetFileInformationByHandle(sourceHandle, FileRenameInfo, info,
-                                  static_cast<DWORD>(storage.size()))) fail("handle_rename_failed");
+                                  static_cast<DWORD>(infoBytes))) fail("handle_rename_failed");
 }
 
 void deleteByHandle(const std::wstring& filePath) {
