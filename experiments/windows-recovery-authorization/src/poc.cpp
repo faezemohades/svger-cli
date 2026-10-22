@@ -257,14 +257,21 @@ void renameOpenHandle(HANDLE sourceHandle, const std::wstring& destinationDirect
   Handle directory = openNoFollow(destinationDirectory,
       READ_CONTROL | FILE_ADD_FILE | FILE_LIST_DIRECTORY, true);
   inspectHandle(directory.value, true);
-  const size_t nameBytes = destinationName.size() * sizeof(wchar_t);
+  const std::wstring destinationPath =
+      (std::filesystem::path(destinationDirectory) / destinationName).wstring();
+  const size_t nameBytes = destinationPath.size() * sizeof(wchar_t);
   const size_t infoBytes = offsetof(FILE_RENAME_INFO, FileName) + nameBytes;
   std::vector<unsigned char> storage(infoBytes);
   auto* info = reinterpret_cast<FILE_RENAME_INFO*>(storage.data());
   info->ReplaceIfExists = FALSE;
-  info->RootDirectory = directory.value;
+  // Keep the source object pinned by handle, and name the destination
+  // absolutely. Some Windows filesystem/provider combinations reject a
+  // non-null RootDirectory for FileRenameInfo with ERROR_INVALID_PARAMETER.
+  // The destination directory was independently opened and authorized above;
+  // its protected ACL prevents other principals from substituting entries.
+  info->RootDirectory = nullptr;
   info->FileNameLength = static_cast<DWORD>(nameBytes);
-  memcpy(info->FileName, destinationName.data(), nameBytes);
+  memcpy(info->FileName, destinationPath.data(), nameBytes);
   if (!SetFileInformationByHandle(sourceHandle, FileRenameInfo, info,
                                   static_cast<DWORD>(infoBytes))) fail("handle_rename_failed");
 }
