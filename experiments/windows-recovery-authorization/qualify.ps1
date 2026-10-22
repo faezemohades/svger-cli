@@ -88,6 +88,18 @@ try {
   Set-Acl -LiteralPath $inheritedParent -AclObject $parentAcl
   $inheritedFile = Join-Path $inheritedParent 'child.bin'
   [System.IO.File]::WriteAllText($inheritedFile, 'temporary fixture')
+  # Hosted Windows runners can create PowerShell/.NET files with the
+  # Administrators group as owner when the process is elevated. Make this
+  # fixture's owner explicit so the inherited-ACE assertion reaches the ACE
+  # check rather than failing the independent owner authorization gate.
+  $inheritedFileAcl = Get-Acl -LiteralPath $inheritedFile
+  $inheritedFileAcl.SetOwner($identity.User)
+  Set-Acl -LiteralPath $inheritedFile -AclObject $inheritedFileAcl
+  $inheritedOwner = (Get-Acl -LiteralPath $inheritedFile).GetOwner(
+    [System.Security.Principal.SecurityIdentifier]).Value
+  if ($inheritedOwner -ne $userSid) {
+    throw "Inherited-ACE fixture owner mismatch: expected $userSid, observed $inheritedOwner."
+  }
   $inheritedRules = (Get-Acl -LiteralPath $inheritedFile).GetAccessRules($true, $true, [System.Security.Principal.SecurityIdentifier])
   if (-not ($inheritedRules | Where-Object { $_.IdentityReference.Value -eq $everyone.Value -and $_.AccessControlType -eq $allow -and $_.IsInherited -and ($_.FileSystemRights -band $write) -ne 0 })) {
     throw 'Inherited Everyone write ACE was not present in the fixture before inspection.'
