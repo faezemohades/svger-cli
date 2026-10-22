@@ -108,15 +108,16 @@ void inspectHandle(HANDLE file, bool directory, bool requireProtectedDacl = true
   if (directory != ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)) fail("object_type_mismatch");
 
   PSID owner = nullptr;
+  PSID group = nullptr;
   PACL dacl = nullptr;
   PSECURITY_DESCRIPTOR descriptor = nullptr;
   DWORD status = GetSecurityInfo(file, SE_FILE_OBJECT,
-      OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION,
-      &owner, nullptr, &dacl, nullptr, &descriptor);
+      OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION,
+      &owner, &group, &dacl, nullptr, &descriptor);
   LocalMemory descriptorMemory;
   descriptorMemory.value = descriptor;
   if (status != ERROR_SUCCESS) fail("security_descriptor_read_failed", status);
-  if (!owner || !dacl) fail("owner_or_dacl_missing", ERROR_INVALID_SECURITY_DESCR);
+  if (!owner || !group || !dacl) fail("owner_group_or_dacl_missing", ERROR_INVALID_SECURITY_DESCR);
   SECURITY_DESCRIPTOR_CONTROL control = 0;
   DWORD revision = 0;
   if (!GetSecurityDescriptorControl(descriptor, &control, &revision)) fail("sd_control_read_failed");
