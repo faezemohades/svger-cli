@@ -4,8 +4,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { recoverOutputTransactions } from '../../dist/index.js';
 
-const fixture = await fs.mkdtemp(
+const lexicalFixture = await fs.mkdtemp(
   path.join(os.tmpdir(), 'svger-recovery-hardening-')
+);
+const fixture = await fs.realpath(lexicalFixture);
+console.log(
+  `Recovery hardening fixture paths: lexical=${lexicalFixture}; physical=${fixture}`
 );
 const recoveryRoot = path.join(fixture, 'transactions');
 await fs.mkdir(recoveryRoot);
@@ -39,10 +43,12 @@ function journal(id, overrides = {}) {
 }
 
 async function writeJournal(id, value) {
-  await fs.writeFile(
-    path.join(recoveryRoot, `.svger-transaction-${id}.json`),
-    JSON.stringify(value)
+  const journalPath = path.join(
+    recoveryRoot,
+    `.svger-transaction-${id}.json`
   );
+  await fs.writeFile(journalPath, JSON.stringify(value), { mode: 0o600 });
+  await fs.chmod(journalPath, 0o600);
 }
 
 // A legitimate interrupted transaction restores an original output and removes
@@ -63,6 +69,7 @@ async function writeJournal(id, value) {
   await fs.mkdir(path.dirname(value.entries[0].backupPath), {
     recursive: true,
   });
+  await fs.chmod(value.stageDir, 0o700);
   await fs.mkdir(value.outputDir, { recursive: true });
   await fs.writeFile(value.entries[0].outputPath, 'replacement');
   await fs.writeFile(value.entries[0].backupPath, 'original');
@@ -122,10 +129,12 @@ await fs.writeFile(outsideFile, 'protected');
 
 // Corrupt JSON and incomplete original-file recovery metadata produce diagnostics
 // and leave both the journal and output untouched.
-await fs.writeFile(
-  path.join(recoveryRoot, '.svger-transaction-corrupt.json'),
-  '{'
+const corruptJournalPath = path.join(
+  recoveryRoot,
+  '.svger-transaction-corrupt.json'
 );
+await fs.writeFile(corruptJournalPath, '{', { mode: 0o600 });
+await fs.chmod(corruptJournalPath, 0o600);
 {
   const id = 'incomplete';
   const value = journal(id, {
@@ -206,6 +215,7 @@ await fs.access(path.join(recoveryRoot, '.svger-transaction-path-escape.json'));
   await fs.mkdir(value.outputDir, { recursive: true });
   await fs.writeFile(value.entries[0].outputPath, 'restored original');
   await fs.mkdir(path.join(value.stageDir, 'rollback'), { recursive: true });
+  await fs.chmod(value.stageDir, 0o700);
   await fs.writeFile(
     path.join(value.stageDir, 'rollback', '0'),
     'restore-started'

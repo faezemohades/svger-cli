@@ -43,6 +43,7 @@ const stagedFiles = path.join(stage, 'files');
 await fs.mkdir(output);
 await fs.mkdir(backup, { recursive: true });
 await fs.mkdir(stagedFiles);
+await fs.chmod(stage, 0o700);
 
 const createdOutput = path.join(output, 'Created.tsx');
 const restoredOutput = path.join(output, 'Restored.tsx');
@@ -74,10 +75,12 @@ const journal = {
     },
   ],
 };
-await fs.writeFile(
-  path.join(fixture, '.svger-transaction-recovery-test.json'),
-  JSON.stringify(journal)
+const journalPath = path.join(
+  fixture,
+  '.svger-transaction-recovery-test.json'
 );
+await fs.writeFile(journalPath, JSON.stringify(journal), { mode: 0o600 });
+await fs.chmod(journalPath, 0o600);
 
 const recovered = await recoverOutputTransactions(fixture);
 assert.deepEqual(recovered, { inspected: 1, recovered: 1, diagnostics: [] });
@@ -121,6 +124,7 @@ async function assertRejectedJournalPaths({
   await fs.mkdir(output);
   await fs.mkdir(path.join(stage, 'backup'), { recursive: true });
   await fs.mkdir(path.join(stage, 'files'), { recursive: true });
+  await fs.chmod(stage, 0o700);
   await fs.writeFile(outputFile, 'must remain unchanged');
 
   const relativeOutputPath =
@@ -151,7 +155,8 @@ async function assertRejectedJournalPaths({
     recoveryRoot,
     `.svger-transaction-${id}.json`
   );
-  await fs.writeFile(journalPath, JSON.stringify(journal));
+  await fs.writeFile(journalPath, JSON.stringify(journal), { mode: 0o600 });
+  await fs.chmod(journalPath, 0o600);
 
   const report = await recoverOutputTransactions(recoveryRoot);
   assert.equal(report.inspected, 1);
