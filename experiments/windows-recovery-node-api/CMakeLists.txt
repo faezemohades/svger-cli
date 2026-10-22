@@ -15,9 +15,12 @@ if(NOT NODE_IMPORT_LIBRARY OR NOT EXISTS "${NODE_IMPORT_LIBRARY}")
   message(FATAL_ERROR "Set NODE_IMPORT_LIBRARY to the matching node.lib.")
 endif()
 
-add_library(svger_recovery_session MODULE src/addon.cpp)
+add_library(svger_recovery_session MODULE
+  src/addon.cpp
+  src/parent-lock.cpp
+)
 target_include_directories(svger_recovery_session PRIVATE "${NODE_API_INCLUDE_DIR}")
-target_link_libraries(svger_recovery_session PRIVATE "${NODE_IMPORT_LIBRARY}")
+target_link_libraries(svger_recovery_session PRIVATE "${NODE_IMPORT_LIBRARY}" Advapi32)
 target_compile_features(svger_recovery_session PRIVATE cxx_std_17)
 target_compile_definitions(svger_recovery_session PRIVATE
   NAPI_VERSION=8

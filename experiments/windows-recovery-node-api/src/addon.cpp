@@ -3,12 +3,16 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "parent-lock.hpp"
 
 #include <algorithm>
 #include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace {
 
@@ -39,6 +43,20 @@ struct NativeFailure {
   bool retryable;
   DWORD win32;
 };
+
+NativeFailure convertParentLockFailure(const ParentLockError& failure) {
+  ErrorCategory category = ErrorCategory::Io;
+  switch (failure.category) {
+    case ParentLockErrorCategory::Authorization: category = ErrorCategory::Authorization; break;
+    case ParentLockErrorCategory::Busy: category = ErrorCategory::Busy; break;
+    case ParentLockErrorCategory::Malformed: category = ErrorCategory::Malformed; break;
+    case ParentLockErrorCategory::Ambiguous: category = ErrorCategory::Ambiguous; break;
+    case ParentLockErrorCategory::Io: category = ErrorCategory::Io; break;
+    case ParentLockErrorCategory::Unsupported: category = ErrorCategory::Unsupported; break;
+  }
+  return NativeFailure{failure.code, category,
+      failure.category == ParentLockErrorCategory::Busy, failure.win32};
+}
 
 std::atomic<uint32_t> g_liveResources{0};
 char kConstructorToken;
@@ -120,12 +138,29 @@ class OwnedEvent {
 class Session {
  public:
   Session() = default;
+  Session(const std::wstring& parentPath, bool failAfterLock) {
+    parentLock_ = std::make_unique<ParentLock>(parentPath);
+    if (failAfterLock) {
+      throw NativeFailure{"E_SESSION_INIT_INJECTED", ErrorCategory::Io, false, ERROR_SUCCESS};
+    }
+  }
 
   void closeLocked() {
     if (closed_) return;
     closed_ = true;
+    DWORD closeError = ERROR_SUCCESS;
     if (!event_.close()) {
-      throw NativeFailure{"E_SESSION_CLOSE", ErrorCategory::Io, false, GetLastError()};
+      closeError = GetLastError();
+    }
+    if (parentLock_) {
+      try {
+        parentLock_->close();
+      } catch (const ParentLockError& failure) {
+        if (closeError == ERROR_SUCCESS) closeError = failure.win32;
+      }
+    }
+    if (closeError != ERROR_SUCCESS) {
+      throw NativeFailure{"E_SESSION_CLOSE", ErrorCategory::Io, false, closeError};
     }
   }
 
@@ -169,11 +204,50 @@ class Session {
   std::mutex operationMutex_;
   std::mutex stateMutex_;
   OwnedEvent event_;
+  std::unique_ptr<ParentLock> parentLock_;
   bool closed_ = false;
   uint64_t sequence_ = 0;
   uint32_t active_ = 0;
   uint32_t peak_ = 0;
 };
+
+std::wstring getWideString(napi_env env, napi_value value, const char* message) {
+  static_assert(sizeof(wchar_t) == sizeof(char16_t), "Windows wchar_t must be UTF-16");
+  size_t length = 0;
+  if (napi_get_value_string_utf16(env, value, nullptr, 0, &length) != napi_ok || length == 0) {
+    napi_throw_type_error(env, nullptr, message);
+    return {};
+  }
+  std::vector<char16_t> buffer(length + 1);
+  size_t written = 0;
+  if (napi_get_value_string_utf16(env, value, buffer.data(), buffer.size(), &written) != napi_ok ||
+      written != length) {
+    napi_throw_type_error(env, nullptr, message);
+    return {};
+  }
+  if (std::find(buffer.begin(), buffer.begin() + written, u'\0') != buffer.begin() + written) {
+    napi_throw_type_error(env, nullptr, message);
+    return {};
+  }
+  return std::wstring(reinterpret_cast<const wchar_t*>(buffer.data()), written);
+}
+
+bool getBooleanOption(napi_env env, napi_value options, const char* name) {
+  bool present = false;
+  if (napi_has_named_property(env, options, name, &present) != napi_ok) {
+    napi_throw_type_error(env, nullptr, "Unable to read session options.");
+    return false;
+  }
+  if (!present) return false;
+  napi_value value;
+  bool result = false;
+  if (napi_get_named_property(env, options, name, &value) != napi_ok ||
+      napi_get_value_bool(env, value, &result) != napi_ok) {
+    napi_throw_type_error(env, nullptr, "Session fault-injection options must be booleans.");
+    return false;
+  }
+  return result;
+}
 
 struct AddonData {
   napi_ref sessionConstructor = nullptr;
@@ -245,6 +319,24 @@ Session* unwrapSession(napi_env env, napi_callback_info info, size_t* argc = nul
 
 void finalizeSession(napi_env, void* data, void*) {
   delete static_cast<Session*>(data);
+}
+
+napi_value wrapSession(napi_env env, AddonData* addon, std::unique_ptr<Session> session) {
+  napi_value constructor;
+  napi_value token;
+  if (napi_get_reference_value(env, addon->sessionConstructor, &constructor) != napi_ok ||
+      napi_create_external(env, &kConstructorToken, nullptr, nullptr, &token) != napi_ok) {
+    napi_throw_error(env, nullptr, "Unable to construct native session wrapper.");
+    return nullptr;
+  }
+  napi_value instance;
+  if (napi_new_instance(env, constructor, 1, &token, &instance) != napi_ok) return nullptr;
+  if (napi_wrap(env, instance, session.get(), finalizeSession, nullptr, nullptr) != napi_ok) {
+    napi_throw_error(env, nullptr, "Unable to attach native session state.");
+    return nullptr;
+  }
+  session.release();
+  return instance;
 }
 
 napi_value sessionConstructor(napi_env env, napi_callback_info info) {
@@ -321,6 +413,56 @@ napi_value openSession(napi_env env, napi_callback_info info) {
     }
     session.release();
     return instance;
+  } catch (const NativeFailure& failure) {
+    throwFailure(env, failure);
+    return nullptr;
+  } catch (...) {
+    throwFailure(env, NativeFailure{"E_SESSION_INIT", ErrorCategory::Io, false, ERROR_SUCCESS});
+    return nullptr;
+  }
+}
+
+napi_value openLockedSession(napi_env env, napi_callback_info info) {
+  size_t argc = 2;
+  napi_value argv[2];
+  if (napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr) != napi_ok || argc == 0) {
+    napi_throw_type_error(env, nullptr, "openLockedSession requires an authorized parent path.");
+    return nullptr;
+  }
+  napi_valuetype pathType;
+  if (napi_typeof(env, argv[0], &pathType) != napi_ok || pathType != napi_string) {
+    napi_throw_type_error(env, nullptr, "Authorized parent path must be a string.");
+    return nullptr;
+  }
+  const std::wstring parentPath = getWideString(
+      env, argv[0], "Authorized parent path must be a non-empty UTF-16 string without NUL.");
+  bool exceptionPending = false;
+  napi_is_exception_pending(env, &exceptionPending);
+  if (exceptionPending) return nullptr;
+
+  bool failAfterLock = false;
+  if (argc > 1) {
+    napi_valuetype optionsType;
+    if (napi_typeof(env, argv[1], &optionsType) != napi_ok || optionsType != napi_object) {
+      napi_throw_type_error(env, nullptr, "Locked-session options must be an object.");
+      return nullptr;
+    }
+    failAfterLock = getBooleanOption(env, argv[1], "failAfterLock");
+    napi_is_exception_pending(env, &exceptionPending);
+    if (exceptionPending) return nullptr;
+  }
+
+  AddonData* addon = nullptr;
+  if (napi_get_instance_data(env, reinterpret_cast<void**>(&addon)) != napi_ok || addon == nullptr) {
+    napi_throw_error(env, nullptr, "Native session environment is unavailable.");
+    return nullptr;
+  }
+  try {
+    auto session = std::make_unique<Session>(parentPath, failAfterLock);
+    return wrapSession(env, addon, std::move(session));
+  } catch (const ParentLockError& failure) {
+    throwFailure(env, convertParentLockFailure(failure));
+    return nullptr;
   } catch (const NativeFailure& failure) {
     throwFailure(env, failure);
     return nullptr;
@@ -538,6 +680,12 @@ napi_value pendingWorkCount(napi_env env, napi_callback_info) {
   return result;
 }
 
+napi_value authorizationHandleCount(napi_env env, napi_callback_info) {
+  napi_value result;
+  napi_create_uint32(env, liveAuthorizationHandleCount(), &result);
+  return result;
+}
+
 void finalizeAddon(napi_env, void* data, void*) {
   // Node disposes environment-owned napi_ref values during teardown. Keep this
   // callback native-only because it runs after cleanup hooks on shutdown.
@@ -573,10 +721,12 @@ napi_value initialize(napi_env env, napi_value exports) {
   addon.release();
   napi_property_descriptor moduleProperties[] = {
       {"openSession", nullptr, openSession, nullptr, nullptr, nullptr, napi_default, nullptr},
+      {"openLockedSession", nullptr, openLockedSession, nullptr, nullptr, nullptr, napi_default, nullptr},
       {"liveResourceCount", nullptr, liveResourceCount, nullptr, nullptr, nullptr, napi_default, nullptr},
       {"pendingWorkCount", nullptr, pendingWorkCount, nullptr, nullptr, nullptr, napi_default, nullptr},
+      {"authorizationHandleCount", nullptr, authorizationHandleCount, nullptr, nullptr, nullptr, napi_default, nullptr},
   };
-  if (napi_define_properties(env, exports, 3, moduleProperties) != napi_ok) {
+  if (napi_define_properties(env, exports, sizeof(moduleProperties) / sizeof(moduleProperties[0]), moduleProperties) != napi_ok) {
     napi_throw_error(env, nullptr, "Unable to export native session module.");
     return nullptr;
   }

@@ -1,4 +1,4 @@
-name: Isolated Windows Node-API Session Qualification
+name: Isolated Windows Node-API Session and Parent-Lock Qualification
 
 on:
   workflow_dispatch:
@@ -92,7 +92,36 @@ jobs:
           "QUALIFIED_NODE_VERSION=$(node --version)" >> $env:GITHUB_ENV
           "QUALIFIED_NODE_ARCH=$nodeArch" >> $env:GITHUB_ENV
 
-      - name: Verify runtime and run M.1 lifecycle tests
+      - name: Create and verify private disposable test root
+        id: test_root
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP ("svger-node-api-m2-" + [guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Path $root | Out-Null
+          "SVGER_NODE_API_TEST_ROOT=$root" >> $env:GITHUB_ENV
+          "SVGER_NODE_API_TEST_ROOT=$root" >> $env:GITHUB_OUTPUT
+          $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+          $sddl = "O:$sid" + "D:P(A;OICI;FA;;;$sid)(A;OICI;FA;;;SY)"
+          $acl = Get-Acl -LiteralPath $root
+          $acl.SetSecurityDescriptorSddlForm($sddl)
+          Set-Acl -LiteralPath $root -AclObject $acl
+          $verified = Get-Acl -LiteralPath $root
+          $ownerSid = $verified.Owner
+          if ($ownerSid -notmatch '^S-1-') {
+            $ownerSid = ([Security.Principal.NTAccount]::new($verified.Owner)).Translate([Security.Principal.SecurityIdentifier]).Value
+          }
+          if ($ownerSid -ne $sid) { throw "Test-root owner mismatch: $ownerSid" }
+          if (-not $verified.AreAccessRulesProtected) { throw 'Test-root DACL is not protected' }
+          $trustees = @($verified.Access | ForEach-Object {
+            if ($_.IdentityReference -is [Security.Principal.SecurityIdentifier]) { $_.IdentityReference.Value }
+            else { $_.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value }
+          } | Sort-Object -Unique)
+          if ($trustees.Count -ne 2 -or $trustees -notcontains $sid -or $trustees -notcontains 'S-1-5-18') {
+            throw "Unexpected test-root DACL trustees: $($trustees -join ', ')"
+          }
+
+      - name: Verify runtime and run M.1/M.2 lifecycle and locking tests
         shell: pwsh
         env:
           UV_THREADPOOL_SIZE: 4
@@ -101,3 +130,11 @@ jobs:
           Write-Host "Qualified runtime: $env:QUALIFIED_NODE_VERSION ($env:QUALIFIED_NODE_ARCH)"
           node --expose-gc --test experiments/windows-recovery-node-api/tests/session-lifecycle.test.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test experiments/windows-recovery-node-api/tests/parent-lock.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Remove disposable test root
+        if: always() && steps.test_root.outputs.SVGER_NODE_API_TEST_ROOT != ''
+        shell: pwsh
+        run: |
+          Remove-Item -LiteralPath '${{ steps.test_root.outputs.SVGER_NODE_API_TEST_ROOT }}' -Recurse -Force -ErrorAction SilentlyContinue

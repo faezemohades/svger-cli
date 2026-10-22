@@ -18,6 +18,11 @@ export interface SessionOptions {
   failAfterResource?: boolean;
 }
 
+export interface LockedSessionOptions {
+  /** Test-only fault injection after parent authorization and lock acquisition. */
+  failAfterLock?: boolean;
+}
+
 export interface SessionSnapshot {
   closed: boolean;
   sequence: number;
@@ -37,7 +42,11 @@ export interface NativeSession {
 }
 
 export function openSession(options?: SessionOptions): NativeSession;
+/** Opens a Windows parent-scoped authorization and exclusive cooperative lock session. */
+export function openLockedSession(parentPath: string, options?: LockedSessionOptions): NativeSession;
 /** Experimental process-local resource counter used by lifecycle tests. */
 export function liveResourceCount(): number;
 /** Experimental test-only count of queued native async work. */
 export function pendingWorkCount(): number;
+/** Experimental test-only count of held parent and lock handles. */
+export function authorizationHandleCount(): number;
