@@ -1,0 +1,103 @@
+name: Isolated Windows Node-API Session Qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/directive-046-dependency-security
+
+permissions:
+  contents: read
+
+jobs:
+  session-lifecycle:
+    name: Node-API session / Windows x64 / Node ${{ matrix.node }}
+    runs-on: windows-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - 18.17.0
+          - 22
+          - 24
+
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js ${{ matrix.node }} x64
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+          architecture: x64
+
+      - name: Configure and build isolated addon
+        shell: pwsh
+        run: |
+          $nodeExe = (Get-Command node).Source
+          $nodeVersion = node -p 'process.versions.node'
+          $nodeArch = node -p 'process.arch'
+          $nodeRoot = Split-Path $nodeExe -Parent
+          $nodeHeaders = Join-Path $nodeRoot 'include/node'
+          if (-not (Test-Path (Join-Path $nodeHeaders 'node_api.h'))) {
+            Write-Host "setup-node runtime has no headers at $nodeHeaders; obtaining the matching official header archive."
+            $archiveName = "node-v$nodeVersion-headers.tar.gz"
+            $releaseUrl = "https://nodejs.org/dist/v$nodeVersion"
+            $checksums = (Invoke-WebRequest -Uri "$releaseUrl/SHASUMS256.txt").Content
+            $escapedName = [regex]::Escape($archiveName)
+            $checksumMatch = [regex]::Match($checksums, "(?m)^([0-9a-fA-F]{64})\s+$escapedName\s*$")
+            if (-not $checksumMatch.Success) { throw "Official checksum entry missing for $archiveName" }
+            $headerRoot = Join-Path $env:RUNNER_TEMP "node-v$nodeVersion-headers"
+            $archivePath = Join-Path $env:RUNNER_TEMP $archiveName
+            Invoke-WebRequest -Uri "$releaseUrl/$archiveName" -OutFile $archivePath
+            $actualHash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash
+            if ($actualHash -ne $checksumMatch.Groups[1].Value) { throw "Checksum mismatch for $archiveName" }
+            New-Item -ItemType Directory -Path $headerRoot -Force | Out-Null
+            tar -xzf $archivePath -C $headerRoot
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $nodeHeaders = Join-Path $headerRoot "node-v$nodeVersion/include/node"
+          }
+          if (-not (Test-Path (Join-Path $nodeHeaders 'node_api.h'))) {
+            throw "Verified Node-API headers not found at $nodeHeaders"
+          }
+          $nodeImportLibrary = Join-Path $nodeRoot 'node.lib'
+          if (-not (Test-Path $nodeImportLibrary)) {
+            Write-Host "setup-node runtime has no node.lib at $nodeImportLibrary; obtaining the matching official x64 import library."
+            if (-not $checksums) {
+              $releaseUrl = "https://nodejs.org/dist/v$nodeVersion"
+              $checksums = (Invoke-WebRequest -Uri "$releaseUrl/SHASUMS256.txt").Content
+            }
+            $libraryName = 'node.lib'
+            $libraryRelativePath = 'win-x64/node.lib'
+            $escapedLibraryPath = [regex]::Escape($libraryRelativePath)
+            $libraryChecksumMatch = [regex]::Match($checksums, "(?m)^([0-9a-fA-F]{64})\s+$escapedLibraryPath\s*$")
+            if (-not $libraryChecksumMatch.Success) { throw "Official checksum entry missing for $libraryRelativePath" }
+            $libraryDownload = Join-Path $env:RUNNER_TEMP $libraryName
+            Invoke-WebRequest -Uri "$releaseUrl/$libraryRelativePath" -OutFile $libraryDownload
+            $libraryHash = (Get-FileHash -LiteralPath $libraryDownload -Algorithm SHA256).Hash
+            if ($libraryHash -ne $libraryChecksumMatch.Groups[1].Value) { throw "Checksum mismatch for $libraryRelativePath" }
+            $nodeImportLibrary = $libraryDownload
+          }
+          $build = Join-Path $env:RUNNER_TEMP 'svger-node-api-session-build'
+          cmake -S experiments/windows-recovery-node-api -B $build `
+            "-DNODE_API_INCLUDE_DIR=$nodeHeaders" `
+            "-DNODE_IMPORT_LIBRARY=$nodeImportLibrary"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build $build --config Release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "SVGER_NODE_API_ADDON=$(Join-Path $build 'Release/svger_recovery_session.node')" >> $env:GITHUB_ENV
+          "QUALIFIED_NODE_VERSION=$(node --version)" >> $env:GITHUB_ENV
+          "QUALIFIED_NODE_ARCH=$nodeArch" >> $env:GITHUB_ENV
+
+      - name: Verify runtime and run M.1 lifecycle tests
+        shell: pwsh
+        env:
+          UV_THREADPOOL_SIZE: 4
+        run: |
+          if ($env:QUALIFIED_NODE_ARCH -ne 'x64') { throw "Expected x64, got $env:QUALIFIED_NODE_ARCH" }
+          Write-Host "Qualified runtime: $env:QUALIFIED_NODE_VERSION ($env:QUALIFIED_NODE_ARCH)"
+          node --expose-gc --test experiments/windows-recovery-node-api/tests/session-lifecycle.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
