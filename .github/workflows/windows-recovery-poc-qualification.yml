@@ -63,21 +63,13 @@ jobs:
 
       - name: Run ACL, owner, reparse-point, and cross-process qualification
         id: qualify
+        if: ${{ always() && steps.build.outcome == 'success' }}
         shell: pwsh
         run: |
           $evidence = "$env:RUNNER_TEMP\svger-windows-recovery-evidence"
           $exe = "$env:RUNNER_TEMP\svger-windows-recovery-build\Release\svger-recovery-poc.exe"
           & "$env:GITHUB_WORKSPACE\experiments\windows-recovery-authorization\qualify.ps1" -Exe $exe -ReportPath "$evidence\qualification.json" 2>&1 | Tee-Object -FilePath "$evidence\qualification.log"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Preserve text qualification evidence (no binaries)
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: windows-recovery-poc-evidence-${{ github.run_id }}
-          path: ${{ runner.temp }}\svger-windows-recovery-evidence\
-          if-no-files-found: warn
-          retention-days: 14
 
       - name: Summarize qualification boundaries
         if: always()
@@ -98,11 +90,31 @@ jobs:
           Add-Content -LiteralPath $summary -Value '- Node.js 22/24 integration: UNTESTED (no Node integration exists)'
           Add-Content -LiteralPath $summary -Value '- Experimental executable: not included in uploaded evidence'
           $report = "$env:RUNNER_TEMP\svger-windows-recovery-evidence\qualification.json"
-          if (-not (Test-Path -LiteralPath $report)) {
-            Add-Content -LiteralPath $summary -Value '- Qualification report: MISSING; build or earlier test failed'
-            exit 1
+          if (Test-Path -LiteralPath $report) {
+            $data = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
+          } else {
+            $data = [pscustomobject]@{
+              schemaVersion = 1
+              generatedAtUtc = [DateTime]::UtcNow.ToString('o')
+              nodeIntegration = 'UNTESTED: no Node integration exists'
+              results = @()
+            }
           }
-          $data = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
+          foreach ($gate in @(
+            @{ name = 'MSVC/CMake configure'; outcome = $env:CONFIGURE_OUTCOME },
+            @{ name = 'C++ build'; outcome = $env:BUILD_OUTCOME },
+            @{ name = 'Disposable self-test'; outcome = $env:SELF_TEST_OUTCOME }
+          )) {
+            if ($gate.outcome -eq 'success') { $status = 'PASS' }
+            elseif ($gate.outcome -eq 'failure') { $status = 'FAIL' }
+            else { $status = 'NOT_RUN' }
+            $data.results += [pscustomobject]@{
+              gate = $gate.name
+              status = $status
+              evidence = "GitHub Actions step outcome: $($gate.outcome)"
+            }
+          }
+          $data | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $report -Encoding UTF8
           Add-Content -LiteralPath $summary -Value ''
           Add-Content -LiteralPath $summary -Value '| Gate | Result | Evidence |'
           Add-Content -LiteralPath $summary -Value '| --- | --- | --- |'
@@ -115,4 +127,13 @@ jobs:
             Add-Content -LiteralPath $summary -Value '> Owner-mismatch security gate is inconclusive on this runner. The workflow is not a full qualification pass; use a suitable isolated Windows runner with the required privilege.'
             exit 1
           }
-          if ($data.results.status -contains 'FAIL') { exit 1 }
+          if ($data.results.status -contains 'FAIL' -or $data.results.status -contains 'NOT_RUN') { exit 1 }
+
+      - name: Preserve text qualification evidence (no binaries)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-recovery-poc-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}\svger-windows-recovery-evidence\
+          if-no-files-found: warn
+          retention-days: 14
