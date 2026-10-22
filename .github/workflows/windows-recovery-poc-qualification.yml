@@ -1,0 +1,118 @@
+name: Windows Recovery Authorization POC Qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/directive-046-dependency-security
+
+permissions:
+  contents: read
+
+jobs:
+  windows-poc:
+    name: Isolated Win32 POC (Windows Server 2022)
+    runs-on: windows-2022
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Enforce remediation-branch scope
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -ne 'refs/heads/fix/directive-046-dependency-security') {
+            throw "This qualification is limited to the remediation branch; got $env:GITHUB_REF"
+          }
+          "Qualified revision: $(git rev-parse HEAD)"
+
+      - name: Create evidence directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Path "$env:RUNNER_TEMP\svger-windows-recovery-evidence" -Force | Out-Null
+
+      - name: Configure with MSVC and CMake
+        id: configure
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidence = "$env:RUNNER_TEMP\svger-windows-recovery-evidence"
+          cmake -S experiments/windows-recovery-authorization -B "$env:RUNNER_TEMP\svger-windows-recovery-build" -A x64 2>&1 | Tee-Object -FilePath "$evidence\configure.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build isolated harness
+        id: build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidence = "$env:RUNNER_TEMP\svger-windows-recovery-evidence"
+          cmake --build "$env:RUNNER_TEMP\svger-windows-recovery-build" --config Release --parallel 2 2>&1 | Tee-Object -FilePath "$evidence\build.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run disposable-directory self-test
+        id: self_test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidence = "$env:RUNNER_TEMP\svger-windows-recovery-evidence"
+          $exe = "$env:RUNNER_TEMP\svger-windows-recovery-build\Release\svger-recovery-poc.exe"
+          & $exe self-test 2>&1 | Tee-Object -FilePath "$evidence\self-test.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run ACL, owner, reparse-point, and cross-process qualification
+        id: qualify
+        shell: pwsh
+        run: |
+          $evidence = "$env:RUNNER_TEMP\svger-windows-recovery-evidence"
+          $exe = "$env:RUNNER_TEMP\svger-windows-recovery-build\Release\svger-recovery-poc.exe"
+          & "$env:GITHUB_WORKSPACE\experiments\windows-recovery-authorization\qualify.ps1" -Exe $exe -ReportPath "$evidence\qualification.json" 2>&1 | Tee-Object -FilePath "$evidence\qualification.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Preserve text qualification evidence (no binaries)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-recovery-poc-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}\svger-windows-recovery-evidence\
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Summarize qualification boundaries
+        if: always()
+        shell: pwsh
+        env:
+          CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          SELF_TEST_OUTCOME: ${{ steps.self_test.outcome }}
+        run: |
+          $summary = $env:GITHUB_STEP_SUMMARY
+          Add-Content -LiteralPath $summary -Value '# Isolated Windows recovery POC qualification'
+          Add-Content -LiteralPath $summary -Value ''
+          Add-Content -LiteralPath $summary -Value "- Revision: ``$(git rev-parse HEAD)``"
+          Add-Content -LiteralPath $summary -Value "- MSVC/CMake configure: **$env:CONFIGURE_OUTCOME**"
+          Add-Content -LiteralPath $summary -Value "- C++ build: **$env:BUILD_OUTCOME**"
+          Add-Content -LiteralPath $summary -Value "- Disposable self-test: **$env:SELF_TEST_OUTCOME**"
+          Add-Content -LiteralPath $summary -Value '- Production integration: NOT PERFORMED'
+          Add-Content -LiteralPath $summary -Value '- Node.js 22/24 integration: UNTESTED (no Node integration exists)'
+          Add-Content -LiteralPath $summary -Value '- Experimental executable: not included in uploaded evidence'
+          $report = "$env:RUNNER_TEMP\svger-windows-recovery-evidence\qualification.json"
+          if (-not (Test-Path -LiteralPath $report)) {
+            Add-Content -LiteralPath $summary -Value '- Qualification report: MISSING; build or earlier test failed'
+            exit 1
+          }
+          $data = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
+          Add-Content -LiteralPath $summary -Value ''
+          Add-Content -LiteralPath $summary -Value '| Gate | Result | Evidence |'
+          Add-Content -LiteralPath $summary -Value '| --- | --- | --- |'
+          foreach ($result in $data.results) {
+            $evidence = ([string]$result.evidence).Replace('|', '\|').Replace("`r", ' ').Replace("`n", ' ')
+            Add-Content -LiteralPath $summary -Value "| $($result.gate) | **$($result.status)** | $evidence |"
+          }
+          if ($data.results.status -contains 'INCONCLUSIVE') {
+            Add-Content -LiteralPath $summary -Value ''
+            Add-Content -LiteralPath $summary -Value '> Owner-mismatch security gate is inconclusive on this runner. The workflow is not a full qualification pass; use a suitable isolated Windows runner with the required privilege.'
+            exit 1
+          }
+          if ($data.results.status -contains 'FAIL') { exit 1 }
