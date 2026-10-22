@@ -260,7 +260,10 @@ void renameOpenHandle(HANDLE sourceHandle, const std::wstring& destinationDirect
   const std::wstring destinationPath =
       (std::filesystem::path(destinationDirectory) / destinationName).wstring();
   const size_t nameBytes = destinationPath.size() * sizeof(wchar_t);
-  const size_t infoBytes = offsetof(FILE_RENAME_INFO, FileName) + nameBytes;
+  // Keep a trailing NUL in the backing buffer for filesystems that inspect
+  // the wide string terminator, while FileNameLength remains the byte count
+  // excluding that terminator as required by the API.
+  const size_t infoBytes = offsetof(FILE_RENAME_INFO, FileName) + nameBytes + sizeof(wchar_t);
   std::vector<unsigned char> storage(infoBytes);
   auto* info = reinterpret_cast<FILE_RENAME_INFO*>(storage.data());
   info->ReplaceIfExists = FALSE;
