@@ -33,6 +33,61 @@ jobs:
         shell: pwsh
         run: New-Item -ItemType Directory -Path "$env:RUNNER_TEMP\svger-windows-recovery-evidence" -Force | Out-Null
 
+      - name: Create and verify protected disposable test parent
+        id: secure_temp
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+          $currentSid = $identity.User
+          $systemSid = [System.Security.Principal.SecurityIdentifier]::new('S-1-5-18')
+          $secureTemp = Join-Path $env:RUNNER_TEMP ("svger-poc-private-" + [guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Path $secureTemp | Out-Null
+          try {
+            $acl = [System.Security.AccessControl.DirectorySecurity]::new()
+            $acl.SetOwner($currentSid)
+            $acl.SetAccessRuleProtection($true, $false)
+            $inheritance = [System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor `
+              [System.Security.AccessControl.InheritanceFlags]::ObjectInherit
+            $allow = [System.Security.AccessControl.AccessControlType]::Allow
+            $fullControl = [System.Security.AccessControl.FileSystemRights]::FullControl
+            [void]$acl.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new(
+              $currentSid, $fullControl, $inheritance,
+              [System.Security.AccessControl.PropagationFlags]::None, $allow))
+            [void]$acl.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new(
+              $systemSid, $fullControl, $inheritance,
+              [System.Security.AccessControl.PropagationFlags]::None, $allow))
+            Set-Acl -LiteralPath $secureTemp -AclObject $acl
+
+            $verified = Get-Acl -LiteralPath $secureTemp
+            $actualOwnerSid = $verified.GetOwner([System.Security.Principal.SecurityIdentifier]).Value
+            if ($actualOwnerSid -ne $currentSid.Value) { throw "Private test parent owner mismatch: $actualOwnerSid" }
+            if (-not $verified.AreAccessRulesProtected) { throw 'Private test parent DACL is not protected.' }
+            $rules = $verified.GetAccessRules($true, $true, [System.Security.Principal.SecurityIdentifier])
+            $allowedSids = @($currentSid.Value, $systemSid.Value)
+            if ($rules.Count -ne 2) { throw "Private test parent has $($rules.Count) ACEs; expected exactly two." }
+            foreach ($rule in $rules) {
+              if ($rule.AccessControlType -ne $allow -or $rule.IdentityReference.Value -notin $allowedSids) {
+                throw "Unexpected ACE on private test parent: $($rule.AccessControlType) for $($rule.IdentityReference.Value)"
+              }
+            }
+            foreach ($sid in $allowedSids) {
+              if (-not ($rules | Where-Object { $_.IdentityReference.Value -eq $sid -and $_.AccessControlType -eq $allow -and ($_.FileSystemRights -band $fullControl) -eq $fullControl })) {
+                throw "Private test parent is missing full-control allow ACE for $sid."
+              }
+            }
+            if ((Get-Item -LiteralPath $secureTemp).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+              throw 'Private test parent is a reparse point.'
+            }
+            "TEMP=$secureTemp" | Add-Content -LiteralPath $env:GITHUB_ENV
+            "TMP=$secureTemp" | Add-Content -LiteralPath $env:GITHUB_ENV
+            "SVGER_POC_SECURE_TEMP=$secureTemp" | Add-Content -LiteralPath $env:GITHUB_ENV
+            Write-Host 'PASS private disposable parent: current-user owner; protected DACL; only current user and SYSTEM allow ACEs'
+          } catch {
+            Remove-Item -LiteralPath $secureTemp -Recurse -Force -ErrorAction SilentlyContinue
+            throw
+          }
+
       - name: Configure with MSVC and CMake
         id: configure
         shell: pwsh
@@ -53,6 +108,7 @@ jobs:
 
       - name: Run disposable-directory self-test
         id: self_test
+        if: steps.secure_temp.outcome == 'success'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -63,7 +119,7 @@ jobs:
 
       - name: Run ACL, owner, reparse-point, and cross-process qualification
         id: qualify
-        if: ${{ always() && steps.build.outcome == 'success' }}
+        if: ${{ always() && steps.build.outcome == 'success' && steps.secure_temp.outcome == 'success' }}
         shell: pwsh
         run: |
           $evidence = "$env:RUNNER_TEMP\svger-windows-recovery-evidence"
@@ -77,6 +133,7 @@ jobs:
         env:
           CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
           BUILD_OUTCOME: ${{ steps.build.outcome }}
+          SECURE_TEMP_OUTCOME: ${{ steps.secure_temp.outcome }}
           SELF_TEST_OUTCOME: ${{ steps.self_test.outcome }}
         run: |
           $summary = $env:GITHUB_STEP_SUMMARY
@@ -85,6 +142,7 @@ jobs:
           Add-Content -LiteralPath $summary -Value "- Revision: ``$(git rev-parse HEAD)``"
           Add-Content -LiteralPath $summary -Value "- MSVC/CMake configure: **$env:CONFIGURE_OUTCOME**"
           Add-Content -LiteralPath $summary -Value "- C++ build: **$env:BUILD_OUTCOME**"
+          Add-Content -LiteralPath $summary -Value "- Protected disposable parent: **$env:SECURE_TEMP_OUTCOME**"
           Add-Content -LiteralPath $summary -Value "- Disposable self-test: **$env:SELF_TEST_OUTCOME**"
           Add-Content -LiteralPath $summary -Value '- Production integration: NOT PERFORMED'
           Add-Content -LiteralPath $summary -Value '- Node.js 22/24 integration: UNTESTED (no Node integration exists)'
@@ -103,6 +161,7 @@ jobs:
           foreach ($gate in @(
             @{ name = 'MSVC/CMake configure'; outcome = $env:CONFIGURE_OUTCOME },
             @{ name = 'C++ build'; outcome = $env:BUILD_OUTCOME },
+            @{ name = 'Protected disposable test parent'; outcome = $env:SECURE_TEMP_OUTCOME },
             @{ name = 'Disposable self-test'; outcome = $env:SELF_TEST_OUTCOME }
           )) {
             if ($gate.outcome -eq 'success') { $status = 'PASS' }
@@ -113,6 +172,26 @@ jobs:
               status = $status
               evidence = "GitHub Actions step outcome: $($gate.outcome)"
             }
+          }
+          $tempCleanupStatus = 'NOT_RUN'
+          $tempCleanupEvidence = 'protected disposable parent was not created'
+          if ($env:SVGER_POC_SECURE_TEMP -and (Test-Path -LiteralPath $env:SVGER_POC_SECURE_TEMP)) {
+            Remove-Item -LiteralPath $env:SVGER_POC_SECURE_TEMP -Recurse -Force -ErrorAction SilentlyContinue
+            if (Test-Path -LiteralPath $env:SVGER_POC_SECURE_TEMP) {
+              $tempCleanupStatus = 'FAIL'
+              $tempCleanupEvidence = 'protected disposable parent remains after cleanup attempt'
+            } else {
+              $tempCleanupStatus = 'PASS'
+              $tempCleanupEvidence = 'protected disposable parent and contents removed'
+            }
+          } elseif ($env:SVGER_POC_SECURE_TEMP) {
+            $tempCleanupStatus = 'PASS'
+            $tempCleanupEvidence = 'protected disposable parent already absent'
+          }
+          $data.results += [pscustomobject]@{
+            gate = 'Protected parent cleanup'
+            status = $tempCleanupStatus
+            evidence = $tempCleanupEvidence
           }
           $data | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $report -Encoding UTF8
           Add-Content -LiteralPath $summary -Value ''

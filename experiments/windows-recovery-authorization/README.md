@@ -70,7 +70,13 @@ the remediation branch and manual dispatch, grants only `contents: read`, and
 uploads text logs plus the JSON result for 14 days. It does not upload the
 experimental executable, integrate the harness into SVGER-CLI, or publish a
 release artifact. Its summary explicitly reports Node 22/24 integration as
-untested because this isolated POC has no Node integration.
+untested because this isolated POC has no Node integration. For its tests, the
+workflow creates a unique disposable temp parent, sets its owner to the runner
+identity, applies a protected DACL allowing only that identity and `SYSTEM`,
+verifies the resulting owner and ACE list, and points both `TEMP` and `TMP` at
+it. The POC's parent authorization checks remain enabled; the parent is removed
+after results are recorded. This accommodates the hosted runner's default temp
+parent without relaxing the POC's ownership or ACL policy.
 
 To test process exclusion, start one process holding a disposable lock:
 
