@@ -62,7 +62,8 @@ struct TokenUserBuffer {
 
 PSID tokenUserSid(TokenUserBuffer& storage, Handle& token) {
   HANDLE raw = INVALID_HANDLE_VALUE;
-  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &raw)) fail("E_PARENT_TOKEN", GetLastError());
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_DUPLICATE, &raw))
+    fail("E_PARENT_TOKEN", GetLastError());
   token = Handle(raw);
   DWORD needed = 0;
   GetTokenInformation(token.get(), TokenUser, nullptr, 0, &needed);
