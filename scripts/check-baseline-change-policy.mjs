@@ -16,6 +16,15 @@ process.stdout.write(verify.stdout);
 process.stderr.write(verify.stderr);
 if (verify.status !== 0) process.exit(verify.status ?? 1);
 
+const verifierTests = spawnSync(
+  process.execPath,
+  ['--test', 'tests/phase0/baseline-verifier-cross-platform.test.mjs'],
+  { cwd: repositoryRoot, encoding: 'utf8' }
+);
+process.stdout.write(verifierTests.stdout);
+process.stderr.write(verifierTests.stderr);
+if (verifierTests.status !== 0) process.exit(verifierTests.status ?? 1);
+
 const baseRef = process.env.GITHUB_BASE_REF;
 if (!baseRef) {
   console.log(

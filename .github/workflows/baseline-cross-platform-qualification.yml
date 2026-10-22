@@ -1,0 +1,80 @@
+name: Baseline Cross-Platform Qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/directive-046-dependency-security
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-qualification:
+    name: Baseline - ${{ matrix.os }} / Node.js ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        node:
+          - 22
+          - 24
+          - 26
+
+    steps:
+      - name: Checkout exact branch revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Preserve exact baseline blob bytes
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+
+          const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          const paths = execFileSync('git', ['ls-tree', '-r', '-z', '--name-only', revision, '--', 'baselines'])
+            .toString('utf8')
+            .split('\0')
+            .filter(Boolean);
+
+          for (const relativePath of paths) {
+            if (!relativePath.startsWith('baselines/')) throw new Error(`Unexpected path: ${relativePath}`);
+            const bytes = execFileSync('git', ['cat-file', 'blob', `${revision}:${relativePath}`]);
+            mkdirSync(path.dirname(relativePath), { recursive: true });
+            writeFileSync(relativePath, bytes);
+            const expectedBlob = execFileSync('git', ['rev-parse', `${revision}:${relativePath}`], { encoding: 'utf8' }).trim();
+            const actualBlob = execFileSync('git', ['hash-object', '--no-filters', relativePath], { encoding: 'utf8' }).trim();
+            if (actualBlob !== expectedBlob) throw new Error(`Working-tree bytes differ from Git blob: ${relativePath}`);
+          }
+          NODE
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify immutable baseline
+        run: npm run baseline:verify
+
+      - name: Verify baseline policy and security regressions
+        run: npm run baseline:policy
+
+      - name: Report tested revision
+        shell: bash
+        run: |
+          tested_revision="$(git rev-parse HEAD)"
+          printf 'Commit: %s\n' "$GITHUB_SHA"
+          printf 'Checked-out revision: %s\n' "$tested_revision"
+          test "$GITHUB_SHA" = "$tested_revision"

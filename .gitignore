@@ -14,6 +14,8 @@ GITHUB_PAGES_SETUP.md
 dist/
 build/
 lib/
+!scripts/lib/
+!scripts/lib/**
 *.tsbuildinfo
 
 # Environment variables
