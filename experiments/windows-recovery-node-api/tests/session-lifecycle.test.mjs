@@ -128,32 +128,48 @@ test('queued cancellation rejects structurally and disposes all ownership', { ti
 
 test('wrapper finalization releases a session resource', { timeout: 5000 }, async () => {
   assert.equal(typeof global.gc, 'function', 'run Node with --expose-gc');
-  function abandonSession() {
+  function finalizationSignal() {
+    let resolveFinalized;
+    const finalized = new Promise(resolve => {
+      resolveFinalized = resolve;
+    });
+    return {
+      finalized,
+      registry: new FinalizationRegistry(resolveFinalized),
+    };
+  }
+  async function waitForFinalization(signal, label) {
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      global.gc();
+      const completed = await Promise.race([
+        signal.finalized.then(() => true),
+        new Promise(resolve => setTimeout(() => resolve(false), 10)),
+      ]);
+      if (completed) return;
+    }
+    assert.fail(`${label} was not finalized after repeated garbage collection`);
+  }
+  function abandonSession(registry) {
     const session = addon.openSession();
-    return new WeakRef(session);
+    registry.register(session, 'idle session');
   }
-  const reference = abandonSession();
+  const abandoned = finalizationSignal();
+  abandonSession(abandoned.registry);
   assert.equal(addon.liveResourceCount(), baseline + 1);
-  for (let attempt = 0; attempt < 40 && reference.deref(); attempt += 1) {
-    global.gc();
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-  assert.equal(reference.deref(), undefined);
+  await waitForFinalization(abandoned, 'idle session wrapper');
   assert.equal(addon.liveResourceCount(), baseline);
 
-  async function abandonDuringProbe() {
+  async function abandonDuringProbe(registry) {
     const session = addon.openSession();
     const operation = session.probe(100);
-    return { reference: new WeakRef(session), operation };
+    registry.register(session, 'session with pending probe');
+    return operation;
   }
-  const pendingSession = await abandonDuringProbe();
+  const pending = finalizationSignal();
+  const operation = await abandonDuringProbe(pending.registry);
   assert.equal(addon.liveResourceCount(), baseline + 1);
-  await pendingSession.operation;
-  for (let attempt = 0; attempt < 40 && pendingSession.reference.deref(); attempt += 1) {
-    global.gc();
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-  assert.equal(pendingSession.reference.deref(), undefined);
+  await operation;
+  await waitForFinalization(pending, 'session wrapper retained by pending work');
   assert.equal(addon.liveResourceCount(), baseline);
   assert.equal(addon.pendingWorkCount(), baselinePending);
 });
