@@ -262,7 +262,7 @@ void renameOpenHandle(HANDLE sourceHandle, const std::wstring& destinationDirect
   info->RootDirectory = directory.value;
   info->FileNameLength = static_cast<DWORD>(nameBytes);
   memcpy(info->FileName, destinationName.data(), nameBytes);
-  if (!SetFileInformationByHandle(sourceHandle.value, FileRenameInfo, info,
+  if (!SetFileInformationByHandle(sourceHandle, FileRenameInfo, info,
                                   static_cast<DWORD>(storage.size()))) fail("handle_rename_failed");
 }
 
